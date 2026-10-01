@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: pdd_demo
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/pdd_demo?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&allowMultiQueries=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.zeewoncode.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+jwt:
+  secret: abcdefghijklmnopqrstuvwxyz1234567890abcdefgh
+  expire-time: 7200000

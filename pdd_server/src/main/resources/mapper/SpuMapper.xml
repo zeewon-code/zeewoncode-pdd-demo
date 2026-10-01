@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeewoncode.pdd_server.mapper.SpuMapper">
+
+
+    <!-- 1. 公共查询条件 -->
+    <sql id="queryCondition">
+        <where>
+            s.status = 1 AND s.deleted_flag = 0
+            <if test="categoryId != null">
+                AND s.category_id = #{categoryId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND s.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <!-- 2. 核心查询逻辑 (使用 CTE 派生表预聚合) -->
+    <select id="selectSpuList" parameterType="com.zeewoncode.req.SpuListQueryReq" resultType="com.zeewoncode.entity.SpuCard">
+        WITH sku_agg AS (
+        -- 预聚合 SKU 价格，并过滤已删除和已下架的 SKU
+        SELECT spu_id, MIN(price) as min_price, MAX(price) as max_price
+        FROM sku
+        WHERE deleted_flag = 0 AND status = 1
+        GROUP BY spu_id
+        ), groupon_agg AS (
+        -- 预聚合拼团信息 (直接利用 spu_id 关联)，并过滤未生效的拼团
+        SELECT spu_id, MIN(group_price) as min_group_price, 1 as has_groupon
+        FROM groupon_define
+        WHERE status = 1
+        GROUP BY spu_id
+        )
+        SELECT
+        s.id,
+        s.title,
+        s.main_image AS mainImage,
+        s.sales,
+        sku_agg.min_price AS minPrice,
+        sku_agg.max_price AS maxPrice,
+        groupon_agg.min_group_price AS groupPrice,
+        groupon_agg.has_groupon AS hasGroupon
+        FROM spu s
+        LEFT JOIN sku_agg ON s.id = sku_agg.spu_id
+        LEFT JOIN groupon_agg ON s.id = groupon_agg.spu_id
+        <include refid="queryCondition"/>
+
+        <choose>
+            <when test='sort == "priceAsc"'> ORDER BY sku_agg.min_price ASC </when>
+            <when test='sort == "priceDesc"'> ORDER BY sku_agg.min_price DESC </when>
+            <when test='sort == "sales"'> ORDER BY s.sales DESC </when>
+            <when test='sort == "newest"'> ORDER BY s.created_at DESC </when>
+            <otherwise> ORDER BY s.id DESC </otherwise>
+        </choose>
+    </select>
+
+    <!-- 3. 优化的 Count 查询 (PageHelper 优先拦截此方法) -->
+    <!-- 仅统计主表符合条件的记录数，完全避开复杂的 LEFT JOIN，极大提升分页性能 -->
+    <select id="selectSpuList_COUNT" resultType="long">
+        SELECT COUNT(1)
+        FROM spu s
+        <include refid="queryCondition"/>
+    </select>
+</mapper>

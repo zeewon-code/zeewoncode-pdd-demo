@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeewoncode.pdd_server.mapper.ReviewMapper">
+
+
+    <select id="selectReviewList" resultType="com.zeewoncode.entity.Review">
+        select r.id AS id, u.nickname AS nickname, u.avatar AS avatar, r.rating AS rating, r.content AS content,
+               r.images AS images, r.created_at AS createdAt
+        from product_review r left join user u on r.user_id = u.id
+        <where>
+            <if test="spuId != null">
+                AND r.spu_id = #{spuId}
+            </if>
+            <if test="req.rating != null">
+                AND r.rating = #{req.rating}
+            </if>
+        </where>
+        ORDER BY r.created_at DESC
+    </select>
+</mapper>

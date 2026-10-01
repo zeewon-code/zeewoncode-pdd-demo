@@ -1,0 +1,22 @@
+package com.zeewoncode.pdd_server.mapper;
+
+import com.zeewoncode.entity.Sku;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
+
+
+@Mapper
+public interface SkuMapper {
+    /**
+     * 根据spu_id查询sku列表
+     * @param id
+     * @return
+     */
+    @Select("select id, spu_id, specs, price, stock, locked_stock, image, status " +
+            "from sku " +
+            "where spu_id = #{id} AND deleted_flag = 0 " +
+            "ORDER BY price ASC")
+    List<Sku> selectSkuListBySpuId(Integer id);
+}
