@@ -18,5 +18,7 @@ public class MessageConstant {
     public static final String PHONE_ERROR = "手机号格式错误";
     public static final String NICKNAME_ERROR = "昵称格式错误";
     public static final String AVATAR_ERROR = "头像格式错误";
+    public static final String ORDER_NOT_EXIST = "订单不存在";
+    public static final String ORDER_STATUS_NOT_ALLOW_ADD_REVIEW = "订单状态不允许添加评价";
 
 }

@@ -3,8 +3,10 @@ package com.zeewoncode.pdd_server.c.service;
 import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.ReviewStat;
+import com.zeewoncode.req.ReviewCreateReq;
 import com.zeewoncode.req.ReviewsListQueryReq;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.ReviewCreateResult;
 
 public interface ReviewService {
     /**
@@ -29,4 +31,11 @@ public interface ReviewService {
      * @return
      */
     PageResult<OrderCard> getUnreviewedOrders(Integer page, Integer size, Integer userId);
+
+    /**
+     * 发表评价
+     * @param req
+     * @return
+     */
+    ReviewCreateResult addReview(ReviewCreateReq req);
 }

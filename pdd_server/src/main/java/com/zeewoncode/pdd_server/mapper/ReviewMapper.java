@@ -1,8 +1,10 @@
 package com.zeewoncode.pdd_server.mapper;
 
+import com.zeewoncode.entity.ProductReview;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.ReviewStat;
 import com.zeewoncode.req.ReviewsListQueryReq;
+import com.zeewoncode.result.ReviewCreateResult;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -26,4 +28,11 @@ public interface ReviewMapper {
      */
     @Select("SELECT rating FROM product_review WHERE spu_id = #{id}")
     List<Review> selectReviewListBySpuId(Integer id);
+
+    /**
+     * 添加评论
+     * @param productReview
+     * @return
+     */
+    void insert(ProductReview productReview);
 }

@@ -5,9 +5,11 @@ import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.ReviewStat;
 import com.zeewoncode.pdd_server.c.service.ReviewService;
+import com.zeewoncode.req.ReviewCreateReq;
 import com.zeewoncode.req.ReviewsListQueryReq;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
+import com.zeewoncode.result.ReviewCreateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -62,5 +64,17 @@ public class ReviewController {
         Integer userId = BaseContext.getCurrentId();
         PageResult<OrderCard> unReviewedOrders = reviewService.getUnreviewedOrders(page, size, userId);
         return Result.success(unReviewedOrders);
+    }
+
+    /**
+     * 发表评价
+     * @param req
+     * @return
+     */
+    @PostMapping("/reviews")
+    public Result<ReviewCreateResult> addReview(@RequestBody ReviewCreateReq req) {
+        log.info("发表评价:{}", req);
+        ReviewCreateResult reviewCreateResult = reviewService.addReview(req);
+        return Result.success(reviewCreateResult);
     }
 }
