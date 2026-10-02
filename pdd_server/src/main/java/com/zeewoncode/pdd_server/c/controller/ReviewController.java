@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.c.controller;
 
 import com.zeewoncode.entity.Review;
+import com.zeewoncode.entity.ReviewStat;
 import com.zeewoncode.pdd_server.c.service.ReviewService;
 import com.zeewoncode.req.ReviewsListQueryReq;
 import com.zeewoncode.result.PageResult;
@@ -35,5 +36,17 @@ public class ReviewController {
                                                     ReviewsListQueryReq req) {
         log.info("获取评价列表:{},{}", id, req);
         return Result.success(reviewService.getReviewList(id, req));
+    }
+
+    /**
+     * 获取评价统计
+     * @param id
+     * @return
+     */
+    @GetMapping("/spu/{id}/reviews/stat")
+    public Result<ReviewStat> getReviewStat(@PathVariable Integer id) {
+        log.info("统计商品id：{}的商品评分分布", id);
+        ReviewStat reviewStat = reviewService.getReviewStat(id);
+        return Result.success(reviewStat);
     }
 }
