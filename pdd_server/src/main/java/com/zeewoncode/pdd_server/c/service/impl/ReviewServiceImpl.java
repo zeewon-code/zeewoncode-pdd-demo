@@ -3,9 +3,11 @@ package com.zeewoncode.pdd_server.c.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.constant.RatingConstant;
+import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.ReviewStat;
 import com.zeewoncode.pdd_server.c.service.ReviewService;
+import com.zeewoncode.pdd_server.mapper.OrderMapper;
 import com.zeewoncode.pdd_server.mapper.ReviewMapper;
 import com.zeewoncode.req.ReviewsListQueryReq;
 import com.zeewoncode.result.PageResult;
@@ -21,6 +23,8 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Autowired
     private ReviewMapper reviewMapper;
+    @Autowired
+    private OrderMapper orderMapper;
 
     /**
      * 获取评价列表
@@ -73,5 +77,24 @@ public class ReviewServiceImpl implements ReviewService {
                 .count());
         reviewStat.setRatingDist(ratingDist);
         return reviewStat;
+    }
+
+    /**
+     * 获取待评价订单列表
+     * @param page
+     * @param size
+     * @return
+     */
+    @Override
+    public PageResult<OrderCard> getUnreviewedOrders(Integer page, Integer size, Integer userId) {
+        PageHelper.startPage(page, size);
+        List<OrderCard> orderList = orderMapper.selectUnreviewedOrdersPage(userId);
+        PageInfo<OrderCard> pageInfo = new PageInfo<>(orderList);
+        PageResult<OrderCard> result = new PageResult<>();
+        result.setTotal((int) pageInfo.getTotal());
+        result.setRecords(pageInfo.getList());
+        result.setSize(pageInfo.getSize());
+        result.setPage(pageInfo.getPageNum());
+        return result;
     }
 }

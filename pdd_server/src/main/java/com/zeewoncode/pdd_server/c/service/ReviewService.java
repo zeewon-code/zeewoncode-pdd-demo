@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.c.service;
 
+import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.ReviewStat;
 import com.zeewoncode.req.ReviewsListQueryReq;
@@ -20,4 +21,12 @@ public interface ReviewService {
      * @return
      */
     ReviewStat getReviewStat(Integer id);
+
+    /**
+     * 获取待评价订单列表
+     * @param page
+     * @param size
+     * @return
+     */
+    PageResult<OrderCard> getUnreviewedOrders(Integer page, Integer size, Integer userId);
 }

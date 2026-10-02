@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeewoncode.pdd_server.mapper.OrderMapper">
+    <!-- 子对象的 ResultMap,订单明细 -->
+    <resultMap id="OrderItemVOMap" type="com.zeewoncode.vo.OrderItemVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="specs" column="specs"/>
+        <result property="image" column="image"/>    <!-- 表字段是 image，VO属性是 images -->
+        <result property="price" column="price"/>
+        <result property="quantity" column="quantity"/>
+        <result property="amount" column="amount"/>
+    </resultMap>
+    <!-- 订单的 ResultMap -->
+    <resultMap id="OrderCardMap" type="com.zeewoncode.entity.OrderCard">
+        <id property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="status" column="status"/>
+        <result property="statusText" column="status_text"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="payableAmount" column="payable_amount"/>
+        <result property="createAt" column="created_at"/>
+<!--        collection 嵌套 ResultMap: 一条订单 -> 多条明细-->
+        <collection property="items"
+                    column="id"
+                    select="com.zeewoncode.pdd_server.mapper.OrderMapper.selectItemsByOrderId"/>
+    </resultMap>
+
+    <!-- ==================== 主查询：已完成但未评价的订单 ==================== -->
+    <select id="selectUnreviewedOrdersPage" resultMap="OrderCardMap">
+        SELECT id, order_no, status, total_amount, payable_amount, created_at,
+            CASE status
+                WHEN 0 THEN '待付款'
+                WHEN 1 THEN '待发货'
+                WHEN 2 THEN '待收货'
+                WHEN 3 THEN '已完成'
+                WHEN 4 THEN '已取消'
+                WHEN 5 THEN '已关闭'
+                ELSE '未知状态'
+            END AS status_text
+        FROM orders o
+        WHERE o.user_id = #{userId}
+        AND o.status = 3
+        AND NOT EXISTS (
+            SELECT 1 FROM product_review pr WHERE pr.order_id = o.id
+        )
+        ORDER BY o.created_at DESC
+    </select>
+
+    <!-- ==================== 子查询：查订单明细 ==================== -->
+    <select id="selectItemsByOrderId" resultType="com.zeewoncode.vo.OrderItemVO">
+        SELECT id, title, specs, image, price, quantity, amount
+        FROM order_item
+        WHERE order_id = #{orderId}
+        ORDER BY id ASC
+    </select>
+</mapper>
