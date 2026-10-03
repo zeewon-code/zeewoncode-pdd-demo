@@ -30,4 +30,10 @@ public interface CartService {
      * @param req
      */
     void selectCart(CartSelectReq req);
+
+    /**
+     * 删除购物车
+     * @param id
+     */
+    void deleteCart(Long id);
 }

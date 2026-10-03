@@ -148,4 +148,13 @@ public class CartServiceImpl implements CartService {
         Integer selected = isSelected != null && isSelected ? 1 : 0;
         cartMapper.updateCartSelectByIds(ids, selected);
     }
+
+    /**
+     * 删除购物车
+     * @param id
+     */
+    @Override
+    public void deleteCart(Long id) {
+        cartMapper.deleteCartById(id);
+    }
 }

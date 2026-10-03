@@ -2,10 +2,7 @@ package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.CartGroup;
 import com.zeewoncode.entity.CartItem;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -58,4 +55,11 @@ public interface CartMapper {
      * @param selected
      */
     void updateCartSelectByIds(List<Integer> ids, Integer selected);
+
+    /**
+     * 根据ID删除购物车项
+     * @param id
+     */
+    @Delete("DELETE FROM cart_item WHERE id = #{id}")
+    void deleteCartById(Long id);
 }

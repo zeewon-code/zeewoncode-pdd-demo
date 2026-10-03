@@ -71,4 +71,16 @@ public class CartController {
         cartService.selectCart(req);
         return Result.success();
     }
+
+    /**
+     * 删除购物车
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/{id}")
+    public Result deleteCart(@PathVariable Integer id) {
+        log.info("删除购物车:id:{}", id);
+        cartService.deleteCart(id.longValue());
+        return Result.success();
+    }
 }
