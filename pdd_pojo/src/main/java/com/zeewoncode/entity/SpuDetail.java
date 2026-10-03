@@ -20,7 +20,7 @@ public class SpuDetail implements Serializable {
     private Integer id;
     private String title;
     private String subtitle;
-    private Integer merchantId; // 店铺id
+    private Long merchantId; // 店铺id
     private String shopName; // 店铺名称
     private String mainImage;
     private List<String> images; // 图集JSON数组

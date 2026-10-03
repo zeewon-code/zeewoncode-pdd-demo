@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.SpuService;
 import com.zeewoncode.pdd_server.mapper.GrouponMapper;
+import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.SkuMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
 import com.zeewoncode.req.SpuListQueryReq;
@@ -30,6 +31,8 @@ public class SpuServiceImpl implements SpuService {
     private GrouponMapper grouponMapper;
     @Autowired
     private SkuMapper skuMapper;
+    @Autowired
+    private MerchantMapper merchantMapper;
     /**
      * 获取商品分类树
      * @return
@@ -119,6 +122,8 @@ public class SpuServiceImpl implements SpuService {
         // b. 根据spuid查询拼团活动定义，封装成groupons集合
         List<GrouponDefine> groupons = grouponMapper.selectGrouponDefineListBySpuId(id);
         SpuDetail spuDetail = spuMapper.getSpuDetailById(id);
+        Merchant merchant = merchantMapper.selectMerchantById(spuDetail.getMerchantId());
+        spuDetail.setShopName(merchant.getShopName());
         spuDetail.setSkus(skus);
         spuDetail.setGroupons(groupons);
         return spuDetail;
