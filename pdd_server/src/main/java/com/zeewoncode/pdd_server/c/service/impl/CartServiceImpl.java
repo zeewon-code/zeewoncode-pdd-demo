@@ -5,6 +5,7 @@ import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.CartService;
 import com.zeewoncode.pdd_server.mapper.*;
 import com.zeewoncode.req.CartAddReq;
+import com.zeewoncode.req.CartQuantityReq;
 import com.zeewoncode.vo.CartItemVO;
 import com.zeewoncode.vo.CartResult;
 import org.springframework.beans.BeanUtils;
@@ -123,5 +124,15 @@ public class CartServiceImpl implements CartService {
                     .build();
             cartMapper.insert(cartItem);
         }
+    }
+
+    /**
+     * 更新购物车数量
+     * @param id
+     * @param req
+     */
+    @Override
+    public void updateCartQuantity(Long id, CartQuantityReq req) {
+        cartMapper.updateCartQuantity(id, req.getQuantity());
     }
 }

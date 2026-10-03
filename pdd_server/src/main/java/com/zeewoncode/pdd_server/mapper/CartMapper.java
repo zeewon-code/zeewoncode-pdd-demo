@@ -5,6 +5,7 @@ import com.zeewoncode.entity.CartItem;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -42,4 +43,12 @@ public interface CartMapper {
     @Insert("INSERT INTO cart_item (sku_id, quantity, selected, spu_id, user_id) " +
             "VALUES (#{skuId}, #{quantity}, #{selected}, #{spuId}, #{userId})")
     void insert(CartItem cartItem);
+
+    /**
+     * 更新购物车项数量
+     * @param id
+     * @param quantity
+     */
+    @Update("UPDATE cart_item SET quantity = #{quantity} WHERE id = #{id}")
+    void updateCartQuantity(Long id, Integer quantity);
 }
