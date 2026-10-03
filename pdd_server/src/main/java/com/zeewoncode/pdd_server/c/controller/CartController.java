@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.c.controller;
 import com.zeewoncode.pdd_server.c.service.CartService;
 import com.zeewoncode.req.CartAddReq;
 import com.zeewoncode.req.CartQuantityReq;
+import com.zeewoncode.req.CartSelectReq;
 import com.zeewoncode.vo.CartResult;
 import com.zeewoncode.result.Result;
 import io.swagger.models.auth.In;
@@ -55,6 +56,19 @@ public class CartController {
     public Result updateCartQuantity(@PathVariable Integer id, @RequestBody CartQuantityReq req) {
         log.info("更新购物车数量:id:{},quantity:{}", id,req);
         cartService.updateCartQuantity(id.longValue(), req);
+        return Result.success();
+    }
+
+
+    /**
+     * 选中或取消选中购物车
+     * @param req
+     * @return
+     */
+    @PutMapping("/select")
+    public Result selectCart(@RequestBody CartSelectReq req) {
+        log.info("选中或取消选中购物车:{}", req);
+        cartService.selectCart(req);
         return Result.success();
     }
 }

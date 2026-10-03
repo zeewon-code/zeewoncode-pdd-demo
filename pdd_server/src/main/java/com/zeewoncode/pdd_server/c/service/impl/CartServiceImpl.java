@@ -6,6 +6,7 @@ import com.zeewoncode.pdd_server.c.service.CartService;
 import com.zeewoncode.pdd_server.mapper.*;
 import com.zeewoncode.req.CartAddReq;
 import com.zeewoncode.req.CartQuantityReq;
+import com.zeewoncode.req.CartSelectReq;
 import com.zeewoncode.vo.CartItemVO;
 import com.zeewoncode.vo.CartResult;
 import org.springframework.beans.BeanUtils;
@@ -134,5 +135,17 @@ public class CartServiceImpl implements CartService {
     @Override
     public void updateCartQuantity(Long id, CartQuantityReq req) {
         cartMapper.updateCartQuantity(id, req.getQuantity());
+    }
+
+    /**
+     * 勾选 / 取消勾选购物车（支持批量）
+     * @param req
+     */
+    @Override
+    public void selectCart(CartSelectReq req) {
+        List<Integer> ids = req.getIds();
+        Boolean isSelected = req.getSelected();
+        Integer selected = isSelected != null && isSelected ? 1 : 0;
+        cartMapper.updateCartSelectByIds(ids, selected);
     }
 }

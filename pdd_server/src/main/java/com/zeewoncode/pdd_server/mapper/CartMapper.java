@@ -51,4 +51,11 @@ public interface CartMapper {
      */
     @Update("UPDATE cart_item SET quantity = #{quantity} WHERE id = #{id}")
     void updateCartQuantity(Long id, Integer quantity);
+
+    /**
+     * 根据ID更新购物车项选中状态
+     * @param ids
+     * @param selected
+     */
+    void updateCartSelectByIds(List<Integer> ids, Integer selected);
 }

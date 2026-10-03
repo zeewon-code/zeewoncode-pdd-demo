@@ -18,4 +18,14 @@
         </set>
         where sku_id = #{cartItem.skuId} AND user_id = #{userId}
     </update>
+    <update id="updateCartSelectByIds">
+        update cart_item
+        <set>
+            selected = #{selected}
+        </set>
+        where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
 </mapper>

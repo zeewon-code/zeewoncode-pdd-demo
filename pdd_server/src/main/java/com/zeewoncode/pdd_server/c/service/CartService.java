@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.c.service;
 
 import com.zeewoncode.req.CartAddReq;
 import com.zeewoncode.req.CartQuantityReq;
+import com.zeewoncode.req.CartSelectReq;
 import com.zeewoncode.vo.CartResult;
 
 public interface CartService {
@@ -23,4 +24,10 @@ public interface CartService {
      * @param req
      */
     void updateCartQuantity(Long id, CartQuantityReq req);
+
+    /**
+     * 选中或取消选中购物车
+     * @param req
+     */
+    void selectCart(CartSelectReq req);
 }
