@@ -19,4 +19,12 @@ public interface SkuMapper {
             "where spu_id = #{id} AND deleted_flag = 0 " +
             "ORDER BY price ASC")
     List<Sku> selectSkuListBySpuId(Integer id);
+
+    /**
+     * 根据id查询sku
+     * @param skuId
+     * @return
+     */
+    @Select("select * from sku where id = #{skuId} and stock > 0 and status = 1 and deleted_flag = 0")
+    Sku selectSkuById(Long skuId);
 }
