@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.Category;
+import com.zeewoncode.entity.Spu;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
 import com.zeewoncode.req.SpuListQueryReq;
@@ -32,4 +33,12 @@ public interface SpuMapper {
      */
     @Select("SELECT * FROM spu WHERE id = #{id}")
     SpuDetail getSpuDetailById(Integer id);
+
+    /**
+     *  根据id查询商品
+     * @param spuId
+     * @return
+     */
+    @Select("SELECT * FROM spu WHERE id = #{spuId}")
+    Spu getSpuById(Integer spuId);
 }

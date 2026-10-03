@@ -23,6 +23,6 @@ public class Sku implements Serializable {
     private Integer lockedStock; //预占库存（下单未支付）
     private String image;
     private Integer status; // 状态：0->禁售；1->可售
-
+    private Integer deletedFlag;
 
 }

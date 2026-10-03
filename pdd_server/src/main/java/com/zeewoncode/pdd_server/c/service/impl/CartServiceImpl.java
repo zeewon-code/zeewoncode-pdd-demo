@@ -4,6 +4,7 @@ import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.CartService;
 import com.zeewoncode.pdd_server.mapper.*;
+import com.zeewoncode.req.CartAddReq;
 import com.zeewoncode.vo.CartItemVO;
 import com.zeewoncode.vo.CartResult;
 import org.springframework.beans.BeanUtils;
@@ -36,7 +37,7 @@ public class CartServiceImpl implements CartService {
     public CartResult getCartList() {
         Integer userId = BaseContext.getCurrentId();
         CartResult cartResult = new CartResult();
-        List<CartItem> cartItemList = cartMapper.selectCartItemByUserId(userId);
+        List<CartItem> cartItemList = cartMapper.selectCartItemByUserId(userId.longValue());
         Double totalAmountCopy = 0.0;
         for (CartItem cartItem : cartItemList) {
             Long skuId = cartItem.getSkuId();
@@ -81,5 +82,46 @@ public class CartServiceImpl implements CartService {
         }).collect(Collectors.toList());
         cartResult.setGroups(groups);
         return cartResult;
+    }
+
+    /**
+     * 加入购物车（同 sku 数量累加）
+     * @param req
+     */
+    @Override
+    public void addCart(CartAddReq req) {
+        // 1. 对sku表的stock,status和deleted_flag进行校验
+        Sku sku = skuMapper.selectSkuById(req.getSkuId());
+        if (sku == null || sku.getStock() <= 0 || sku.getStatus() != 1 || sku.getDeletedFlag() != 0) {
+            throw new RuntimeException("该商品规格已售罄或已下架");
+        }
+        // 2. 对spu表的status和deleted_flag进行校验
+        Spu spuDetail = spuMapper.getSpuById(sku.getSpuId());
+        if (spuDetail.getStatus() != 1 || spuDetail.getDeletedFlag() != 0) {
+            throw new RuntimeException("该商品已下架");
+        }
+        // 3. 对购物车表进行操作，加入购物车（同 sku 数量累加）
+        // 3.1 查询购物车表，判断该用户是否已经将该商品规格加入过购物车
+        Long userId = BaseContext.getCurrentId().longValue();
+        Long skuId = req.getSkuId();
+        List<CartItem> cartItemList = cartMapper.selectCartItemByUserIdAndSkuId(userId, skuId);
+        // 3.2 已存在则更新数量
+        if (cartItemList != null && cartItemList.size() == 1) {
+            CartItem cartItem = cartItemList.get(0);
+            cartItem.setQuantity(cartItem.getQuantity() + req.getQuantity());
+            cartMapper.updateCartItem(cartItem, userId);
+        } else {
+            // 3.3 不存在则插入新记录
+            // 填充spuId
+            Integer spuId = skuMapper.selectSkuById(skuId).getSpuId();
+            CartItem cartItem = CartItem.builder()
+                    .userId(userId)
+                    .skuId(req.getSkuId())
+                    .spuId(spuId.longValue())
+                    .quantity(req.getQuantity())
+                    .selected(1)
+                    .build();
+            cartMapper.insert(cartItem);
+        }
     }
 }

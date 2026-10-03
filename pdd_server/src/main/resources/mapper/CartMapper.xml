@@ -2,4 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.zeewoncode.pdd_server.mapper.CartMapper">
 
+
+    <update id="updateCartItem" parameterType="com.zeewoncode.entity.CartItem">
+        update cart_item
+        <set>
+            <if test="cartItem.quantity != null">
+                quantity = #{cartItem.quantity},
+            </if>
+            <if test="cartItem.selected != null">
+                selected = #{cartItem.selected},
+            </if>
+            <if test="cartItem.updatedAt != null">
+                updated_at = #{cartItem.updatedAt},
+            </if>
+        </set>
+        where sku_id = #{cartItem.skuId} AND user_id = #{userId}
+    </update>
 </mapper>
