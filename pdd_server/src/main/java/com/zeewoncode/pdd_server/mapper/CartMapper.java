@@ -62,4 +62,11 @@ public interface CartMapper {
      */
     @Delete("DELETE FROM cart_item WHERE id = #{id}")
     void deleteCartById(Long id);
+
+    /**
+     * 根据用户ID删除已勾选购物车项
+     * @param userId
+     */
+    @Delete("DELETE FROM cart_item WHERE user_id = #{userId} AND selected = 1")
+    void deleteCartBySelected(Long userId);
 }

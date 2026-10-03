@@ -36,4 +36,9 @@ public interface CartService {
      * @param id
      */
     void deleteCart(Long id);
+
+    /**
+     * 清空已勾选购物车条目
+     */
+    void deleteCartBySelected();
 }

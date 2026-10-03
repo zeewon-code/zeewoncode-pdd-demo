@@ -157,4 +157,12 @@ public class CartServiceImpl implements CartService {
     public void deleteCart(Long id) {
         cartMapper.deleteCartById(id);
     }
+
+    /**
+     * 删除购物车中已勾选的商品
+     */
+    @Override
+    public void deleteCartBySelected() {
+        cartMapper.deleteCartBySelected(BaseContext.getCurrentId().longValue());
+    }
 }

@@ -83,4 +83,15 @@ public class CartController {
         cartService.deleteCart(id.longValue());
         return Result.success();
     }
+
+    /**
+     * 清空已勾选购物车条目
+     * @return
+     */
+    @DeleteMapping("/selected")
+    public Result deleteCartBySelected() {
+        log.info("清空已勾选购物车条目");
+        cartService.deleteCartBySelected();
+        return Result.success();
+    }
 }
