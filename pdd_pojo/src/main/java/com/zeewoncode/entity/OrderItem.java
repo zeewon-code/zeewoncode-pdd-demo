@@ -20,7 +20,7 @@ public class OrderItem implements Serializable {
     private Long spuId;
     private Long skuId;
     private String title;
-    private String speces;
+    private String specs;
     private String image;
     private BigDecimal price;
     private Integer quantity;

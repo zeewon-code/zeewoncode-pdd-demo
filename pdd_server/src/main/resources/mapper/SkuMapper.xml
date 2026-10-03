@@ -3,4 +3,23 @@
 <mapper namespace="com.zeewoncode.pdd_server.mapper.SkuMapper">
 
 
+    <update id="lockStock">
+        UPDATE sku
+        SET locked_stock = CASE id
+            <foreach collection="items" item="item">
+                WHEN #{item.skuId} THEN locked_stock + #{item.quantity}
+            </foreach>
+        END
+        WHERE id IN
+            <foreach collection="items" item="item" separator="," open="(" close=")">
+                #{item.skuId}
+            </foreach>
+        AND deleted_flag = 0
+        AND status = 1
+        AND (stock - locked_stock) >= CASE id
+            <foreach collection="items" item="item">
+                WHEN #{item.skuId} THEN #{item.quantity}
+            </foreach>
+        END
+    </update>
 </mapper>

@@ -1,8 +1,10 @@
 package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.Sku;
+import com.zeewoncode.req.OrderItemReq;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -27,4 +29,11 @@ public interface SkuMapper {
      */
     @Select("select * from sku where id = #{skuId} and stock > 0 and status = 1 and deleted_flag = 0")
     Sku selectSkuById(Long skuId);
+
+    /**
+     * 预占库存
+     * @param items
+     * @return
+     */
+    boolean lockStock(List<OrderItemReq> items);
 }

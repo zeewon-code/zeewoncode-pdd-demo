@@ -4,9 +4,7 @@ import com.zeewoncode.entity.Order;
 import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.OrderItem;
 import com.zeewoncode.vo.OrderItemVO;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -40,4 +38,25 @@ public interface OrderMapper {
      */
     @Select("SELECT * FROM orders WHERE id = #{orderId}")
     Order selectOrderById(Long orderId);
+
+    /**
+     * 插入订单
+     * @param order
+     */
+    @Insert("INSERT INTO orders (order_no, user_id, merchant_id, address_id, " +
+            "receiver_name, receiver_phone, receiver_address, total_amount, " +
+            "discount_amount, payable_amount, payment_id, groupon_instance_id, " +
+            "status, cancel_type, paid_at, completed_at) " +
+            "VALUES (#{orderNo}, #{userId}, #{merchantId}, #{addressId}, " +
+            "#{receiverName}, #{receiverPhone}, #{receiverAddress}, #{totalAmount}, " +
+            "#{discountAmount}, #{payableAmount}, #{paymentId}, #{grouponInstanceId}, " +
+            "#{status}, #{cancelType}, #{paidAt}, #{completedAt})")
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
+    void insert(Order order);
+
+    /**
+     * 插入订单明细
+     * @param orderItems
+     */
+    void insertOrderItems(List<OrderItem> orderItems);
 }

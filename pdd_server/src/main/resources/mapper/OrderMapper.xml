@@ -54,4 +54,14 @@
         WHERE order_id = #{orderId}
         ORDER BY id ASC
     </select>
+
+    <insert id="insertOrderItems">
+        INSERT INTO order_item (order_id, spu_id, sku_id, title, specs, image, price, quantity, amount)
+        VALUES
+        <foreach collection="orderItems" item="orderItem" separator=",">
+            (#{orderItem.orderId}, #{orderItem.spuId}, #{orderItem.skuId},
+             #{orderItem.title}, #{orderItem.specs}, #{orderItem.image},
+             #{orderItem.price}, #{orderItem.quantity}, #{orderItem.amount})
+        </foreach>
+    </insert>
 </mapper>

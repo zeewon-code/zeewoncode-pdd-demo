@@ -41,4 +41,6 @@ public interface SpuMapper {
      */
     @Select("SELECT * FROM spu WHERE id = #{spuId}")
     Spu getSpuById(Integer spuId);
+
+
 }
