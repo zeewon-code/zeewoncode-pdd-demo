@@ -17,8 +17,8 @@ public class Coupon implements Serializable {
     private Long id;
     private String title;
     private Integer type;
-    private Long conditionAmount;
-    private Long discountAmount;
+    private Double conditionAmount;
+    private Double discountAmount;
     private Double discountRate;
     private LocalDateTime validFrom;
     private LocalDateTime validTo;

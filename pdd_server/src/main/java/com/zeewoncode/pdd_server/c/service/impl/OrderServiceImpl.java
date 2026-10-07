@@ -1,18 +1,18 @@
 package com.zeewoncode.pdd_server.c.service.impl;
 
-import com.fasterxml.jackson.databind.ser.Serializers;
+
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.OrderService;
 import com.zeewoncode.pdd_server.mapper.*;
 import com.zeewoncode.req.OrderCreateReq;
 import com.zeewoncode.req.OrderItemReq;
+import com.zeewoncode.req.OrderPreviewReq;
 import com.zeewoncode.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,7 +78,7 @@ public class OrderServiceImpl implements OrderService {
         // 判断是否有使用优惠券
         if (req.getUserCouponId() != null) {
             Integer couponId = req.getUserCouponId();
-            Coupon coupon = couponMapper.selectById(couponId);
+            Coupon coupon = couponMapper.selectById(couponId, LocalDateTime.now());
             if (coupon.getType() == 1) {
                 // 优惠券类型为满减券
                 if (totalAmount >= coupon.getConditionAmount()) {
@@ -131,5 +131,60 @@ public class OrderServiceImpl implements OrderService {
                 .payableAmount(order.getPayableAmount().doubleValue())
                 .build();
         return result;
+    }
+
+    /**
+     * 订单结算预览
+     * @param orderPreviewReq
+     * @return
+     */
+    @Override
+    public OrderPreviewResult previewOrder(OrderPreviewReq orderPreviewReq) {
+        // orderPreviewReq中包含 商品规格id和数量的数组，以及用户优惠券id（可能为null）
+        // 1、计算订单总金额 totalAmount
+        OrderPreviewResult orderPreviewResult = new OrderPreviewResult();
+        Double totalAmount = 0.0;
+        Double payableAmount = 0.0;
+        for (OrderItemReq item : orderPreviewReq.getItems()) {
+            Long skuId = item.getSkuId().longValue();
+            Integer quantity = item.getQuantity();
+            Sku sku = skuMapper.selectSkuById(skuId);
+            totalAmount += (sku.getPrice() * quantity);
+        }
+        payableAmount = totalAmount;
+        // 填充totalAmount字段
+        orderPreviewResult.setTotalAmount(totalAmount);
+        // 2.计算优惠总额 discountAmount
+        if (orderPreviewReq.getUserCouponId() != null) {
+            // 判断用户的优惠券是否过期，如果过期则不能使用
+            Long userCouponId = orderPreviewReq.getUserCouponId().longValue();
+            UserCoupon userCoupon = couponMapper.selectUserCouponById(userCouponId);
+            if (userCoupon.getStatus() == 1) {
+                throw new RuntimeException("优惠券已使用");
+            } else if (userCoupon.getStatus() == 2) {
+                throw new RuntimeException("优惠券已过期");
+            }
+            Coupon coupon = couponMapper.selectById(userCoupon.getCouponId().intValue(), LocalDateTime.now());
+            if (coupon.getType() == 1) {
+                // 优惠券类型为满减券
+                Double conditionAmount = coupon.getConditionAmount();
+                Double discountAmount = coupon.getDiscountAmount();
+                if (totalAmount >= conditionAmount) {
+                    payableAmount -= discountAmount;
+                    // 填充discountAmount字段
+                    orderPreviewResult.setDiscountAmount(discountAmount);
+                }
+            } else {
+                // 优惠券为折扣券
+                Double discountRate = coupon.getDiscountRate();
+                Double discountAmount = (1-discountRate) * totalAmount;
+                payableAmount = totalAmount - discountAmount;
+                // 填充discountAmount字段
+                orderPreviewResult.setDiscountAmount(discountAmount);
+            }
+        }
+        // 3. 设置实付金额 payableAmount
+        orderPreviewResult.setPayableAmount(payableAmount);
+        return orderPreviewResult;
     }
 }
