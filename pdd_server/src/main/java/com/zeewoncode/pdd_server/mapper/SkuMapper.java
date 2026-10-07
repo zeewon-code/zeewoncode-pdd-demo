@@ -36,4 +36,12 @@ public interface SkuMapper {
      * @return
      */
     boolean lockStock(List<OrderItemReq> items);
+
+    /**
+     * 待付款订单取消导致预占库存减少
+     * @param skuId
+     * @param quantity
+     */
+    @Update("update sku set locked_stock = locked_stock - #{quantity} where id = #{skuId} and locked_stock >= #{quantity}")
+    void releaseLockStock(Long skuId, Integer quantity);
 }

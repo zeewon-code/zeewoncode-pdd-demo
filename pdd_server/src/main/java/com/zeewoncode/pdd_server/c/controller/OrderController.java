@@ -8,10 +8,7 @@ import com.zeewoncode.req.OrderPreviewReq;
 import com.zeewoncode.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -44,5 +41,17 @@ public class OrderController {
         log.info("订单结算预览:{}", orderPreviewReq);
         OrderPreviewResult result = orderService.previewOrder(orderPreviewReq);
         return Result.success(result);
+    }
+
+    /**
+     * 取消待付款订单
+     * @param id
+     * @return
+     */
+    @PostMapping("/{id}/cancel")
+    public Result cancelOrderPendingPayMent(@PathVariable Integer id) {
+        log.info("取消待付款订单:{}", id);
+        orderService.cancelOrderPendingPayMent(id);
+        return Result.success();
     }
 }

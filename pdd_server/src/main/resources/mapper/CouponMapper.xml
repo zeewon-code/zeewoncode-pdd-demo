@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeewoncode.pdd_server.mapper.CouponMapper">
+
+
+
+    <update id="updateUserCoupon">
+        update user_coupon
+        <set>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="orderId != null">
+                order_id = #{orderId},
+            </if>
+            <if test="usedAt != null">
+                used_at = #{usedAt},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+</mapper>

@@ -17,11 +17,11 @@ public interface OrderMapper {
     List<OrderCard> selectUnreviewedOrdersPage(@Param("userId") Integer userId);
 
     /**
-     * 根据订单id查询订单明细
+     * 根据订单id查询订单明细返回
      * @param orderId
      * @return
      */
-    List<OrderItemVO> selectItemsByOrderId(@Param("orderId") Integer orderId);
+    List<OrderItemVO> selectItemsVOByOrderId(@Param("orderId") Integer orderId);
 
     /**
      * 根据订单明细id查询订单明细
@@ -59,4 +59,26 @@ public interface OrderMapper {
      * @param orderItems
      */
     void insertOrderItems(List<OrderItem> orderItems);
+
+    /**
+     * 更新订单
+     * @param orderDb
+     */
+    void update(Order orderDb);
+
+
+    /**
+     * 根据订单id查询订单明细
+     * @param orderId
+     * @return
+     */
+    @Select("SELECT * FROM order_item WHERE order_id = #{orderId}")
+    List<OrderItem> selectItemsByOrderId(Long orderId);
+
+    /**
+     * 根据订单id删除订单明细
+     * @param orderId
+     */
+    @Delete("DELETE FROM order_item WHERE order_id = #{orderId}")
+    void deleteByOrderId(Long orderId);
 }

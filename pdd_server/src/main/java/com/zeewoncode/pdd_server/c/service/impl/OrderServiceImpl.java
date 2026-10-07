@@ -9,8 +9,11 @@ import com.zeewoncode.req.OrderCreateReq;
 import com.zeewoncode.req.OrderItemReq;
 import com.zeewoncode.req.OrderPreviewReq;
 import com.zeewoncode.utils.SnowflakeIdGenerator;
+import com.zeewoncode.vo.OrderItemVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,7 +42,7 @@ public class OrderServiceImpl implements OrderService {
      * @param req
      * @return
      */
-//    @Transactional
+    @Transactional
     @Override
     public OrderCreateResult createOrder(OrderCreateReq req) {
         Integer userId = BaseContext.getCurrentId();
@@ -75,10 +78,11 @@ public class OrderServiceImpl implements OrderService {
         }
         order.setTotalAmount(new BigDecimal(totalAmount.toString()));
         // 填充discountAmount, payableAmount
-        // 判断是否有使用优惠券
+        // 判断用户是否有使用优惠券的资格
         if (req.getUserCouponId() != null) {
-            Integer couponId = req.getUserCouponId();
-            Coupon coupon = couponMapper.selectById(couponId, LocalDateTime.now());
+            Long couponId = req.getUserCouponId().longValue();
+            UserCoupon userCoupon = couponMapper.selectUserCouponById(couponId);
+            Coupon coupon = couponMapper.selectById(userCoupon.getCouponId().intValue(), LocalDateTime.now());
             if (coupon.getType() == 1) {
                 // 优惠券类型为满减券
                 if (totalAmount >= coupon.getConditionAmount()) {
@@ -86,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
                 } else throw new RuntimeException("优惠券不满足使用条件");
             } else {
                 // 优惠券为折扣券
-                Double discountAmount = coupon.getDiscountRate() * totalAmount;
+                Double discountAmount = (1-coupon.getDiscountRate()) * totalAmount;
                 order.setDiscountAmount(new BigDecimal(discountAmount.toString()));
             }
         } else {
@@ -95,11 +99,22 @@ public class OrderServiceImpl implements OrderService {
         order.setPayableAmount((order.getTotalAmount().subtract(order.getDiscountAmount())));
         order.setPaymentId(null);
         order.setGrouponInstanceId(null);
-        order.setStatus(1);
+        order.setStatus(0);
         order.setCancelType(null);
         order.setPaidAt(null);
         order.setCompletedAt(null);
         orderMapper.insert(order);
+        if (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
+            // 修改优惠券的状态
+            UserCoupon userCouponDb = UserCoupon.builder()
+                    .orderId(order.getId())
+                    .status(1)
+                    .usedAt(LocalDateTime.now())
+                    .id(req.getUserCouponId().longValue())
+                    .build();
+            couponMapper.updateUserCoupon(userCouponDb);
+        }
+
         // 3. 插入订单商品项表order_items
         List<OrderItem> orderItems = new ArrayList<OrderItem>();
         for (OrderItemReq orderItem : req.getItems()) {
@@ -186,5 +201,43 @@ public class OrderServiceImpl implements OrderService {
         // 3. 设置实付金额 payableAmount
         orderPreviewResult.setPayableAmount(payableAmount);
         return orderPreviewResult;
+    }
+
+    /**
+     * 取消待付款订单
+     * @param id
+     */
+    @Override
+    @Transactional
+    public void cancelOrderPendingPayMent(Integer id) {
+        Long orderId = Long.valueOf(id);
+        Long userId = BaseContext.getCurrentId().longValue();
+        Order order = orderMapper.selectOrderById(orderId);
+        if (order == null) {
+            throw new RuntimeException("该订单不存在");
+        }
+        // 1.校验订单状态status，是否=0待付款
+        if (order.getStatus() != 0) {
+            throw new RuntimeException("该订单不是待付款，订单不能取消");
+        }
+        // 2.更新订单状态status=4，cancel_type=1
+        Order orderDb = Order.builder().id(orderId).cancelType(1).status(4).build();
+        orderMapper.update(orderDb);
+        // 3.释放预占库存
+        List<OrderItem> orderItems = orderMapper.selectItemsByOrderId(orderId);
+        for (OrderItem orderItem : orderItems) {
+            skuMapper.releaseLockStock(orderItem.getSkuId(), orderItem.getQuantity());
+        }
+        // 4.退还优惠券(将优惠券状态改为未使用，status=0, used_at=null, order_id = null)
+        // 判断是否使用了优惠券
+        if (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
+            UserCoupon userCoupon = UserCoupon.builder().userId(userId).orderId(orderId).status(0).usedAt(null).build();
+            couponMapper.updateUserCouponStatusAndUsedAt(userCoupon);
+            UserCoupon userCoupon1 = couponMapper.selectUserCouponByUserIdAndOrderId(userId, orderId);
+            userCoupon1.setOrderId(null);
+            couponMapper.updateUserCouponSetOrderIdToNull(userCoupon1);
+        }
+        // 5.删掉order_item表的数据
+        orderMapper.deleteByOrderId(orderId);
     }
 }

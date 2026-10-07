@@ -20,4 +20,10 @@ public interface OrderService {
      * @return
      */
     OrderPreviewResult previewOrder(OrderPreviewReq orderPreviewReq);
+
+    /**
+     * 取消待付款订单
+     * @param id
+     */
+    void cancelOrderPendingPayMent(Integer id);
 }

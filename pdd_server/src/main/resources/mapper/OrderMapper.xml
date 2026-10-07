@@ -48,7 +48,7 @@
     </select>
 
     <!-- ==================== 子查询：查订单明细 ==================== -->
-    <select id="selectItemsByOrderId" resultType="com.zeewoncode.vo.OrderItemVO">
+    <select id="selectItemsVOByOrderId" resultType="com.zeewoncode.vo.OrderItemVO">
         SELECT id, title, specs, image, price, quantity, amount
         FROM order_item
         WHERE order_id = #{orderId}
@@ -64,4 +64,23 @@
              #{orderItem.price}, #{orderItem.quantity}, #{orderItem.amount})
         </foreach>
     </insert>
+
+    <update id="update">
+        UPDATE orders
+        <set>
+            <if test="addressId != null">address_id = #{addressId},</if>
+            <if test="receiverName != null">receiver_name = #{receiverName},</if>
+            <if test="receiverAddress != null">receiver_address = #{receiverAddress},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="discountAmount != null">discount_amount = #{discountAmount},</if>
+            <if test="payableAmount != null">payable_amount = #{payableAmount},</if>
+            <if test="paymentId != null">payment_id = #{paymentId},</if>
+            <if test="grouponInstanceId != null">groupon_instance_id = #{grouponInstanceId},</if>
+            <if test="cancelType != null">cancel_type = #{cancelType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="paidAt != null">paid_at = #{paidAt},</if>
+            <if test="completedAt != null">completed_at = #{completedAt},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
 </mapper>
