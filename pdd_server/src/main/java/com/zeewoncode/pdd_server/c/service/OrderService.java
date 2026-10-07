@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.c.service;
 
+import com.zeewoncode.entity.CountdownResult;
 import com.zeewoncode.entity.OrderCreateResult;
 import com.zeewoncode.entity.OrderPreviewResult;
 import com.zeewoncode.req.OrderCreateReq;
@@ -26,4 +27,11 @@ public interface OrderService {
      * @param id
      */
     void cancelOrderPendingPayMent(Integer id);
+
+    /**
+     * 获取订单支付倒计时
+     * @param id
+     * @return
+     */
+    CountdownResult getCountdown(Integer id);
 }

@@ -9,13 +9,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderCreateResult implements Serializable {
+@NoArgsConstructor
+public class CountdownResult implements Serializable {
+    private Integer status;
+    private LocalDateTime payExpireTime;
 
-    private Integer orderId;
-    private String orderNo;
-    private Double payableAmount;
-    private LocalDateTime payExpireTime; //支付过期时间
 }

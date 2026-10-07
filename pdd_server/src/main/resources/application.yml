@@ -1,7 +1,8 @@
 spring:
   application:
     name: pdd_demo
-
+  jackson:
+    time-zone: Asia/Shanghai
   datasource:
     url: jdbc:mysql://localhost:3306/pdd_demo?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&allowMultiQueries=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
     username: root

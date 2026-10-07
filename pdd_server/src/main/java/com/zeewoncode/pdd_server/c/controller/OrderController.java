@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.c.controller;
 
+import com.zeewoncode.entity.CountdownResult;
 import com.zeewoncode.entity.OrderCreateResult;
 import com.zeewoncode.entity.OrderPreviewResult;
 import com.zeewoncode.pdd_server.c.service.OrderService;
@@ -53,5 +54,17 @@ public class OrderController {
         log.info("取消待付款订单:{}", id);
         orderService.cancelOrderPendingPayMent(id);
         return Result.success();
+    }
+
+    /**
+     * 获取订单支付倒计时
+     * @param id
+     * @return
+     */
+    @PostMapping("/{id}/countdown")
+    public Result<CountdownResult> getCountdown(@PathVariable Integer id) {
+        log.info("获取订单支付倒计时:订单id：{}", id);
+        CountdownResult result = orderService.getCountdown(id);
+        return Result.success(result);
     }
 }

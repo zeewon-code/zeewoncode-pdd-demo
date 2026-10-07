@@ -9,7 +9,6 @@ import com.zeewoncode.req.OrderCreateReq;
 import com.zeewoncode.req.OrderItemReq;
 import com.zeewoncode.req.OrderPreviewReq;
 import com.zeewoncode.utils.SnowflakeIdGenerator;
-import com.zeewoncode.vo.OrderItemVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +35,9 @@ public class OrderServiceImpl implements OrderService {
     private CouponMapper couponMapper;
     @Autowired
     private CartMapper cartMapper;
+
+    //定义超时时长为 15 分钟
+    private static final long PAY_TIMEOUT_MINUTES = 15;
 
     /**
      * 创建订单
@@ -140,10 +142,13 @@ public class OrderServiceImpl implements OrderService {
             cartMapper.deleteCartItemsByUserIdAndSkuId(userId, orderItem.getSkuId().longValue());
         }
         // 5. 返回创建订单结果
+        // 返回支付截止时间
+        LocalDateTime expireDateTime = LocalDateTime.now().plusMinutes(PAY_TIMEOUT_MINUTES);
         OrderCreateResult result = OrderCreateResult.builder()
                 .orderId(order.getId().intValue())
                 .orderNo(order.getOrderNo())
                 .payableAmount(order.getPayableAmount().doubleValue())
+                .payExpireTime(expireDateTime)
                 .build();
         return result;
     }
@@ -239,5 +244,31 @@ public class OrderServiceImpl implements OrderService {
         }
         // 5.删掉order_item表的数据
         orderMapper.deleteByOrderId(orderId);
+    }
+
+    /**
+     * 获取订单支付倒计时
+     * @param id
+     * @return
+     */
+    @Override
+    public CountdownResult getCountdown(Integer id) {
+        if (id == null) {
+            throw new RuntimeException("订单id不能为空");
+        }
+        Order order = orderMapper.selectOrderById(id.longValue());
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        Integer status = order.getStatus();
+        if (status != 0) {
+            // status != 0, 截止日期返回null
+            CountdownResult result = CountdownResult.builder().status(status).payExpireTime(null).build();
+            return result;
+        }
+        LocalDateTime createdAt = order.getCreatedAt();
+        LocalDateTime payExpireTime = createdAt.plusMinutes(PAY_TIMEOUT_MINUTES);
+        CountdownResult result = CountdownResult.builder().status(status).payExpireTime(payExpireTime).build();
+        return result;
     }
 }
