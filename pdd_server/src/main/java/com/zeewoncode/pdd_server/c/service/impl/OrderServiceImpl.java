@@ -35,9 +35,11 @@ public class OrderServiceImpl implements OrderService {
     private CouponMapper couponMapper;
     @Autowired
     private CartMapper cartMapper;
+    @Autowired
+    private PaymentMapper paymentMapper;
 
     //定义超时时长为 15 分钟
-    private static final long PAY_TIMEOUT_MINUTES = 15;
+    private static final long PAY_TIMEOUT_MINUTES = 1;
 
     /**
      * 创建订单
@@ -270,5 +272,64 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime payExpireTime = createdAt.plusMinutes(PAY_TIMEOUT_MINUTES);
         CountdownResult result = CountdownResult.builder().status(status).payExpireTime(payExpireTime).build();
         return result;
+    }
+
+    /**
+     * 订单支付
+     * @param id
+     * @return
+     */
+    @Override
+    public PayResult orderPay(Long id) {
+        // 1.检查待付款时间是否超时
+        // 超时
+        Order order = orderMapper.selectOrderById(id);
+        if (order == null) {
+            throw new RuntimeException("订单不存在");
+        }
+        if (LocalDateTime.now().isAfter(order.getCreatedAt().plusMinutes(PAY_TIMEOUT_MINUTES))) {
+            Order build = Order.builder().id(id).status(5).build();
+            orderMapper.update(build);
+            if (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
+                UserCoupon userCoupon = UserCoupon.builder()
+                        .userId(BaseContext.getCurrentId().longValue())
+                        .orderId(id)
+                        .status(0)
+                        .usedAt(null)
+                        .build();
+                couponMapper.updateUserCouponStatusAndUsedAt(userCoupon);
+                UserCoupon userCoupon1 = couponMapper.selectUserCouponByUserIdAndOrderId(BaseContext.getCurrentId().longValue(), id);
+                userCoupon1.setOrderId(null);
+                couponMapper.updateUserCouponSetOrderIdToNull(userCoupon1);
+            }
+            throw new RuntimeException("订单支付超时");
+        }
+        // 2.不超时
+        // 3.往payment表插入数据，支付记录
+        BigDecimal payableAmount = order.getPayableAmount();
+        Payment payment = Payment.builder()
+                .paymentNo("P" + String.valueOf(snowflakeIdGenerator.nextId()))
+                .orderId(id)
+                .userId(BaseContext.getCurrentId().longValue())
+                .amount(payableAmount)
+                .channel("MOCK模拟")
+                .status(1)
+                .paidAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .build();
+        paymentMapper.insert(payment);
+        // 4.订单状态修改为1 （待发货）
+        Order build = Order.builder().id(id).status(1).build();
+        orderMapper.update(build);
+        // 5.扣减库存跟释放预占库存
+        List<OrderItem> orderItems = orderMapper.selectItemsByOrderId(id);
+        for (OrderItem orderItem : orderItems) {
+            skuMapper.reduceStockAndLockStock(orderItem.getSkuId(), orderItem.getQuantity());
+        }
+        PayResult payResult = PayResult.builder().paymentId(payment.getId())
+                .paymentNo(payment.getPaymentNo())
+                .paidAmount(payment.getAmount())
+                .build();
+        return payResult;
     }
 }

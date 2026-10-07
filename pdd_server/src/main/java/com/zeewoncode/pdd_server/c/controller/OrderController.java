@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.c.controller;
 import com.zeewoncode.entity.CountdownResult;
 import com.zeewoncode.entity.OrderCreateResult;
 import com.zeewoncode.entity.OrderPreviewResult;
+import com.zeewoncode.entity.PayResult;
 import com.zeewoncode.pdd_server.c.service.OrderService;
 import com.zeewoncode.req.OrderCreateReq;
 import com.zeewoncode.req.OrderPreviewReq;
@@ -61,10 +62,22 @@ public class OrderController {
      * @param id
      * @return
      */
-    @PostMapping("/{id}/countdown")
+    @GetMapping("/{id}/countdown")
     public Result<CountdownResult> getCountdown(@PathVariable Integer id) {
         log.info("获取订单支付倒计时:订单id：{}", id);
         CountdownResult result = orderService.getCountdown(id);
+        return Result.success(result);
+    }
+
+    /**
+     * 订单支付
+     * @param id
+     * @return
+     */
+    @PostMapping("/{id}/pay")
+    public Result<PayResult> orderPay(@PathVariable Long id) {
+        log.info("订单支付:{}", id);
+        PayResult result = orderService.orderPay(id);
         return Result.success(result);
     }
 }

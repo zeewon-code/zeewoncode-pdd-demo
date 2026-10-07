@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.c.service;
 import com.zeewoncode.entity.CountdownResult;
 import com.zeewoncode.entity.OrderCreateResult;
 import com.zeewoncode.entity.OrderPreviewResult;
+import com.zeewoncode.entity.PayResult;
 import com.zeewoncode.req.OrderCreateReq;
 import com.zeewoncode.req.OrderPreviewReq;
 
@@ -34,4 +35,11 @@ public interface OrderService {
      * @return
      */
     CountdownResult getCountdown(Integer id);
+
+    /**
+     * 订单支付
+     * @param id
+     * @return
+     */
+    PayResult orderPay(Long id);
 }

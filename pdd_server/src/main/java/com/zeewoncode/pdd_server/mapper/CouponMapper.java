@@ -45,9 +45,9 @@ public interface CouponMapper {
 
     /**
      * 更新用户优惠券
-     * @param userCouponDb
+     * @param userCoupon
      */
-    void updateUserCoupon(UserCoupon userCouponDb);
+    void updateUserCoupon(UserCoupon userCoupon);
 
 
     /**

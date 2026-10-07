@@ -62,9 +62,9 @@ public interface OrderMapper {
 
     /**
      * 更新订单
-     * @param orderDb
+     * @param order
      */
-    void update(Order orderDb);
+    void update(Order order);
 
 
     /**
