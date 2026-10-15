@@ -1,6 +1,8 @@
 package com.zeewoncode.pdd_server.c.service.impl;
 
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.OrderService;
@@ -8,6 +10,7 @@ import com.zeewoncode.pdd_server.mapper.*;
 import com.zeewoncode.req.OrderCreateReq;
 import com.zeewoncode.req.OrderItemReq;
 import com.zeewoncode.req.OrderPreviewReq;
+import com.zeewoncode.result.PageResult;
 import com.zeewoncode.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -331,5 +334,30 @@ public class OrderServiceImpl implements OrderService {
                 .paidAmount(payment.getAmount())
                 .build();
         return payResult;
+    }
+
+    /**
+     * 获取订单列表
+     * @param status
+     * @param page
+     * @param size
+     * @return
+     */
+    @Override
+    public PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        // 1.启动分页
+        PageHelper.startPage(page, size, true);
+        // 2.查询订单列表
+        List<OrderCard> orderList = orderMapper.selectOrderList(userId, status);
+        // 3.包装分页结果
+        PageInfo<OrderCard> pageInfo = new PageInfo<>(orderList);
+        PageResult<OrderCard> result = new PageResult<>();
+        result.setTotal((int) pageInfo.getTotal());
+        result.setSize(pageInfo.getSize());
+        result.setPage(pageInfo.getPageNum());
+        result.setRecords(pageInfo.getList());
+        return result;
+
     }
 }

@@ -54,7 +54,6 @@
         WHERE order_id = #{orderId}
         ORDER BY id ASC
     </select>
-
     <insert id="insertOrderItems">
         INSERT INTO order_item (order_id, spu_id, sku_id, title, specs, image, price, quantity, amount)
         VALUES
@@ -64,6 +63,33 @@
              #{orderItem.price}, #{orderItem.quantity}, #{orderItem.amount})
         </foreach>
     </insert>
+
+
+    <!--    主查询，查询订单表，根据用户ID和订单状态-->
+    <select id="selectOrderList" resultType="com.zeewoncode.entity.OrderCard" resultMap="OrderCardMap">
+        SELECT id, order_no, status, total_amount, payable_amount, created_at,
+               CASE status
+                   WHEN 0 THEN '待付款'
+                   WHEN 1 THEN '待发货'
+                   WHEN 2 THEN '待收货'
+                   WHEN 3 THEN '已完成'
+                   WHEN 4 THEN '已取消'
+                   WHEN 5 THEN '已关闭'
+                   ELSE '未知状态'
+                   END AS status_text
+        FROM orders
+        <where>
+            user_id = #{userId}
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+
+
+
 
     <update id="update">
         UPDATE orders
@@ -83,4 +109,8 @@
         </set>
         WHERE id = #{id}
     </update>
+
+
+
+
 </mapper>

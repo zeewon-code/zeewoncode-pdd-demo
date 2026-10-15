@@ -1,11 +1,9 @@
 package com.zeewoncode.pdd_server.c.service;
 
-import com.zeewoncode.entity.CountdownResult;
-import com.zeewoncode.entity.OrderCreateResult;
-import com.zeewoncode.entity.OrderPreviewResult;
-import com.zeewoncode.entity.PayResult;
+import com.zeewoncode.entity.*;
 import com.zeewoncode.req.OrderCreateReq;
 import com.zeewoncode.req.OrderPreviewReq;
+import com.zeewoncode.result.PageResult;
 
 public interface OrderService {
 
@@ -42,4 +40,13 @@ public interface OrderService {
      * @return
      */
     PayResult orderPay(Long id);
+
+    /**
+     * 获取订单列表
+     * @param status
+     * @param page
+     * @param size
+     * @return
+     */
+    PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size);
 }

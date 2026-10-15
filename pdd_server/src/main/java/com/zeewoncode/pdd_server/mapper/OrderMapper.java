@@ -21,7 +21,7 @@ public interface OrderMapper {
      * @param orderId
      * @return
      */
-    List<OrderItemVO> selectItemsVOByOrderId(@Param("orderId") Integer orderId);
+    List<OrderItemVO> selectItemsVOByOrderId(Long orderId);
 
     /**
      * 根据订单明细id查询订单明细
@@ -81,4 +81,12 @@ public interface OrderMapper {
      */
     @Delete("DELETE FROM order_item WHERE order_id = #{orderId}")
     void deleteByOrderId(Long orderId);
+
+    /**
+     * 根据用户id和订单状态查询订单列表
+     * @param userId
+     * @param status
+     * @return
+     */
+    List<OrderCard> selectOrderList(Long userId, Integer status);
 }

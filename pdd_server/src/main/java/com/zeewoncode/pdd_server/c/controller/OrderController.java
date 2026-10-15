@@ -1,12 +1,10 @@
 package com.zeewoncode.pdd_server.c.controller;
 
-import com.zeewoncode.entity.CountdownResult;
-import com.zeewoncode.entity.OrderCreateResult;
-import com.zeewoncode.entity.OrderPreviewResult;
-import com.zeewoncode.entity.PayResult;
+import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.OrderService;
 import com.zeewoncode.req.OrderCreateReq;
 import com.zeewoncode.req.OrderPreviewReq;
+import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,5 +77,21 @@ public class OrderController {
         log.info("订单支付:{}", id);
         PayResult result = orderService.orderPay(id);
         return Result.success(result);
+    }
+
+    /**
+     * 获取订单列表
+     * @param status
+     * @param page
+     * @param size
+     * @return
+     */
+    @GetMapping()
+    public PageResult<OrderCard> getOrderList(@RequestParam(required = false) Integer status,
+                                              @RequestParam(defaultValue = "1") Integer page,
+                                              @RequestParam(defaultValue = "10") Integer size) {
+        log.info("获取订单列表:状态{}, 页码{}, 每页数量{}", status, page, size);
+        PageResult<OrderCard> result = orderService.getOrderList(status, page, size);
+        return result;
     }
 }
