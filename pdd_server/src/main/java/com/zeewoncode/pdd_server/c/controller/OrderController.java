@@ -94,4 +94,16 @@ public class OrderController {
         PageResult<OrderCard> result = orderService.getOrderList(status, page, size);
         return result;
     }
+
+    /**
+     * 获取订单详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public Result<OrderDetail> getOrderDetail(@PathVariable Integer id) {
+        log.info("获取订单详情:{}", id);
+        OrderDetail result = orderService.getOrderDetail(id);
+        return Result.success(result);
+    }
 }

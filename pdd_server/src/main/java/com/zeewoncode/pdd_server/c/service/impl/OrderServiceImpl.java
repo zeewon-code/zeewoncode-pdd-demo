@@ -40,9 +40,11 @@ public class OrderServiceImpl implements OrderService {
     private CartMapper cartMapper;
     @Autowired
     private PaymentMapper paymentMapper;
+    @Autowired
+    private ShipmentMapper shipmentMapper;
 
     //定义超时时长为 15 分钟
-    private static final long PAY_TIMEOUT_MINUTES = 1;
+    private static final long PAY_TIMEOUT_MINUTES = 15;
 
     /**
      * 创建订单
@@ -359,5 +361,23 @@ public class OrderServiceImpl implements OrderService {
         result.setRecords(pageInfo.getList());
         return result;
 
+    }
+
+    /**
+     * 获取订单详情
+     * @param id
+     * @return
+     */
+    @Override
+    public OrderDetail getOrderDetail(Integer id) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        OrderDetail orderDetail = orderMapper.selectOrderDetail(userId, id);
+        // 1.补充receiver类字段
+        Receiver receiver = orderMapper.selectReceiverByOrderId(id);
+        // 2.补充shipment类字段
+        Shipment shipment = shipmentMapper.selectShipmentByOrderId(id);
+        orderDetail.setShipment(shipment);
+        orderDetail.setReceiver(receiver);
+        return orderDetail;
     }
 }

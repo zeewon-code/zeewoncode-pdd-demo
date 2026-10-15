@@ -88,7 +88,32 @@
     </select>
 
 
-
+    <resultMap id="OrderDetailMap" type="com.zeewoncode.entity.OrderDetail">
+        <id property="id" column="id"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="status" column="status"/>
+        <result property="statusText" column="status_text"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="payableAmount" column="payable_amount"/>
+        <!--        collection 嵌套 ResultMap: 一条订单 -> 多条明细-->
+        <collection property="items"
+                    column="id"
+                    select="com.zeewoncode.pdd_server.mapper.OrderMapper.selectItemsByOrderId"/>
+    </resultMap>
+    <select id="selectOrderDetail" resultType="com.zeewoncode.entity.OrderDetail" resultMap="OrderDetailMap">
+        SELECT id, order_no, status, total_amount, discount_amount, payable_amount, created_at,
+            CASE status
+                WHEN 0 THEN '待付款'
+                WHEN 1 THEN '待发货'
+                WHEN 2 THEN '待收货'
+                WHEN 3 THEN '已完成'
+                WHEN 4 THEN '已取消'
+                WHEN 5 THEN '已关闭'
+            ELSE '未知状态'
+            END AS status_text
+        FROM orders
+        WHERE id = #{id}
+    </select>
 
 
     <update id="update">

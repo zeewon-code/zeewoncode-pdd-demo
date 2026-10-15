@@ -1,8 +1,6 @@
 package com.zeewoncode.pdd_server.mapper;
 
-import com.zeewoncode.entity.Order;
-import com.zeewoncode.entity.OrderCard;
-import com.zeewoncode.entity.OrderItem;
+import com.zeewoncode.entity.*;
 import com.zeewoncode.vo.OrderItemVO;
 import org.apache.ibatis.annotations.*;
 
@@ -89,4 +87,23 @@ public interface OrderMapper {
      * @return
      */
     List<OrderCard> selectOrderList(Long userId, Integer status);
+
+    /**
+     * 根据用户id和订单id查询订单详情
+     * @param userId
+     * @param id
+     * @return
+     */
+    OrderDetail selectOrderDetail(Long userId, Integer id);
+
+    /**
+     * 根据订单id查询收货人信息
+     * @param id
+     * @return
+     */
+    @Select("SELECT receiver_name as name, receiver_phone as phone, receiver_address as address " +
+            "FROM orders " +
+            "WHERE id = #{id}")
+    Receiver selectReceiverByOrderId(Integer id);
+
 }

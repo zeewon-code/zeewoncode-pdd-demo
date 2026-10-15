@@ -49,4 +49,11 @@ public interface OrderService {
      * @return
      */
     PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size);
+
+    /**
+     * 获取订单详情
+     * @param id
+     * @return
+     */
+    OrderDetail getOrderDetail(Integer id);
 }
