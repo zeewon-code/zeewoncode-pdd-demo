@@ -10,8 +10,8 @@ import com.zeewoncode.pdd_server.c.service.ReviewService;
 import com.zeewoncode.pdd_server.mapper.OrderMapper;
 import com.zeewoncode.pdd_server.mapper.ReviewMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
-import com.zeewoncode.req.ReviewCreateReq;
-import com.zeewoncode.req.ReviewsListQueryReq;
+import com.zeewoncode.dto.ReviewCreateDTO;
+import com.zeewoncode.dto.ReviewsListQueryDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.ReviewCreateResult;
 import org.springframework.beans.BeanUtils;
@@ -40,7 +40,7 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public PageResult<Review> getReviewList(Integer spuId, ReviewsListQueryReq req) {
+    public PageResult<Review> getReviewList(Integer spuId, ReviewsListQueryDTO req) {
         PageHelper.startPage(req.getPage(), req.getSize());
         List<Review> reviewList = reviewMapper.selectReviewList(spuId, req);
         PageInfo<Review> pageInfo = new PageInfo<>(reviewList);
@@ -111,7 +111,7 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public ReviewCreateResult addReview(ReviewCreateReq req) {
+    public ReviewCreateResult addReview(ReviewCreateDTO req) {
         Order order = orderMapper.selectOrderById(req.getOrderId());
         if (order == null) {
             throw new RuntimeException(MessageConstant.ORDER_NOT_EXIST);

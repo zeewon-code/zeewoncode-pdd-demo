@@ -1,4 +1,4 @@
-package com.zeewoncode.entity;
+package com.zeewoncode.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @NoArgsConstructor
-public class CountdownResult implements Serializable {
+public class CountdownVO implements Serializable {
     private Integer status;
     private LocalDateTime payExpireTime;
 

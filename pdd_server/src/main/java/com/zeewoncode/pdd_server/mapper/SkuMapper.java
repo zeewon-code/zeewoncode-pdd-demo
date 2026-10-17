@@ -1,7 +1,7 @@
 package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.Sku;
-import com.zeewoncode.req.OrderItemReq;
+import com.zeewoncode.dto.OrderItemDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -35,7 +35,7 @@ public interface SkuMapper {
      * @param items
      * @return
      */
-    boolean lockStock(List<OrderItemReq> items);
+    boolean lockStock(List<OrderItemDTO> items);
 
     /**
      * 待付款订单取消导致预占库存减少

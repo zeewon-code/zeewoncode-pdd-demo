@@ -1,4 +1,4 @@
-package com.zeewoncode.entity;
+package com.zeewoncode.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderPreviewResult implements Serializable {
+public class OrderPreviewVO implements Serializable {
 
     private Double totalAmount;
     private Double discountAmount; // 优惠总额（优惠券）

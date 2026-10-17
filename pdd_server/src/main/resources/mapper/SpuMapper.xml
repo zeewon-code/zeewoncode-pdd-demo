@@ -17,7 +17,7 @@
     </sql>
 
     <!-- 2. 核心查询逻辑 (使用 CTE 派生表预聚合) -->
-    <select id="selectSpuList" parameterType="com.zeewoncode.req.SpuListQueryReq" resultType="com.zeewoncode.entity.SpuCard">
+    <select id="selectSpuList" parameterType="com.zeewoncode.dto.SpuListQueryDTO" resultType="com.zeewoncode.entity.SpuCard">
         WITH sku_agg AS (
         -- 预聚合 SKU 价格，并过滤已删除和已下架的 SKU
         SELECT spu_id, MIN(price) as min_price, MAX(price) as max_price

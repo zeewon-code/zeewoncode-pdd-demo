@@ -7,11 +7,15 @@ import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.OrderService;
 import com.zeewoncode.pdd_server.mapper.*;
-import com.zeewoncode.req.OrderCreateReq;
-import com.zeewoncode.req.OrderItemReq;
-import com.zeewoncode.req.OrderPreviewReq;
+import com.zeewoncode.dto.OrderCreateDTO;
+import com.zeewoncode.dto.OrderItemDTO;
+import com.zeewoncode.dto.OrderPreviewDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.utils.SnowflakeIdGenerator;
+import com.zeewoncode.vo.CountdownVO;
+import com.zeewoncode.vo.OrderCreateVO;
+import com.zeewoncode.vo.OrderPreviewVO;
+import com.zeewoncode.vo.PayVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Transactional
     @Override
-    public OrderCreateResult createOrder(OrderCreateReq req) {
+    public OrderCreateVO createOrder(OrderCreateDTO req) {
         Integer userId = BaseContext.getCurrentId();
         // 1.预占库存
         boolean isLockStock = skuMapper.lockStock(req.getItems());
@@ -78,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
         order.setReceiverAddress(address);
         Double totalAmount = 0.0;
         // 填充totalAmount
-        for (OrderItemReq item : req.getItems()) {
+        for (OrderItemDTO item : req.getItems()) {
             Long skuId = item.getSkuId().longValue();
             Integer quantity = item.getQuantity();
             Sku skuDB = skuMapper.selectSkuById(skuId);
@@ -126,7 +130,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 3. 插入订单商品项表order_items
         List<OrderItem> orderItems = new ArrayList<OrderItem>();
-        for (OrderItemReq orderItem : req.getItems()) {
+        for (OrderItemDTO orderItem : req.getItems()) {
             OrderItem item = new OrderItem();
             Long orderId = order.getId();
             item.setOrderId(orderId);
@@ -145,13 +149,13 @@ public class OrderServiceImpl implements OrderService {
         }
         orderMapper.insertOrderItems(orderItems);
         // 4. 删除cart_items表购物车数据
-        for (OrderItemReq orderItem : req.getItems()) {
+        for (OrderItemDTO orderItem : req.getItems()) {
             cartMapper.deleteCartItemsByUserIdAndSkuId(userId, orderItem.getSkuId().longValue());
         }
         // 5. 返回创建订单结果
         // 返回支付截止时间
         LocalDateTime expireDateTime = LocalDateTime.now().plusMinutes(PAY_TIMEOUT_MINUTES);
-        OrderCreateResult result = OrderCreateResult.builder()
+        OrderCreateVO result = OrderCreateVO.builder()
                 .orderId(order.getId().intValue())
                 .orderNo(order.getOrderNo())
                 .payableAmount(order.getPayableAmount().doubleValue())
@@ -162,17 +166,17 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 订单结算预览
-     * @param orderPreviewReq
+     * @param orderPreviewDTO
      * @return
      */
     @Override
-    public OrderPreviewResult previewOrder(OrderPreviewReq orderPreviewReq) {
+    public OrderPreviewVO previewOrder(OrderPreviewDTO orderPreviewDTO) {
         // orderPreviewReq中包含 商品规格id和数量的数组，以及用户优惠券id（可能为null）
         // 1、计算订单总金额 totalAmount
-        OrderPreviewResult orderPreviewResult = new OrderPreviewResult();
+        OrderPreviewVO orderPreviewVO = new OrderPreviewVO();
         Double totalAmount = 0.0;
         Double payableAmount = 0.0;
-        for (OrderItemReq item : orderPreviewReq.getItems()) {
+        for (OrderItemDTO item : orderPreviewDTO.getItems()) {
             Long skuId = item.getSkuId().longValue();
             Integer quantity = item.getQuantity();
             Sku sku = skuMapper.selectSkuById(skuId);
@@ -180,11 +184,11 @@ public class OrderServiceImpl implements OrderService {
         }
         payableAmount = totalAmount;
         // 填充totalAmount字段
-        orderPreviewResult.setTotalAmount(totalAmount);
+        orderPreviewVO.setTotalAmount(totalAmount);
         // 2.计算优惠总额 discountAmount
-        if (orderPreviewReq.getUserCouponId() != null) {
+        if (orderPreviewDTO.getUserCouponId() != null) {
             // 判断用户的优惠券是否过期，如果过期则不能使用
-            Long userCouponId = orderPreviewReq.getUserCouponId().longValue();
+            Long userCouponId = orderPreviewDTO.getUserCouponId().longValue();
             UserCoupon userCoupon = couponMapper.selectUserCouponById(userCouponId);
             if (userCoupon.getStatus() == 1) {
                 throw new RuntimeException("优惠券已使用");
@@ -199,7 +203,7 @@ public class OrderServiceImpl implements OrderService {
                 if (totalAmount >= conditionAmount) {
                     payableAmount -= discountAmount;
                     // 填充discountAmount字段
-                    orderPreviewResult.setDiscountAmount(discountAmount);
+                    orderPreviewVO.setDiscountAmount(discountAmount);
                 }
             } else {
                 // 优惠券为折扣券
@@ -207,12 +211,12 @@ public class OrderServiceImpl implements OrderService {
                 Double discountAmount = (1-discountRate) * totalAmount;
                 payableAmount = totalAmount - discountAmount;
                 // 填充discountAmount字段
-                orderPreviewResult.setDiscountAmount(discountAmount);
+                orderPreviewVO.setDiscountAmount(discountAmount);
             }
         }
         // 3. 设置实付金额 payableAmount
-        orderPreviewResult.setPayableAmount(payableAmount);
-        return orderPreviewResult;
+        orderPreviewVO.setPayableAmount(payableAmount);
+        return orderPreviewVO;
     }
 
     /**
@@ -259,7 +263,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public CountdownResult getCountdown(Integer id) {
+    public CountdownVO getCountdown(Integer id) {
         if (id == null) {
             throw new RuntimeException("订单id不能为空");
         }
@@ -270,12 +274,12 @@ public class OrderServiceImpl implements OrderService {
         Integer status = order.getStatus();
         if (status != 0) {
             // status != 0, 截止日期返回null
-            CountdownResult result = CountdownResult.builder().status(status).payExpireTime(null).build();
+            CountdownVO result = CountdownVO.builder().status(status).payExpireTime(null).build();
             return result;
         }
         LocalDateTime createdAt = order.getCreatedAt();
         LocalDateTime payExpireTime = createdAt.plusMinutes(PAY_TIMEOUT_MINUTES);
-        CountdownResult result = CountdownResult.builder().status(status).payExpireTime(payExpireTime).build();
+        CountdownVO result = CountdownVO.builder().status(status).payExpireTime(payExpireTime).build();
         return result;
     }
 
@@ -285,7 +289,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public PayResult orderPay(Long id) {
+    public PayVO orderPay(Long id) {
         // 1.检查待付款时间是否超时
         // 超时
         Order order = orderMapper.selectOrderById(id);
@@ -331,11 +335,11 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItem orderItem : orderItems) {
             skuMapper.reduceStockAndLockStock(orderItem.getSkuId(), orderItem.getQuantity());
         }
-        PayResult payResult = PayResult.builder().paymentId(payment.getId())
+        PayVO payVO = PayVO.builder().paymentId(payment.getId())
                 .paymentNo(payment.getPaymentNo())
                 .paidAmount(payment.getAmount())
                 .build();
-        return payResult;
+        return payVO;
     }
 
     /**

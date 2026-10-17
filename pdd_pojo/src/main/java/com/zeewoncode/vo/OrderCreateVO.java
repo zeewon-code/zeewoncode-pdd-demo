@@ -1,4 +1,4 @@
-package com.zeewoncode.entity;
+package com.zeewoncode.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderCreateResult implements Serializable {
+public class OrderCreateVO implements Serializable {
 
     private Integer orderId;
     private String orderNo;

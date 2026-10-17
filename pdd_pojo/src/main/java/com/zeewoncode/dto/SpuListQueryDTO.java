@@ -1,4 +1,4 @@
-package com.zeewoncode.req;
+package com.zeewoncode.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SpuListQueryReq implements Serializable {
+public class SpuListQueryDTO implements Serializable {
 
         private Integer categoryId; //二级分类筛选
         private String keyword; //标题模糊搜索

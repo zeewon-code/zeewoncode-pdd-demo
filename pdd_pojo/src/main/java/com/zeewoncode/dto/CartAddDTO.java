@@ -1,5 +1,4 @@
-package com.zeewoncode.req;
-
+package com.zeewoncode.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,15 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * 修改密码请求类
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChangePasswordReq implements Serializable {
+public class CartAddDTO implements Serializable {
 
-    private String oldPassword;
-    private String newPassword;
+    private Long skuId;
+    private Integer quantity;
 }

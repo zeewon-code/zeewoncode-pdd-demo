@@ -2,7 +2,7 @@ package com.zeewoncode.pdd_server.c.service;
 
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
-import com.zeewoncode.req.SpuListQueryReq;
+import com.zeewoncode.dto.SpuListQueryDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.vo.CategoryNodeVO;
 
@@ -22,7 +22,7 @@ public interface SpuService {
      * @param req
      * @return
      */
-    PageResult<SpuCard> getSpuList(SpuListQueryReq req);
+    PageResult<SpuCard> getSpuList(SpuListQueryDTO req);
 
     /**
      * 获取商品详情

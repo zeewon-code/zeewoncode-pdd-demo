@@ -8,7 +8,7 @@ import com.zeewoncode.pdd_server.mapper.GrouponMapper;
 import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.SkuMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
-import com.zeewoncode.req.SpuListQueryReq;
+import com.zeewoncode.dto.SpuListQueryDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.vo.CategoryNodeVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +75,7 @@ public class SpuServiceImpl implements SpuService {
      * @return
      */
     @Override
-    public PageResult<SpuCard> getSpuList(SpuListQueryReq req) {
+    public PageResult<SpuCard> getSpuList(SpuListQueryDTO req) {
         // id是商品表spu的id
         // title是商品表spu的title
         // mainImage是商品表spu的main_image

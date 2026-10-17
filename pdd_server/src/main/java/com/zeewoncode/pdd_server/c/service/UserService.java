@@ -1,13 +1,12 @@
 package com.zeewoncode.pdd_server.c.service;
 
-import com.zeewoncode.entity.LoginResult;
+import com.zeewoncode.vo.LoginVO;
 import com.zeewoncode.entity.User;
-import com.zeewoncode.req.ChangePasswordReq;
-import com.zeewoncode.req.LoginReq;
-import com.zeewoncode.req.RegisterReq;
-import com.zeewoncode.req.UpdateProfileReq;
+import com.zeewoncode.dto.ChangePasswordDTO;
+import com.zeewoncode.dto.LoginDTO;
+import com.zeewoncode.dto.RegisterDTO;
+import com.zeewoncode.dto.UpdateProfileDTO;
 import com.zeewoncode.result.Result;
-import com.zeewoncode.vo.UserVO;
 import org.apache.poi.ss.formula.functions.T;
 
 /**
@@ -16,17 +15,17 @@ import org.apache.poi.ss.formula.functions.T;
 public interface UserService {
     /**
      * 用户注册
-     * @param registerReq
+     * @param registerDTO
      * @return
      */
-    Result<T> register(RegisterReq registerReq);
+    Result<T> register(RegisterDTO registerDTO);
 
     /**
      * 用户登录
-     * @param loginReq
+     * @param loginDTO
      * @return
      */
-    Result<LoginResult> login(LoginReq loginReq);
+    Result<LoginVO> login(LoginDTO loginDTO);
 
     /**
      * 获取当前用户信息
@@ -36,15 +35,15 @@ public interface UserService {
 
     /**
      * 修改个人信息
-     * @param updateProfileReq
+     * @param updateProfileDTO
      * @return
      */
-    void updateProfile(UpdateProfileReq updateProfileReq, Integer userId);
+    void updateProfile(UpdateProfileDTO updateProfileDTO, Integer userId);
 
     /**
      * 修改密码
-     * @param changePasswordReq
+     * @param changePasswordDTO
      * @param userId
      */
-    void changePassword(ChangePasswordReq changePasswordReq, Integer userId);
+    void changePassword(ChangePasswordDTO changePasswordDTO, Integer userId);
 }

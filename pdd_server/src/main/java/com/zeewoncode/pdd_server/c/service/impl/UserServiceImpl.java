@@ -4,17 +4,16 @@ import cn.hutool.core.bean.BeanUtil;
 import com.zeewoncode.constant.DeletedConstant;
 import com.zeewoncode.constant.StatusConstant;
 import com.zeewoncode.constant.UserTypeConstant;
-import com.zeewoncode.entity.LoginResult;
+import com.zeewoncode.vo.LoginVO;
 import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.pdd_server.c.service.UserService;
-import com.zeewoncode.req.ChangePasswordReq;
-import com.zeewoncode.req.LoginReq;
-import com.zeewoncode.req.RegisterReq;
-import com.zeewoncode.req.UpdateProfileReq;
+import com.zeewoncode.dto.ChangePasswordDTO;
+import com.zeewoncode.dto.LoginDTO;
+import com.zeewoncode.dto.RegisterDTO;
+import com.zeewoncode.dto.UpdateProfileDTO;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.utils.JwtUtil;
-import com.zeewoncode.vo.UserVO;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,37 +40,37 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 用户注册
-     * @param registerReq
+     * @param registerDTO
      * @return
      */
     @Override
-    public Result<T> register(RegisterReq registerReq) {
+    public Result<T> register(RegisterDTO registerDTO) {
         // 1. 参数校验
-        if (registerReq == null) {
+        if (registerDTO == null) {
             return Result.error(PARAM_ERROR);
         }
-        if (registerReq.getCode() == null || !registerReq.getCode().equals("8888")) {
+        if (registerDTO.getCode() == null || !registerDTO.getCode().equals("8888")) {
             return Result.error(CODE_ERROR);
         }
-        if (registerReq.getPassword() == null || registerReq.getPassword().isBlank()) {
+        if (registerDTO.getPassword() == null || registerDTO.getPassword().isBlank()) {
             return Result.error(PASSWORD_ERROR);
         }
-        if (registerReq.getNickname().contains(" ")) {
+        if (registerDTO.getNickname().contains(" ")) {
             return Result.error(NICKNAME_NOT_NULL);
         }
-        if (registerReq.getPhone().length() != 11) {
+        if (registerDTO.getPhone().length() != 11) {
             return Result.error(PHONE_ERROR);
         }
         User user = new User();
-        BeanUtils.copyProperties(registerReq, user);
+        BeanUtils.copyProperties(registerDTO, user);
         // 2. 判断该用户是否已存在
-        User userInDB = userMapper.selectByPhoneAndUser(registerReq.getPhone());
+        User userInDB = userMapper.selectByPhoneAndUser(registerDTO.getPhone());
         if (userInDB != null ) {
             return Result.error(USER_ALREADY_EXIST);
         }
 
         // 3. 注册用户
-        user.setPassword(passwordEncoder.encode(registerReq.getPassword()));
+        user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
         user.setStatus(StatusConstant.ENABLE);
         user.setUserType(UserTypeConstant.USER_TYPE_USER);
         user.setDeletedFlag(DeletedConstant.NOT_DELETED);
@@ -83,18 +82,18 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 用户登录
-     * @param loginReq
+     * @param loginDTO
      * @return
      */
     @Override
-    public Result<LoginResult> login(LoginReq loginReq) {
-        if (loginReq.getPassword() == null || loginReq.getPassword().isBlank()) {
+    public Result<LoginVO> login(LoginDTO loginDTO) {
+        if (loginDTO.getPassword() == null || loginDTO.getPassword().isBlank()) {
             return Result.error(PASSWORD_ERROR);
         }
-        if (loginReq.getPhone() == null || loginReq.getPhone().isBlank()) {
+        if (loginDTO.getPhone() == null || loginDTO.getPhone().isBlank()) {
             return Result.error(PHONE_ERROR);
         }
-        User dbUser = userMapper.selectByPhoneAndUser(loginReq.getPhone());
+        User dbUser = userMapper.selectByPhoneAndUser(loginDTO.getPhone());
         if (dbUser == null) {
             return Result.error(USER_NOT_EXIST);
         }
@@ -105,13 +104,13 @@ public class UserServiceImpl implements UserService {
             return Result.error(USER_FROZEN);
         }
         // 校验密码
-        boolean ok = passwordEncoder.matches(loginReq.getPassword(), dbUser.getPassword());
+        boolean ok = passwordEncoder.matches(loginDTO.getPassword(), dbUser.getPassword());
         if (!ok) {
             return Result.error(PASSWORD_ERROR);
         }
 
         String token = jwtUtil.generateToken(dbUser.getId(), dbUser.getUserType());
-        return Result.success(LoginResult.builder()
+        return Result.success(LoginVO.builder()
                 .token(token)
                 .user(dbUser)
                 .build());
@@ -132,27 +131,27 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 修改个人信息
-     * @param updateProfileReq
+     * @param updateProfileDTO
      * @param userId
      * @return
      */
     @Override
-    public void updateProfile(UpdateProfileReq updateProfileReq, Integer userId) {
+    public void updateProfile(UpdateProfileDTO updateProfileDTO, Integer userId) {
         User userDB = userMapper.selectById(userId);
         if (userDB == null) {
             throw new RuntimeException(USER_NOT_EXIST);
         }
-        String nickName = updateProfileReq.getNickName().trim();
+        String nickName = updateProfileDTO.getNickName().trim();
         if (nickName.isBlank() || nickName.length() > 20) {
             throw new RuntimeException(NICKNAME_ERROR);
         }
-        String avatar = updateProfileReq.getAvatar();
+        String avatar = updateProfileDTO.getAvatar();
         if (avatar != null && !avatar.isBlank()) {
             if (!avatar.startsWith("http://") && !avatar.startsWith("https://")) {
                 throw new RuntimeException(AVATAR_ERROR);
             }
         }
-        User user = BeanUtil.copyProperties(updateProfileReq, User.class);
+        User user = BeanUtil.copyProperties(updateProfileDTO, User.class);
         user.setId(userId);
         user.setUpdatedAt(LocalDateTime.now());
         userMapper.updateById(user);
@@ -161,21 +160,21 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 修改密码
-     * @param changePasswordReq
+     * @param changePasswordDTO
      * @param userId
      */
     @Override
-    public void changePassword(ChangePasswordReq changePasswordReq, Integer userId) {
+    public void changePassword(ChangePasswordDTO changePasswordDTO, Integer userId) {
         User userDB = userMapper.selectById(userId);
         if (userDB == null) {
             throw new RuntimeException(USER_NOT_EXIST);
         }
-        String oldPassword = changePasswordReq.getOldPassword().trim();
+        String oldPassword = changePasswordDTO.getOldPassword().trim();
         boolean ok = passwordEncoder.matches(oldPassword, userDB.getPassword());
         if (!ok) {
             throw new RuntimeException(PASSWORD_ERROR);
         }
-        String newPassword = changePasswordReq.getNewPassword().trim();
+        String newPassword = changePasswordDTO.getNewPassword().trim();
         // 1. 非空校验
         if(newPassword.isBlank()){
             throw new RuntimeException("密码不能为空");

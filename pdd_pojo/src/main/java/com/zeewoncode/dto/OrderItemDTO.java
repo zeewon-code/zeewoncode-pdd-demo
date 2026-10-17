@@ -1,4 +1,4 @@
-package com.zeewoncode.req;
+package com.zeewoncode.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,10 +8,11 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class CartQuantityReq implements Serializable {
+public class OrderItemDTO implements Serializable {
 
+    private Integer skuId;
     private Integer quantity;
 }

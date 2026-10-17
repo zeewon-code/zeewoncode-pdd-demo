@@ -1,9 +1,13 @@
 package com.zeewoncode.pdd_server.c.service;
 
 import com.zeewoncode.entity.*;
-import com.zeewoncode.req.OrderCreateReq;
-import com.zeewoncode.req.OrderPreviewReq;
+import com.zeewoncode.dto.OrderCreateDTO;
+import com.zeewoncode.dto.OrderPreviewDTO;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.vo.CountdownVO;
+import com.zeewoncode.vo.OrderCreateVO;
+import com.zeewoncode.vo.OrderPreviewVO;
+import com.zeewoncode.vo.PayVO;
 
 public interface OrderService {
 
@@ -12,14 +16,14 @@ public interface OrderService {
      * @param req
      * @return
      */
-    OrderCreateResult createOrder(OrderCreateReq req);
+    OrderCreateVO createOrder(OrderCreateDTO req);
 
     /**
      * 订单结算预览
-     * @param orderPreviewReq
+     * @param orderPreviewDTO
      * @return
      */
-    OrderPreviewResult previewOrder(OrderPreviewReq orderPreviewReq);
+    OrderPreviewVO previewOrder(OrderPreviewDTO orderPreviewDTO);
 
     /**
      * 取消待付款订单
@@ -32,14 +36,14 @@ public interface OrderService {
      * @param id
      * @return
      */
-    CountdownResult getCountdown(Integer id);
+    CountdownVO getCountdown(Integer id);
 
     /**
      * 订单支付
      * @param id
      * @return
      */
-    PayResult orderPay(Long id);
+    PayVO orderPay(Long id);
 
     /**
      * 获取订单列表

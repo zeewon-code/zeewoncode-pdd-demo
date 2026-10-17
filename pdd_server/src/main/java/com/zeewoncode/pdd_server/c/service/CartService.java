@@ -1,35 +1,35 @@
 package com.zeewoncode.pdd_server.c.service;
 
-import com.zeewoncode.req.CartAddReq;
-import com.zeewoncode.req.CartQuantityReq;
-import com.zeewoncode.req.CartSelectReq;
-import com.zeewoncode.vo.CartResult;
+import com.zeewoncode.dto.CartAddDTO;
+import com.zeewoncode.dto.CartQuantityDTO;
+import com.zeewoncode.dto.CartSelectDTO;
+import com.zeewoncode.vo.CartVO;
 
 public interface CartService {
     /**
      * 查看购物车列表
      * @return
      */
-    CartResult getCartList();
+    CartVO getCartList();
 
     /**
      * 添加购物车
      * @param req
      */
-    void addCart(CartAddReq req);
+    void addCart(CartAddDTO req);
 
     /**
      * 更新购物车数量
      * @param id
      * @param req
      */
-    void updateCartQuantity(Long id, CartQuantityReq req);
+    void updateCartQuantity(Long id, CartQuantityDTO req);
 
     /**
      * 选中或取消选中购物车
      * @param req
      */
-    void selectCart(CartSelectReq req);
+    void selectCart(CartSelectDTO req);
 
     /**
      * 删除购物车

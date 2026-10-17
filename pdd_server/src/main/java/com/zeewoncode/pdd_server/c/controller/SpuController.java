@@ -3,7 +3,7 @@ package com.zeewoncode.pdd_server.c.controller;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
 import com.zeewoncode.pdd_server.c.service.SpuService;
-import com.zeewoncode.req.SpuListQueryReq;
+import com.zeewoncode.dto.SpuListQueryDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CategoryNodeVO;
@@ -43,7 +43,7 @@ public class SpuController {
      * @return
      */
     @GetMapping("/spu/list")
-    public Result<PageResult<SpuCard>> getSpuList(SpuListQueryReq req) {
+    public Result<PageResult<SpuCard>> getSpuList(SpuListQueryDTO req) {
         log.info("获取商品列表");
         PageResult<SpuCard> result = spuService.getSpuList(req);
         return Result.success(result);

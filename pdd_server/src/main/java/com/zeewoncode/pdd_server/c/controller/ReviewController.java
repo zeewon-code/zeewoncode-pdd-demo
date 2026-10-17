@@ -5,8 +5,8 @@ import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.ReviewStat;
 import com.zeewoncode.pdd_server.c.service.ReviewService;
-import com.zeewoncode.req.ReviewCreateReq;
-import com.zeewoncode.req.ReviewsListQueryReq;
+import com.zeewoncode.dto.ReviewCreateDTO;
+import com.zeewoncode.dto.ReviewsListQueryDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.result.ReviewCreateResult;
@@ -34,7 +34,7 @@ public class ReviewController {
      */
     @GetMapping("/spu/{id}/reviews")
     public Result<PageResult<Review>> getReviewList(@PathVariable Integer id,
-                                                    ReviewsListQueryReq req) {
+                                                    ReviewsListQueryDTO req) {
         log.info("获取评价列表:{},{}", id, req);
         return Result.success(reviewService.getReviewList(id, req));
     }
@@ -72,7 +72,7 @@ public class ReviewController {
      * @return
      */
     @PostMapping("/reviews")
-    public Result<ReviewCreateResult> addReview(@RequestBody ReviewCreateReq req) {
+    public Result<ReviewCreateResult> addReview(@RequestBody ReviewCreateDTO req) {
         log.info("发表评价:{}", req);
         ReviewCreateResult reviewCreateResult = reviewService.addReview(req);
         return Result.success(reviewCreateResult);

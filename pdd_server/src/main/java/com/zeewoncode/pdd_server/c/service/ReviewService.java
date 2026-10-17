@@ -3,8 +3,8 @@ package com.zeewoncode.pdd_server.c.service;
 import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.ReviewStat;
-import com.zeewoncode.req.ReviewCreateReq;
-import com.zeewoncode.req.ReviewsListQueryReq;
+import com.zeewoncode.dto.ReviewCreateDTO;
+import com.zeewoncode.dto.ReviewsListQueryDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.ReviewCreateResult;
 
@@ -15,7 +15,7 @@ public interface ReviewService {
      * @param req
      * @return
      */
-    PageResult<Review> getReviewList(Integer spuId, ReviewsListQueryReq req);
+    PageResult<Review> getReviewList(Integer spuId, ReviewsListQueryDTO req);
 
     /**
      * 获取商品评价统计
@@ -37,5 +37,5 @@ public interface ReviewService {
      * @param req
      * @return
      */
-    ReviewCreateResult addReview(ReviewCreateReq req);
+    ReviewCreateResult addReview(ReviewCreateDTO req);
 }

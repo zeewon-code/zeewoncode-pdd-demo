@@ -1,4 +1,4 @@
-package com.zeewoncode.req;
+package com.zeewoncode.dto;
 
 
 
@@ -16,7 +16,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AddressReq implements Serializable {
+public class AddressDTO implements Serializable {
     private Integer id; // 地址id
     private String receiverName; // 收件人
     private String receiverPhone; // 收件人电话

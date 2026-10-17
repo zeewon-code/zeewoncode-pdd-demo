@@ -1,7 +1,6 @@
 package com.zeewoncode.pdd_server.c.service;
 
-import com.zeewoncode.entity.UserAddress;
-import com.zeewoncode.req.AddressReq;
+import com.zeewoncode.dto.AddressDTO;
 import com.zeewoncode.vo.AddressVO;
 
 import java.util.List;
@@ -21,13 +20,13 @@ public interface AddressesService {
     /**
      * 添加收货地址
      */
-    void addAddress(AddressReq addressReq);
+    void addAddress(AddressDTO addressDTO);
 
     /**
      * 修改收货地址
-     * @param addressReq
+     * @param addressDTO
      */
-    void updateAddress(AddressReq addressReq);
+    void updateAddress(AddressDTO addressDTO);
 
 
     /**

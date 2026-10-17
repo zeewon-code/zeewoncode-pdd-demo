@@ -1,10 +1,9 @@
-package com.zeewoncode.req;
+package com.zeewoncode.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.List;
@@ -13,8 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderPreviewReq implements Serializable {
+public class OrderCreateDTO implements Serializable {
 
-    private List<OrderItemReq> items;
+    private Integer addressId;
+    private List<OrderItemDTO> items;
     private Integer userCouponId;
 }

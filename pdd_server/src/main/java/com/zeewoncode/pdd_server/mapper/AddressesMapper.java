@@ -49,6 +49,6 @@ public interface AddressesMapper {
      * @param id
      * @return
      */
-    @Select("select * from user_address where id = #{id}")
+    @Select("select * from user_address where id = #{id} AND deleted_flag = 0")
     UserAddress selectById(Integer id);
 }

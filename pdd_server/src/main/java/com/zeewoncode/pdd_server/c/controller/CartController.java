@@ -1,12 +1,11 @@
 package com.zeewoncode.pdd_server.c.controller;
 
 import com.zeewoncode.pdd_server.c.service.CartService;
-import com.zeewoncode.req.CartAddReq;
-import com.zeewoncode.req.CartQuantityReq;
-import com.zeewoncode.req.CartSelectReq;
-import com.zeewoncode.vo.CartResult;
+import com.zeewoncode.dto.CartAddDTO;
+import com.zeewoncode.dto.CartQuantityDTO;
+import com.zeewoncode.dto.CartSelectDTO;
+import com.zeewoncode.vo.CartVO;
 import com.zeewoncode.result.Result;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +26,9 @@ public class CartController {
      * @return
      */
     @GetMapping
-    public Result<CartResult> getCartList() {
+    public Result<CartVO> getCartList() {
         log.info("查看购物车列表");
-        CartResult result = cartService.getCartList();
+        CartVO result = cartService.getCartList();
         return Result.success(result);
     }
 
@@ -40,7 +39,7 @@ public class CartController {
      * @return
      */
     @PostMapping("/add")
-    public Result addCart(@RequestBody CartAddReq req) {
+    public Result addCart(@RequestBody CartAddDTO req) {
         log.info("添加购物车:{}", req);
         cartService.addCart(req);
         return Result.success();
@@ -53,7 +52,7 @@ public class CartController {
      * @return
      */
     @PutMapping("/{id}/quantity")
-    public Result updateCartQuantity(@PathVariable Integer id, @RequestBody CartQuantityReq req) {
+    public Result updateCartQuantity(@PathVariable Integer id, @RequestBody CartQuantityDTO req) {
         log.info("更新购物车数量:id:{},quantity:{}", id,req);
         cartService.updateCartQuantity(id.longValue(), req);
         return Result.success();
@@ -66,7 +65,7 @@ public class CartController {
      * @return
      */
     @PutMapping("/select")
-    public Result selectCart(@RequestBody CartSelectReq req) {
+    public Result selectCart(@RequestBody CartSelectDTO req) {
         log.info("选中或取消选中购物车:{}", req);
         cartService.selectCart(req);
         return Result.success();

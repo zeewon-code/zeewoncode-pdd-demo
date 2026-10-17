@@ -5,7 +5,7 @@ import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.entity.UserAddress;
 import com.zeewoncode.pdd_server.c.service.AddressesService;
 import com.zeewoncode.pdd_server.mapper.AddressesMapper;
-import com.zeewoncode.req.AddressReq;
+import com.zeewoncode.dto.AddressDTO;
 import com.zeewoncode.vo.AddressVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,14 +44,14 @@ public class AddressesServiceImpl implements AddressesService {
      */
     @Override
     @Transactional
-    public void addAddress(AddressReq addressReq) {
+    public void addAddress(AddressDTO addressDTO) {
         Integer userId = BaseContext.getCurrentId();
         UserAddress userAddress = new UserAddress();
-        BeanUtils.copyProperties(addressReq, userAddress);
+        BeanUtils.copyProperties(addressDTO, userAddress);
         userAddress.setDeletedFlag(0);
         userAddress.setUserId(userId);
-        if (addressReq.getIsDefault() != null) {
-            userAddress.setIsDefault(Boolean.TRUE.equals(addressReq.getIsDefault()) ? 1 : 0);
+        if (addressDTO.getIsDefault() != null) {
+            userAddress.setIsDefault(Boolean.TRUE.equals(addressDTO.getIsDefault()) ? 1 : 0);
         } else {
             userAddress.setIsDefault(0);
         }
@@ -65,18 +65,18 @@ public class AddressesServiceImpl implements AddressesService {
 
     /**
      * 修改收货地址
-     * @param addressReq
+     * @param addressDTO
      */
     @Override
     @Transactional
-    public void updateAddress(AddressReq addressReq) {
+    public void updateAddress(AddressDTO addressDTO) {
         Integer userId = BaseContext.getCurrentId();
         UserAddress userAddress = new UserAddress();
-        BeanUtils.copyProperties(addressReq, userAddress);
+        BeanUtils.copyProperties(addressDTO, userAddress);
         userAddress.setDeletedFlag(0);
         userAddress.setUserId(userId);
-        if (addressReq.getIsDefault() != null) {
-            userAddress.setIsDefault(Boolean.TRUE.equals(addressReq.getIsDefault()) ? 1 : 0);
+        if (addressDTO.getIsDefault() != null) {
+            userAddress.setIsDefault(Boolean.TRUE.equals(addressDTO.getIsDefault()) ? 1 : 0);
         } else {
             userAddress.setIsDefault(0);
         }

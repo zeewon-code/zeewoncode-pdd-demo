@@ -1,4 +1,4 @@
-package com.zeewoncode.req;
+package com.zeewoncode.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReviewsListQueryReq implements Serializable {
+public class ReviewsListQueryDTO implements Serializable {
 
     private Integer rating; //评分筛选
     private Integer page = 1; // 默认第一页

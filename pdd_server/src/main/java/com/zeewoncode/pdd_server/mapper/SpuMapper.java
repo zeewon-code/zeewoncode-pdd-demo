@@ -4,7 +4,7 @@ import com.zeewoncode.entity.Category;
 import com.zeewoncode.entity.Spu;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
-import com.zeewoncode.req.SpuListQueryReq;
+import com.zeewoncode.dto.SpuListQueryDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -24,7 +24,7 @@ public interface SpuMapper {
      * @param req
      * @return
      */
-    List<SpuCard> selectSpuList(SpuListQueryReq req);
+    List<SpuCard> selectSpuList(SpuListQueryDTO req);
 
     /**
      * 根据id查询商品详情

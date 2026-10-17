@@ -1,4 +1,4 @@
-package com.zeewoncode.req;
+package com.zeewoncode.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReviewCreateReq implements Serializable {
+public class ReviewCreateDTO implements Serializable {
 
     private Long orderId;
     private Long orderItemId;

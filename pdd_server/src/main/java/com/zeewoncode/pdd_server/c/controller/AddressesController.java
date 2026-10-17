@@ -2,9 +2,8 @@ package com.zeewoncode.pdd_server.c.controller;
 
 
 import com.zeewoncode.context.BaseContext;
-import com.zeewoncode.entity.UserAddress;
 import com.zeewoncode.pdd_server.c.service.AddressesService;
-import com.zeewoncode.req.AddressReq;
+import com.zeewoncode.dto.AddressDTO;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.AddressVO;
 import lombok.extern.slf4j.Slf4j;
@@ -38,13 +37,13 @@ public class AddressesController {
 
     /**
      * 添加收货地址
-     * @param addressReq
+     * @param addressDTO
      * @return
      */
     @PostMapping
-    public Result addAddress(@RequestBody AddressReq addressReq) {
-        log.info("添加收货地址:{}", addressReq);
-        addressesService.addAddress(addressReq);
+    public Result addAddress(@RequestBody AddressDTO addressDTO) {
+        log.info("添加收货地址:{}", addressDTO);
+        addressesService.addAddress(addressDTO);
         return Result.success();
     }
 
@@ -55,10 +54,10 @@ public class AddressesController {
      */
     @PutMapping("/{id}")
     public Result updateAddress(@PathVariable Integer id,
-                                @RequestBody AddressReq addressReq) {
-        addressReq.setId(id);
-        log.info("修改收货地址:{}", addressReq);
-        addressesService.updateAddress(addressReq);
+                                @RequestBody AddressDTO addressDTO) {
+        addressDTO.setId(id);
+        log.info("修改收货地址:{}", addressDTO);
+        addressesService.updateAddress(addressDTO);
         return Result.success();
     }
 

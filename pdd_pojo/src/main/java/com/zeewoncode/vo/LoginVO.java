@@ -1,5 +1,6 @@
-package com.zeewoncode.entity;
+package com.zeewoncode.vo;
 
+import com.zeewoncode.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class LoginResult implements Serializable {
+public class LoginVO implements Serializable {
 
     private String token;
     private User user;

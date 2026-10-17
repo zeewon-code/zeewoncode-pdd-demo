@@ -1,4 +1,4 @@
-package com.zeewoncode.req;
+package com.zeewoncode.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,9 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderCreateReq implements Serializable {
+public class CartSelectDTO implements Serializable {
 
-    private Integer addressId;
-    private List<OrderItemReq> items;
-    private Integer userCouponId;
+    private List<Integer> ids;
+    private Boolean selected;
 }

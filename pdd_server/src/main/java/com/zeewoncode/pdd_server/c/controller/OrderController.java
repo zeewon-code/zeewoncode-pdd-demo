@@ -2,10 +2,14 @@ package com.zeewoncode.pdd_server.c.controller;
 
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.OrderService;
-import com.zeewoncode.req.OrderCreateReq;
-import com.zeewoncode.req.OrderPreviewReq;
+import com.zeewoncode.dto.OrderCreateDTO;
+import com.zeewoncode.dto.OrderPreviewDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
+import com.zeewoncode.vo.CountdownVO;
+import com.zeewoncode.vo.OrderCreateVO;
+import com.zeewoncode.vo.OrderPreviewVO;
+import com.zeewoncode.vo.PayVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,22 +28,22 @@ public class OrderController {
      * @return
      */
     @PostMapping
-    public Result<OrderCreateResult> createOrder(@RequestBody OrderCreateReq req) {
+    public Result<OrderCreateVO> createOrder(@RequestBody OrderCreateDTO req) {
         log.info("提交订单:{}", req);
-        OrderCreateResult result = orderService.createOrder(req);
+        OrderCreateVO result = orderService.createOrder(req);
         return Result.success(result);
     }
 
 
     /**
      * 订单结算预览
-     * @param orderPreviewReq
+     * @param orderPreviewDTO
      * @return
      */
     @PostMapping("/preview")
-    public Result<OrderPreviewResult> previewOrder(@RequestBody OrderPreviewReq orderPreviewReq) {
-        log.info("订单结算预览:{}", orderPreviewReq);
-        OrderPreviewResult result = orderService.previewOrder(orderPreviewReq);
+    public Result<OrderPreviewVO> previewOrder(@RequestBody OrderPreviewDTO orderPreviewDTO) {
+        log.info("订单结算预览:{}", orderPreviewDTO);
+        OrderPreviewVO result = orderService.previewOrder(orderPreviewDTO);
         return Result.success(result);
     }
 
@@ -61,9 +65,9 @@ public class OrderController {
      * @return
      */
     @GetMapping("/{id}/countdown")
-    public Result<CountdownResult> getCountdown(@PathVariable Integer id) {
+    public Result<CountdownVO> getCountdown(@PathVariable Integer id) {
         log.info("获取订单支付倒计时:订单id：{}", id);
-        CountdownResult result = orderService.getCountdown(id);
+        CountdownVO result = orderService.getCountdown(id);
         return Result.success(result);
     }
 
@@ -73,9 +77,9 @@ public class OrderController {
      * @return
      */
     @PostMapping("/{id}/pay")
-    public Result<PayResult> orderPay(@PathVariable Long id) {
+    public Result<PayVO> orderPay(@PathVariable Long id) {
         log.info("订单支付:{}", id);
-        PayResult result = orderService.orderPay(id);
+        PayVO result = orderService.orderPay(id);
         return Result.success(result);
     }
 

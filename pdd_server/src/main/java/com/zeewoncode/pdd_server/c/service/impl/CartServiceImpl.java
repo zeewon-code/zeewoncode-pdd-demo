@@ -4,11 +4,11 @@ import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.CartService;
 import com.zeewoncode.pdd_server.mapper.*;
-import com.zeewoncode.req.CartAddReq;
-import com.zeewoncode.req.CartQuantityReq;
-import com.zeewoncode.req.CartSelectReq;
+import com.zeewoncode.dto.CartAddDTO;
+import com.zeewoncode.dto.CartQuantityDTO;
+import com.zeewoncode.dto.CartSelectDTO;
 import com.zeewoncode.vo.CartItemVO;
-import com.zeewoncode.vo.CartResult;
+import com.zeewoncode.vo.CartVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,9 +36,9 @@ public class CartServiceImpl implements CartService {
      * @return
      */
     @Override
-    public CartResult getCartList() {
+    public CartVO getCartList() {
         Integer userId = BaseContext.getCurrentId();
-        CartResult cartResult = new CartResult();
+        CartVO cartVO = new CartVO();
         List<CartItem> cartItemList = cartMapper.selectCartItemByUserId(userId.longValue());
         Double totalAmountCopy = 0.0;
         for (CartItem cartItem : cartItemList) {
@@ -48,7 +48,7 @@ public class CartServiceImpl implements CartService {
             Double price = sku.getPrice();
             totalAmountCopy += (quantity * price);
         }
-        cartResult.setTotalAmount(new BigDecimal(totalAmountCopy.toString()));
+        cartVO.setTotalAmount(new BigDecimal(totalAmountCopy.toString()));
         Map<Long, List<CartItem>> cartList = cartItemList.stream()
                 .collect(Collectors.groupingBy(CartItem::getSpuId));
         List<CartGroup> groups = cartList.entrySet().stream().map(entry -> {
@@ -82,8 +82,8 @@ public class CartServiceImpl implements CartService {
                     .items(cartItemVOS)
                     .build();
         }).collect(Collectors.toList());
-        cartResult.setGroups(groups);
-        return cartResult;
+        cartVO.setGroups(groups);
+        return cartVO;
     }
 
     /**
@@ -91,7 +91,7 @@ public class CartServiceImpl implements CartService {
      * @param req
      */
     @Override
-    public void addCart(CartAddReq req) {
+    public void addCart(CartAddDTO req) {
         // 1. 对sku表的stock,status和deleted_flag进行校验
         Sku sku = skuMapper.selectSkuById(req.getSkuId());
         if (sku == null || sku.getStock() <= 0 || sku.getStatus() != 1 || sku.getDeletedFlag() != 0) {
@@ -133,7 +133,7 @@ public class CartServiceImpl implements CartService {
      * @param req
      */
     @Override
-    public void updateCartQuantity(Long id, CartQuantityReq req) {
+    public void updateCartQuantity(Long id, CartQuantityDTO req) {
         cartMapper.updateCartQuantity(id, req.getQuantity());
     }
 
@@ -142,7 +142,7 @@ public class CartServiceImpl implements CartService {
      * @param req
      */
     @Override
-    public void selectCart(CartSelectReq req) {
+    public void selectCart(CartSelectDTO req) {
         List<Integer> ids = req.getIds();
         Boolean isSelected = req.getSelected();
         Integer selected = isSelected != null && isSelected ? 1 : 0;
