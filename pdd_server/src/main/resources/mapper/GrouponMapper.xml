@@ -3,4 +3,12 @@
 <mapper namespace="com.zeewoncode.pdd_server.mapper.GrouponMapper">
 
 
+    <update id="updateGrouponInstanceCurrentCount">
+        UPDATE groupon_instance
+        SET current_count = current_count + 1,
+            status = CASE WHEN current_count &gt;= target_count THEN 1 ELSE status END
+        WHERE id = #{instanceId}
+          AND status = 0
+          AND current_count &lt; target_count
+    </update>
 </mapper>

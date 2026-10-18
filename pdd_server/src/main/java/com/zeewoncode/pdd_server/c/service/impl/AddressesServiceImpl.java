@@ -108,7 +108,7 @@ public class AddressesServiceImpl implements AddressesService {
         userAddress.setId(id);
         userAddress.setIsDefault(1);
         userAddress.setUserId(BaseContext.getCurrentId());
-        UserAddress userAddressDB = addressesMapper.selectById(id);
+        UserAddress userAddressDB = addressesMapper.selectById(Long.valueOf(id));
         if (userAddressDB != null && userAddressDB.getIsDefault() != null && userAddressDB.getIsDefault() == 1) {
             throw new RuntimeException("当前地址已经是默认地址");
         }

@@ -14,6 +14,8 @@ mybatis:
   type-aliases-package: com.zeewoncode.entity
   configuration:
     map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
 
 jwt:
   secret: abcdefghijklmnopqrstuvwxyz1234567890abcdefgh

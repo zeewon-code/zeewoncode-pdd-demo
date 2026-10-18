@@ -11,7 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class GrouponInitiateDTO implements Serializable {
 
-    private Integer addressId;
-    private Integer defineId;
+    private Long addressId;
+    private Long defineId;
     private Integer quantity;
 }

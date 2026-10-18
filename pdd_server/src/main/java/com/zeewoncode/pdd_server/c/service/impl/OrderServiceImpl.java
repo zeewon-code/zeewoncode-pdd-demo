@@ -75,7 +75,7 @@ public class OrderServiceImpl implements OrderService {
         // 填充addressId
         order.setAddressId(req.getAddressId().longValue());
         // 填充receiverName, receiverPhone, receiverAddress
-        UserAddress userAddress = addressesMapper.selectById(req.getAddressId());
+        UserAddress userAddress = addressesMapper.selectById(req.getAddressId().longValue());
         order.setReceiverName(userAddress.getReceiverName());
         order.setReceiverPhone(userAddress.getReceiverPhone());
         String address = userAddress.getProvince() + userAddress.getCity() + userAddress.getDistrict() + userAddress.getDetail();

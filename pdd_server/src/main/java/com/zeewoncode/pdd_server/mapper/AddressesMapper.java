@@ -50,5 +50,5 @@ public interface AddressesMapper {
      * @return
      */
     @Select("select * from user_address where id = #{id} AND deleted_flag = 0")
-    UserAddress selectById(Integer id);
+    UserAddress selectById(Long id);
 }
