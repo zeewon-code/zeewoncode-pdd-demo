@@ -34,5 +34,11 @@ public interface GrouponsService {
      * 取消拼团(团长取消拼团)
      * @param dto
      */
+    void cancelGrouponByLeader(GrouponCancelDTO dto);
+
+    /**
+     * 团员取消拼团
+     * @param dto
+     */
     void cancelGroupon(GrouponCancelDTO dto);
 }

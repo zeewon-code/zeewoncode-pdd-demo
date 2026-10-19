@@ -75,8 +75,19 @@ public class GrouponsController {
      * @return
      */
     @PostMapping("/leader/cancel")
-    public Result cancelGroupon(@RequestBody GrouponCancelDTO dto){
-        log.info("取消拼团:{}", dto);
+    public Result cancelGrouponByLeader(@RequestBody GrouponCancelDTO dto){
+        log.info("团长取消拼团:{}", dto);
+        grouponsService.cancelGrouponByLeader(dto);
+        return Result.success();
+    }
+
+    /**
+     * 团员取消拼团
+     * @return
+     */
+    @PostMapping("/cancel")
+    public Result cancelGroupon(@RequestBody GrouponCancelDTO dto) {
+        log.info("团员取消拼团：{}", dto);
         grouponsService.cancelGroupon(dto);
         return Result.success();
     }

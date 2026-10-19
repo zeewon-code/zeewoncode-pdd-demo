@@ -134,6 +134,14 @@
         </set>
         WHERE id = #{id}
     </update>
+    <update id="updateOrderStatusAndCancelTypeByInstanceIdAndUserId">
+        update orders
+        SET status = #{status}, cancel_type = #{cancelType}
+        <where>
+            <if test="userId != null">AND user_id = #{userId}</if>
+            <if test="instanceId != null">AND groupon_instance_id = #{instanceId}</if>
+        </where>
+    </update>
 
     <select id="selectOrderByInstanceIdsAndUserIds" resultType="com.zeewoncode.entity.Order">
         SELECT * FROM orders
@@ -155,6 +163,14 @@
         <foreach item="orderId" collection="orderIds" open="(" separator="," close=")">
             #{orderId}
         </foreach>
+    </select>
+    <select id="selectOrderIdsByInstanceIdAndUserId" resultType="java.lang.Long">
+        select id
+        from orders
+        <where>
+            <if test="userId != null">AND user_id = #{userId}</if>
+            <if test="instanceId != null">AND groupon_instance_id = #{instanceId}</if>
+        </where>
     </select>
 
 

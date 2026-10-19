@@ -116,22 +116,9 @@ public interface OrderMapper {
     List<Order> selectOrderByInstanceIdsAndUserIds(List<Long> instanceIds, Long userId, List<Long> leaderUserIds);
 
     /**
-     * 根据团购实例id和订单状态更新订单状态和取消类型
-     * @param instanceId
-     * @param status
-     * @param cancelType
+     * 根据团购实例id和用户id更新订单状态和取消类型
      */
-    @Update("UPDATE orders SET status = #{status}, cancel_type = #{cancelType} " +
-            "WHERE groupon_instance_id = #{instanceId}")
-    void updateOrderStatusAndCancelTypeByInstanceId(Long instanceId, Integer status, Integer cancelType);
-
-    /**
-     * 根据团购实例id查询订单id列表
-     * @param instanceId
-     * @return
-     */
-    @Select("SELECT id FROM orders WHERE groupon_instance_id = #{instanceId}")
-    List<Long> selectOrderIdsByInstanceId(Long instanceId);
+    void updateOrderStatusAndCancelTypeByInstanceIdAndUserId(Long instanceId, Long userId, Integer status, Integer cancelType);
 
     /**
      * 根据订单id列表查询订单商品数量
@@ -139,4 +126,13 @@ public interface OrderMapper {
      * @return
      */
     Integer selectQuantityByOrderIds(List<Long> orderIds);
+
+
+    /**
+     * 根据团购实例id和用户id查询订单id列表
+     * @param instanceId
+     * @param userId
+     * @return
+     */
+    List<Long> selectOrderIdsByInstanceIdAndUserId(Long instanceId, Long userId);
 }

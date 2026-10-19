@@ -46,11 +46,11 @@ public interface GrouponMapper {
     GrouponInstance selectGrouponInstanceById(Long instanceId);
 
     /**
-     * 更新拼团实例当前拼团人数，当拼团人数凑齐时修改该团状态为已拼成
+     * 增加拼团实例当前拼团人数，当拼团人数凑齐时修改该团状态为已拼成
      * @param instanceId
      * @return
      */
-    int updateGrouponInstanceCurrentCount(Long instanceId);
+    int addGrouponInstanceCurrentCount(Long instanceId);
 
     /**
      * 根据拼团活动id和团长用户id查询拼团实例
@@ -97,4 +97,10 @@ public interface GrouponMapper {
      */
     @Update("update groupon_instance set status = #{status} where id = #{instanceId}")
     void updateGrouponInstanceStatus(Long instanceId, Integer status);
+
+    /**
+     * 减少拼团实例当前拼团人数
+     * @param instanceId
+     */
+    void reduceGrouponInstanceCurrentCount(Long instanceId);
 }

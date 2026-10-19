@@ -77,8 +77,9 @@ public class GrouponsServiceImpl implements GrouponsService {
         }
         // 判断是否已经用户目前是否已经开起了拼团活动，
         // 如果已经发起该款商品活动且同商品拼团未结束；则不允许再发起新的同款商品的拼团活动
-        if (grouponMapper.selectGrouponInstanceByDefineIdAndLeaderUserId(defineId, userId) != null) {
-            throw new RuntimeException("您已经发起过该商品的拼团活动");
+        GrouponInstance instanceDb = grouponMapper.selectGrouponInstanceByDefineIdAndLeaderUserId(defineId, userId);
+        if (instanceDb != null && instanceDb.getStatus() == 0) {
+            throw new RuntimeException("您已在进行该商品的拼团活动");
         }
         List<OrderItemDTO> list = new ArrayList<>();
         list.add(OrderItemDTO.builder()
@@ -236,7 +237,7 @@ public class GrouponsServiceImpl implements GrouponsService {
      * @return
      */
     public boolean updateGrouponInstanceCurrentCount(Long instanceId) {
-        int rows = grouponMapper.updateGrouponInstanceCurrentCount(instanceId);
+        int rows = grouponMapper.addGrouponInstanceCurrentCount(instanceId);
         // 影响行数>0 表示参团成功
         return rows > 0;
     }
@@ -328,7 +329,7 @@ public class GrouponsServiceImpl implements GrouponsService {
      */
     @Override
     @Transactional
-    public void cancelGroupon(GrouponCancelDTO dto) {
+    public void cancelGrouponByLeader(GrouponCancelDTO dto) {
         // 团长取消拼团
         // 验证当前用户的id是否为团长id，且拼团状态是否为进行中， 且拼团名额小于成团人数
         Long userId = BaseContext.getCurrentId().longValue();
@@ -343,16 +344,53 @@ public class GrouponsServiceImpl implements GrouponsService {
         if (instance.getCurrentCount().equals(instance.getTargetCount())) {
             throw new RuntimeException("活动已拼成，无法取消");
         }
+        if (instance.getExpireAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("拼团已过期");
+        }
         // 修改拼团实例状态
         grouponMapper.updateGrouponInstanceStatus(instanceId, 3);
         // 通过拼团实例id找到该拼团实例下的所有订单并修改订单状态，并取出订单id
-        orderMapper.updateOrderStatusAndCancelTypeByInstanceId(instanceId, 4, 3);
-        List<Long> orderIds = orderMapper.selectOrderIdsByInstanceId(instanceId);
+        orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId, null, 4, 3);
+        List<Long> orderIds = orderMapper.selectOrderIdsByInstanceIdAndUserId(instanceId,null);
         // 释放预占库存，通过订单id去找到订单明细表中对应的下单的商品数量
         Integer quantity = orderMapper.selectQuantityByOrderIds(orderIds);
         // 通过拼团实例id找到拼团活动define，找到skuId,然后到sku表进行预占库存的释放
         Long skuId = grouponMapper.selectGrouponDefineById(instance.getDefineId()).getSkuId().longValue();
         skuMapper.releaseLockStock(skuId, quantity);
+    }
+
+    /**
+     * 团员取消拼团
+     * @param dto
+     */
+    @Override
+    public void cancelGroupon(GrouponCancelDTO dto) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        Long instanceId = dto.getInstanceId();
+        GrouponInstance instance = grouponMapper.selectGrouponInstanceById(instanceId);
+        if (instance == null) {
+            throw new RuntimeException("拼团事务不存在");
+        }
+        if (instance.getStatus() != 0) {
+            throw new RuntimeException("拼团状态不处于拼团中，无法取消");
+        }
+        if (instance.getCurrentCount().equals(instance.getTargetCount())) {
+            throw new RuntimeException("活动已拼成，无法取消");
+        }
+        if (instance.getExpireAt().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("拼团已过期");
+        }
+        // 修改groupon_instance中的current_count-1
+        grouponMapper.reduceGrouponInstanceCurrentCount(instanceId);
+        // 通过拼团实例id找到该拼团实例下的当前用户id的订单并修改订单状态，并取出订单id
+        orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId,userId, 4, 3);
+        List<Long> orderIds = orderMapper.selectOrderIdsByInstanceIdAndUserId(instanceId, userId);
+        // 释放预占库存，通过订单id去找到订单明细表中对应的下单的商品数量
+        Integer quantity = orderMapper.selectQuantityByOrderIds(orderIds);
+        // 通过拼团实例id找到拼团活动define，找到skuId,然后到sku表进行预占库存的释放
+        Long skuId = grouponMapper.selectGrouponDefineById(instance.getDefineId()).getSkuId().longValue();
+        skuMapper.releaseLockStock(skuId, quantity);
+
     }
 
     //安全的 List 转 Map
