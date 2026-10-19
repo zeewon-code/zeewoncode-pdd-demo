@@ -11,4 +11,41 @@
           AND status = 0
           AND current_count &lt; target_count
     </update>
+    <select id="selectMyGrouponRefs" resultType="com.zeewoncode.pdd_server.mapper.po.InstanceRef">
+        SELECT instance_id, role, join_time
+        FROM (
+                 -- 路径1：我发起的 = 我是团长
+                 SELECT gi.id            AS instance_id,
+                        1                AS role,
+                        gi.created_at   AS join_time
+                 FROM groupon_instance gi
+                 WHERE gi.leader_user_id = #{userId}
+
+                 UNION
+                 -- 路径2：我参与的 = 我在别人的团里下过单
+                 SELECT o.groupon_instance_id AS instance_id,
+                        2                     AS role,
+                        o.created_at         AS join_time
+                 FROM orders o
+                          INNER JOIN groupon_instance gi ON gi.id = o.groupon_instance_id
+                 WHERE o.user_id = #{userId}
+                   AND gi.leader_user_id != #{userId}
+
+             ) t
+        ORDER BY t.join_time DESC
+    </select>
+    <select id="selectGrouponInstanceByIds" resultType="com.zeewoncode.entity.GrouponInstance">
+        SELECT * FROM groupon_instance
+        WHERE id IN
+        <foreach item="instanceId" collection="instanceIds" separator="," open="(" close=")">
+            #{instanceId}
+        </foreach>
+    </select>
+    <select id="selectGrouponDefineByIds" resultType="com.zeewoncode.entity.GrouponDefine">
+        SELECT * FROM groupon_define
+        WHERE id IN
+        <foreach item="defineId" collection="defineIds" separator="," open="(" close=")">
+            #{defineId}
+        </foreach>
+    </select>
 </mapper>

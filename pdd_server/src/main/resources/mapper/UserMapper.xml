@@ -19,4 +19,11 @@
         </set>
         where id = #{id}
     </update>
+    <select id="selectUserByIds" resultType="com.zeewoncode.entity.User">
+        select * from user where id in
+        <foreach item="id" collection="leaderUserIds" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>

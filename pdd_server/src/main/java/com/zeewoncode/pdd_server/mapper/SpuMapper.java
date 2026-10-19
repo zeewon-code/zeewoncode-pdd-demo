@@ -42,5 +42,10 @@ public interface SpuMapper {
     @Select("SELECT * FROM spu WHERE id = #{spuId}")
     Spu getSpuById(Integer spuId);
 
-
+    /**
+     * 根据spuIds查询商品
+     * @param spuIds
+     * @return
+     */
+    List<Spu> selectSpuByIds(List<Integer> spuIds);
 }

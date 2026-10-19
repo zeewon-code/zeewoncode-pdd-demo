@@ -106,4 +106,12 @@ public interface OrderMapper {
             "WHERE id = #{id}")
     Receiver selectReceiverByOrderId(Integer id);
 
+    /**
+     * 根据团购实例id和用户id查询订单
+     * @param instanceIds
+     * @param userId
+     * @param leaderUserIds
+     * @return
+     */
+    List<Order> selectOrderByInstanceIdsAndUserIds(List<Long> instanceIds, Long userId, List<Long> leaderUserIds);
 }

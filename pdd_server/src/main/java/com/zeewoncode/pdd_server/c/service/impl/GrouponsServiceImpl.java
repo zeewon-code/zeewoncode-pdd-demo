@@ -1,5 +1,7 @@
 package com.zeewoncode.pdd_server.c.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.GrouponInitiateDTO;
 import com.zeewoncode.dto.GrouponJoinDTO;
@@ -7,8 +9,11 @@ import com.zeewoncode.dto.OrderItemDTO;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.GrouponsService;
 import com.zeewoncode.pdd_server.mapper.*;
+import com.zeewoncode.pdd_server.mapper.po.InstanceRef;
+import com.zeewoncode.result.PageResult;
 import com.zeewoncode.utils.SnowflakeIdGenerator;
 import com.zeewoncode.vo.GrouponInitiateVO;
+import com.zeewoncode.vo.GrouponInstanceVO;
 import com.zeewoncode.vo.GrouponJoinVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +25,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class GrouponsServiceImpl implements GrouponsService {
@@ -40,6 +46,8 @@ public class GrouponsServiceImpl implements GrouponsService {
     private OrderMapper orderMapper;
     @Autowired
     private RouterFunctionMapping routerFunctionMapping;
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 拼团发起（团长下单）
@@ -232,7 +240,98 @@ public class GrouponsServiceImpl implements GrouponsService {
         return rows > 0;
     }
 
+    // 涉及表：groupon_instance, user, spu, groupon_define, orders
+    /**
+     * 获取我的拼团实例列表
+     * @return
+     */
+    @Override
+    public PageResult<GrouponInstanceVO> getGrouponInstanceList(Integer pageNum, Integer pageSize) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        PageHelper.startPage(pageNum, pageSize);
+        // ===== 1. 只对「我的实例集合」分页 =====
+        List<InstanceRef> refs = grouponMapper.selectMyGrouponRefs(userId);
+        PageInfo<InstanceRef> pageInfo = new PageInfo<>(refs);
+        if (refs.isEmpty()) {
+            return PageResult.empty(pageInfo);
+        }
+        //2. 批量补查 5 张表=====
+        // groupon_instance
+        List<Long> instanceIds = distinctValues(refs, InstanceRef::getInstanceId);
+        List<GrouponInstance> instances = grouponMapper.selectGrouponInstanceByIds(instanceIds);
+        Map<Long, GrouponInstance> instanceMap = toMap(instances, GrouponInstance::getId);
+        // groupon_define
+        List<Long> defineIds = distinctValues(instances, GrouponInstance::getDefineId);
+        Map<Integer, GrouponDefine> defineMap = defineIds.isEmpty()
+                ? Collections.emptyMap()
+                : toMap(grouponMapper.selectGrouponDefineByIds(defineIds), GrouponDefine::getId);
+        // spu
+        List<Integer> spuIds = distinctValues(defineMap.values(), GrouponDefine::getSpuId);
+        Map<Long, Spu> spuMap = spuIds.isEmpty()
+                ? Collections.emptyMap()
+                : toMap(spuMapper.selectSpuByIds(spuIds), Spu::getId);
+        // user
+        List<Long> leaderUserIds = distinctValues(instances, GrouponInstance::getLeaderUserId);
+        Map<Integer, User> userMap = leaderUserIds.isEmpty()
+                ? Collections.emptyMap()
+                : toMap(userMapper.selectUserByIds(leaderUserIds), User::getId);
+        // orders
+//        一次把「团长订单」和「我自己的订单」都捞出来
+        List<Order> orders = orderMapper.selectOrderByInstanceIdsAndUserIds(instanceIds, userId, leaderUserIds);
+        Map<Long, Map<Long, Order>> orderMap = orders.stream()
+                .collect(Collectors.groupingBy(Order::getGrouponInstanceId,
+                        Collectors.toMap(Order::getUserId, order -> order, (o1, o2) -> o1)));
+        // 组装List<GrouponInstanceVO>
+        List<GrouponInstanceVO> voList = refs.stream().map(ref -> {
+            GrouponInstance grouponInstance = instanceMap.get(ref.getInstanceId());
+            if (grouponInstance == null) return null;
+            GrouponInstanceVO vo = new GrouponInstanceVO();
+            vo.setInstanceId(grouponInstance.getId());
+            vo.setDefineId(grouponInstance.getDefineId());
+            vo.setLeaderUserId(grouponInstance.getLeaderUserId());
+            vo.setCurrentCount(grouponInstance.getCurrentCount());
+            vo.setTargetCount(grouponInstance.getTargetCount());
+            vo.setStatus(grouponInstance.getStatus());
+            vo.setExpireAt(grouponInstance.getExpireAt());
+            vo.setRole(ref.getRole());
+            GrouponDefine define = defineMap.get(grouponInstance.getDefineId().intValue());
+            if (define != null) {
+                vo.setGroupPrice(define.getGroupPrice() != null ? define.getGroupPrice().setScale(2, RoundingMode.HALF_UP) : null);
+                Spu spu = spuMap.get(define.getSpuId().longValue());
+                if (spu != null) vo.setSpuTitle(spu.getTitle());
+            }
 
+            // 团长
+            User leaderUser = userMap.get(grouponInstance.getLeaderUserId().intValue());
+            if (leaderUser != null) {
+                vo.setLeaderNickname(leaderUser.getNickname());
+            }
+            Map<Long, Order> instOrders = orderMap.getOrDefault(grouponInstance.getId(), Collections.emptyMap());
+            Long targetUserId = (ref.getRole() == 1) ? grouponInstance.getLeaderUserId() : userId;
+            Order targetOrder = instOrders.get(targetUserId);
+            if (targetOrder != null) {
+                vo.setOrderNo(targetOrder.getOrderNo());
+            }
+            // remainCount
+            if (vo.getTargetCount() != null && vo.getCurrentCount() != null) {
+                vo.setRemainCount(Math.max(0, vo.getTargetCount() - vo.getCurrentCount()));
+            }
+            return vo;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+        return PageResult.of(pageInfo, voList);
+    }
+
+    //安全的 List 转 Map
+    private <E, K> Map<K, E> toMap(List<E> list, Function<E, K> keyFn) {
+        if (list == null || list.isEmpty()) return Collections.emptyMap();
+        return list.stream().collect(Collectors.toMap(keyFn, Function.identity(), (a, b) -> a));
+    }
+
+    //安全的字段提取 + 去重
+    private <E, V> List<V> distinctValues(Collection<E> src, Function<E, V> fn) {
+        if (src == null || src.isEmpty()) return Collections.emptyList();
+        return src.stream().map(fn).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+    }
 
 
 }

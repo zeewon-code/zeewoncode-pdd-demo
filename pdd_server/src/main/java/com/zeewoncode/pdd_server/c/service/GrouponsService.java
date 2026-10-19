@@ -2,7 +2,9 @@ package com.zeewoncode.pdd_server.c.service;
 
 import com.zeewoncode.dto.GrouponInitiateDTO;
 import com.zeewoncode.dto.GrouponJoinDTO;
+import com.zeewoncode.result.PageResult;
 import com.zeewoncode.vo.GrouponInitiateVO;
+import com.zeewoncode.vo.GrouponInstanceVO;
 import com.zeewoncode.vo.GrouponJoinVO;
 
 public interface GrouponsService {
@@ -20,4 +22,10 @@ public interface GrouponsService {
      * @return
      */
     GrouponJoinVO joinGroupon(Long instanceId, GrouponJoinDTO grouponJoinDTO);
+
+    /**
+     * 获取我的拼团列表
+     * @return
+     */
+    PageResult<GrouponInstanceVO> getGrouponInstanceList(Integer pageNum, Integer pageSize);
 }

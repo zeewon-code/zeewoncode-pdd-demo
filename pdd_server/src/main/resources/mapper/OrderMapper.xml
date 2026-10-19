@@ -135,6 +135,20 @@
         WHERE id = #{id}
     </update>
 
+    <select id="selectOrderByInstanceIdsAndUserIds" resultType="com.zeewoncode.entity.Order">
+        SELECT * FROM orders
+        WHERE groupon_instance_id IN
+        <foreach item="grouponInstanceId" collection="instanceIds" open="(" separator="," close=")">
+            #{grouponInstanceId}
+        </foreach>
+        AND (
+        user_id = #{userId}
+        OR user_id IN
+            <foreach item="leaderUserId" collection="leaderUserIds" open="(" separator="," close=")">
+                #{leaderUserId}
+            </foreach>
+        )
+    </select>
 
 
 

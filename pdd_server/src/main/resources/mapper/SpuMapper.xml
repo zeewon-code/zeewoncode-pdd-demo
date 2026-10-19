@@ -61,4 +61,11 @@
         FROM spu s
         <include refid="queryCondition"/>
     </select>
+    <select id="selectSpuByIds" resultType="com.zeewoncode.entity.Spu">
+        SELECT * FROM spu
+        WHERE id IN
+        <foreach item="spuId" collection="spuIds" open="(" separator="," close=")">
+            #{spuId}
+        </foreach>
+    </select>
 </mapper>

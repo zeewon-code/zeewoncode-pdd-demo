@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface UserMapper {
 
@@ -37,4 +39,11 @@ public interface UserMapper {
      * @param user
      */
     void updateById(User user);
+
+    /**
+     * 根据用户id列表查询用户信息
+     * @param leaderUserIds
+     * @return
+     */
+    List<User> selectUserByIds(List<Long> leaderUserIds);
 }

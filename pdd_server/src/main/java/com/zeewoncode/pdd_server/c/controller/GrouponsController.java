@@ -3,8 +3,10 @@ package com.zeewoncode.pdd_server.c.controller;
 import com.zeewoncode.dto.GrouponInitiateDTO;
 import com.zeewoncode.dto.GrouponJoinDTO;
 import com.zeewoncode.pdd_server.c.service.GrouponsService;
+import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.GrouponInitiateVO;
+import com.zeewoncode.vo.GrouponInstanceVO;
 import com.zeewoncode.vo.GrouponJoinVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,5 +53,18 @@ public class GrouponsController {
         log.info("拼团加入:{},{}", instanceId,grouponJoinDTO);
         GrouponJoinVO grouponJoinVO = grouponsService.joinGroupon(instanceId, grouponJoinDTO);
         return Result.success(grouponJoinVO);
+    }
+
+    /**
+     * 获取我的拼团列表
+     * @return
+     */
+    @GetMapping("/mine")
+    public Result<PageResult<GrouponInstanceVO>> getGrouponInstanceList(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size ) {
+        log.info("获取我的拼团列表");
+        PageResult<GrouponInstanceVO> pageResult = grouponsService.getGrouponInstanceList(page, size);
+        return Result.success(pageResult);
     }
 }

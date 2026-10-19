@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.entity.GrouponDefine;
 import com.zeewoncode.entity.GrouponInstance;
 import com.zeewoncode.entity.Order;
+import com.zeewoncode.pdd_server.mapper.po.InstanceRef;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
@@ -71,4 +72,25 @@ public interface GrouponMapper {
      */
     @Select("select * from orders where user_id = #{userId} and groupon_instance_id = #{instanceId}")
     Order selectOrderByUserIdAndInstanceId(Long userId, Long instanceId);
+
+    /**
+     * 根据用户id查询该用户的所有拼团实例id，在每个拼团实例中的角色，开始发起或参与拼团的时间
+     * @param userId
+     * @return
+     */
+    List<InstanceRef> selectMyGrouponRefs(Long userId);
+
+    /**
+     * 根据拼团实例id列表查询拼团实例
+     * @param instanceIds
+     * @return
+     */
+    List<GrouponInstance> selectGrouponInstanceByIds(List<Long> instanceIds);
+
+    /**
+     * 根据拼团活动id列表查询拼团活动
+     * @param defineIds
+     * @return
+     */
+    List<GrouponDefine> selectGrouponDefineByIds(List<Long> defineIds);
 }
