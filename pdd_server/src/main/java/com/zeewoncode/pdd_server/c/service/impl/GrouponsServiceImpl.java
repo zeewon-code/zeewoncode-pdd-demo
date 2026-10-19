@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.c.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
+import com.zeewoncode.dto.GrouponCancelDTO;
 import com.zeewoncode.dto.GrouponInitiateDTO;
 import com.zeewoncode.dto.GrouponJoinDTO;
 import com.zeewoncode.dto.OrderItemDTO;
@@ -319,6 +320,39 @@ public class GrouponsServiceImpl implements GrouponsService {
             return vo;
         }).filter(Objects::nonNull).collect(Collectors.toList());
         return PageResult.of(pageInfo, voList);
+    }
+
+    /**
+     * 团长取消拼团
+     * @param dto
+     */
+    @Override
+    @Transactional
+    public void cancelGroupon(GrouponCancelDTO dto) {
+        // 团长取消拼团
+        // 验证当前用户的id是否为团长id，且拼团状态是否为进行中， 且拼团名额小于成团人数
+        Long userId = BaseContext.getCurrentId().longValue();
+        Long instanceId = dto.getInstanceId();
+        GrouponInstance instance = grouponMapper.selectGrouponInstanceById(instanceId);
+        if (instance == null) {
+            throw new RuntimeException("拼团事务不存在");
+        }
+        if (instance.getStatus() != 0) {
+            throw new RuntimeException("拼团状态不处于拼团中，无法取消");
+        }
+        if (instance.getCurrentCount().equals(instance.getTargetCount())) {
+            throw new RuntimeException("活动已拼成，无法取消");
+        }
+        // 修改拼团实例状态
+        grouponMapper.updateGrouponInstanceStatus(instanceId, 3);
+        // 通过拼团实例id找到该拼团实例下的所有订单并修改订单状态，并取出订单id
+        orderMapper.updateOrderStatusAndCancelTypeByInstanceId(instanceId, 4, 3);
+        List<Long> orderIds = orderMapper.selectOrderIdsByInstanceId(instanceId);
+        // 释放预占库存，通过订单id去找到订单明细表中对应的下单的商品数量
+        Integer quantity = orderMapper.selectQuantityByOrderIds(orderIds);
+        // 通过拼团实例id找到拼团活动define，找到skuId,然后到sku表进行预占库存的释放
+        Long skuId = grouponMapper.selectGrouponDefineById(instance.getDefineId()).getSkuId().longValue();
+        skuMapper.releaseLockStock(skuId, quantity);
     }
 
     //安全的 List 转 Map

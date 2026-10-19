@@ -4,10 +4,7 @@ import com.zeewoncode.entity.GrouponDefine;
 import com.zeewoncode.entity.GrouponInstance;
 import com.zeewoncode.entity.Order;
 import com.zeewoncode.pdd_server.mapper.po.InstanceRef;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -93,4 +90,11 @@ public interface GrouponMapper {
      * @return
      */
     List<GrouponDefine> selectGrouponDefineByIds(List<Long> defineIds);
+
+    /**
+     * 根据拼团实例id更新拼团实例状态
+      * @param status
+     */
+    @Update("update groupon_instance set status = #{status} where id = #{instanceId}")
+    void updateGrouponInstanceStatus(Long instanceId, Integer status);
 }

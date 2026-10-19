@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.c.service;
 
+import com.zeewoncode.dto.GrouponCancelDTO;
 import com.zeewoncode.dto.GrouponInitiateDTO;
 import com.zeewoncode.dto.GrouponJoinDTO;
 import com.zeewoncode.result.PageResult;
@@ -28,4 +29,10 @@ public interface GrouponsService {
      * @return
      */
     PageResult<GrouponInstanceVO> getGrouponInstanceList(Integer pageNum, Integer pageSize);
+
+    /**
+     * 取消拼团(团长取消拼团)
+     * @param dto
+     */
+    void cancelGroupon(GrouponCancelDTO dto);
 }

@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.c.controller;
 
+import com.zeewoncode.dto.GrouponCancelDTO;
 import com.zeewoncode.dto.GrouponInitiateDTO;
 import com.zeewoncode.dto.GrouponJoinDTO;
 import com.zeewoncode.pdd_server.c.service.GrouponsService;
@@ -66,5 +67,17 @@ public class GrouponsController {
         log.info("获取我的拼团列表");
         PageResult<GrouponInstanceVO> pageResult = grouponsService.getGrouponInstanceList(page, size);
         return Result.success(pageResult);
+    }
+
+    /**
+     * 取消拼团(团长取消拼团)
+     * @param dto
+     * @return
+     */
+    @PostMapping("/leader/cancel")
+    public Result cancelGroupon(@RequestBody GrouponCancelDTO dto){
+        log.info("取消拼团:{}", dto);
+        grouponsService.cancelGroupon(dto);
+        return Result.success();
     }
 }
