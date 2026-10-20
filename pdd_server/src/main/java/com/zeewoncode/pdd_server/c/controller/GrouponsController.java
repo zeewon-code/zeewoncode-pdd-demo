@@ -91,4 +91,23 @@ public class GrouponsController {
         grouponsService.cancelGroupon(dto);
         return Result.success();
     }
+
+    /**
+     * 商品进行中的拼团（凑人页）
+     * @param id
+     * @param page
+     * @param size
+     * @return
+     */
+    @GetMapping("/{id}/spu")
+    public Result<PageResult<GrouponInstanceVO>> getGrouponInstanceInSpu(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        log.info("商品进行中的拼团:{}", id);
+        PageResult<GrouponInstanceVO> pageResult = grouponsService.getGrouponInstanceInSpu(id, page, size);
+        return Result.success(pageResult);
+    }
+
 }

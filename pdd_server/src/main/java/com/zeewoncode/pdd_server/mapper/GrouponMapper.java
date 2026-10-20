@@ -103,4 +103,12 @@ public interface GrouponMapper {
      * @param instanceId
      */
     void reduceGrouponInstanceCurrentCount(Long instanceId);
+
+    /**
+     * 根据拼团活动id查询拼团实例id列表
+     * @param defineId
+     * @return
+     */
+    @Select("select id from groupon_instance where define_id = #{defineId}")
+    List<Long> selectGrouponInstanceByDefineId(Long defineId);
 }

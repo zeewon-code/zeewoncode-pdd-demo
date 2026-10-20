@@ -242,86 +242,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         return rows > 0;
     }
 
-    // 涉及表：groupon_instance, user, spu, groupon_define, orders
-    /**
-     * 获取我的拼团实例列表
-     * @return
-     */
-    @Override
-    public PageResult<GrouponInstanceVO> getGrouponInstanceList(Integer pageNum, Integer pageSize) {
-        Long userId = BaseContext.getCurrentId().longValue();
-        PageHelper.startPage(pageNum, pageSize);
-        // ===== 1. 只对「我的实例集合」分页 =====
-        List<InstanceRef> refs = grouponMapper.selectMyGrouponRefs(userId);
-        PageInfo<InstanceRef> pageInfo = new PageInfo<>(refs);
-        if (refs.isEmpty()) {
-            return PageResult.empty(pageInfo);
-        }
-        //2. 批量补查 5 张表=====
-        // groupon_instance
-        List<Long> instanceIds = distinctValues(refs, InstanceRef::getInstanceId);
-        List<GrouponInstance> instances = grouponMapper.selectGrouponInstanceByIds(instanceIds);
-        Map<Long, GrouponInstance> instanceMap = toMap(instances, GrouponInstance::getId);
-        // groupon_define
-        List<Long> defineIds = distinctValues(instances, GrouponInstance::getDefineId);
-        Map<Integer, GrouponDefine> defineMap = defineIds.isEmpty()
-                ? Collections.emptyMap()
-                : toMap(grouponMapper.selectGrouponDefineByIds(defineIds), GrouponDefine::getId);
-        // spu
-        List<Integer> spuIds = distinctValues(defineMap.values(), GrouponDefine::getSpuId);
-        Map<Long, Spu> spuMap = spuIds.isEmpty()
-                ? Collections.emptyMap()
-                : toMap(spuMapper.selectSpuByIds(spuIds), Spu::getId);
-        // user
-        List<Long> leaderUserIds = distinctValues(instances, GrouponInstance::getLeaderUserId);
-        Map<Integer, User> userMap = leaderUserIds.isEmpty()
-                ? Collections.emptyMap()
-                : toMap(userMapper.selectUserByIds(leaderUserIds), User::getId);
-        // orders
-//        一次把「团长订单」和「我自己的订单」都捞出来
-        List<Order> orders = orderMapper.selectOrderByInstanceIdsAndUserIds(instanceIds, userId, leaderUserIds);
-        Map<Long, Map<Long, Order>> orderMap = orders.stream()
-                .collect(Collectors.groupingBy(Order::getGrouponInstanceId,
-                        Collectors.toMap(Order::getUserId, order -> order, (o1, o2) -> o1)));
-        // 组装List<GrouponInstanceVO>
-        List<GrouponInstanceVO> voList = refs.stream().map(ref -> {
-            GrouponInstance grouponInstance = instanceMap.get(ref.getInstanceId());
-            if (grouponInstance == null) return null;
-            GrouponInstanceVO vo = new GrouponInstanceVO();
-            vo.setInstanceId(grouponInstance.getId());
-            vo.setDefineId(grouponInstance.getDefineId());
-            vo.setLeaderUserId(grouponInstance.getLeaderUserId());
-            vo.setCurrentCount(grouponInstance.getCurrentCount());
-            vo.setTargetCount(grouponInstance.getTargetCount());
-            vo.setStatus(grouponInstance.getStatus());
-            vo.setExpireAt(grouponInstance.getExpireAt());
-            vo.setRole(ref.getRole());
-            GrouponDefine define = defineMap.get(grouponInstance.getDefineId().intValue());
-            if (define != null) {
-                vo.setGroupPrice(define.getGroupPrice() != null ? define.getGroupPrice().setScale(2, RoundingMode.HALF_UP) : null);
-                Spu spu = spuMap.get(define.getSpuId().longValue());
-                if (spu != null) vo.setSpuTitle(spu.getTitle());
-            }
 
-            // 团长
-            User leaderUser = userMap.get(grouponInstance.getLeaderUserId().intValue());
-            if (leaderUser != null) {
-                vo.setLeaderNickname(leaderUser.getNickname());
-            }
-            Map<Long, Order> instOrders = orderMap.getOrDefault(grouponInstance.getId(), Collections.emptyMap());
-            Long targetUserId = (ref.getRole() == 1) ? grouponInstance.getLeaderUserId() : userId;
-            Order targetOrder = instOrders.get(targetUserId);
-            if (targetOrder != null) {
-                vo.setOrderNo(targetOrder.getOrderNo());
-            }
-            // remainCount
-            if (vo.getTargetCount() != null && vo.getCurrentCount() != null) {
-                vo.setRemainCount(Math.max(0, vo.getTargetCount() - vo.getCurrentCount()));
-            }
-            return vo;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
-        return PageResult.of(pageInfo, voList);
-    }
 
     /**
      * 团长取消拼团
@@ -405,5 +326,147 @@ public class GrouponsServiceImpl implements GrouponsService {
         return src.stream().map(fn).filter(Objects::nonNull).distinct().collect(Collectors.toList());
     }
 
+    // 涉及表：groupon_instance, user, spu, groupon_define, orders
+    /**
+     * 获取我的拼团实例列表
+     * @return
+     */
+    @Override
+    public PageResult<GrouponInstanceVO> getGrouponInstanceList(Integer pageNum, Integer pageSize) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        PageHelper.startPage(pageNum, pageSize);
+        // ===== 1. 只对「我的实例集合」分页 =====
+        List<InstanceRef> refs = grouponMapper.selectMyGrouponRefs(userId);
+        PageInfo<InstanceRef> pageInfo = new PageInfo<>(refs);
+        if (refs.isEmpty()) {
+            return PageResult.empty(pageInfo);
+        }
+        //2. 批量补查 5 张表=====
+        // groupon_instance
+        List<Long> instanceIds = distinctValues(refs, InstanceRef::getInstanceId);
+        List<GrouponInstance> instances = grouponMapper.selectGrouponInstanceByIds(instanceIds);
+        Map<Long, GrouponInstance> instanceMap = toMap(instances, GrouponInstance::getId);
+        // groupon_define
+        List<Long> defineIds = distinctValues(instances, GrouponInstance::getDefineId);
+        Map<Integer, GrouponDefine> defineMap = defineIds.isEmpty()
+                ? Collections.emptyMap()
+                : toMap(grouponMapper.selectGrouponDefineByIds(defineIds), GrouponDefine::getId);
+        // spu
+        List<Integer> spuIds = distinctValues(defineMap.values(), GrouponDefine::getSpuId);
+        Map<Long, Spu> spuMap = spuIds.isEmpty()
+                ? Collections.emptyMap()
+                : toMap(spuMapper.selectSpuByIds(spuIds), Spu::getId);
+        // user
+        List<Long> leaderUserIds = distinctValues(instances, GrouponInstance::getLeaderUserId);
+        Map<Integer, User> userMap = leaderUserIds.isEmpty()
+                ? Collections.emptyMap()
+                : toMap(userMapper.selectUserByIds(leaderUserIds), User::getId);
+        // orders
+//        一次把「团长订单」和「我自己的订单」都捞出来
+        List<Order> orders = orderMapper.selectOrderByInstanceIdsAndUserIds(instanceIds, userId, leaderUserIds);
+        Map<Long, Map<Long, Order>> orderMap = orders.stream()
+                .collect(Collectors.groupingBy(Order::getGrouponInstanceId,
+                        Collectors.toMap(Order::getUserId, order -> order, (o1, o2) -> o1)));
+        // 组装List<GrouponInstanceVO>
+        List<GrouponInstanceVO> voList = refs.stream().map(ref -> {
+            GrouponInstance grouponInstance = instanceMap.get(ref.getInstanceId());
+            if (grouponInstance == null) return null;
+            GrouponInstanceVO vo = new GrouponInstanceVO();
+            vo.setInstanceId(grouponInstance.getId());
+            vo.setDefineId(grouponInstance.getDefineId());
+            vo.setLeaderUserId(grouponInstance.getLeaderUserId());
+            vo.setCurrentCount(grouponInstance.getCurrentCount());
+            vo.setTargetCount(grouponInstance.getTargetCount());
+            vo.setStatus(grouponInstance.getStatus());
+            vo.setExpireAt(grouponInstance.getExpireAt());
+            vo.setRole(ref.getRole());
+            GrouponDefine define = defineMap.get(grouponInstance.getDefineId().intValue());
+            if (define != null) {
+                vo.setGroupPrice(define.getGroupPrice() != null ? define.getGroupPrice().setScale(2, RoundingMode.HALF_UP) : null);
+                Spu spu = spuMap.get(define.getSpuId().longValue());
+                if (spu != null) vo.setSpuTitle(spu.getTitle());
+            }
+
+            // 团长
+            User leaderUser = userMap.get(grouponInstance.getLeaderUserId().intValue());
+            if (leaderUser != null) {
+                vo.setLeaderNickname(leaderUser.getNickname());
+            }
+            Map<Long, Order> instOrders = orderMap.getOrDefault(grouponInstance.getId(), Collections.emptyMap());
+            Long targetUserId = (ref.getRole() == 1) ? grouponInstance.getLeaderUserId() : userId;
+            Order targetOrder = instOrders.get(targetUserId);
+            if (targetOrder != null) {
+                vo.setOrderNo(targetOrder.getOrderNo());
+            }
+            // remainCount
+            if (vo.getTargetCount() != null && vo.getCurrentCount() != null) {
+                vo.setRemainCount(Math.max(0, vo.getTargetCount() - vo.getCurrentCount()));
+            }
+            return vo;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+        return PageResult.of(pageInfo, voList);
+    }
+
+    /**
+     * 商品进行中的拼团（凑人页）
+     * @param spuId
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public PageResult<GrouponInstanceVO> getGrouponInstanceInSpu(Long spuId, Integer pageNum, Integer pageSize) {
+        // 通过spuId查询拼团活动id，defineId
+        List<GrouponDefine> defines = grouponMapper.selectGrouponDefineListBySpuId(spuId.intValue());
+        if (defines.isEmpty()) {
+            return PageResult.empty(new PageInfo(defines));
+        }
+        GrouponDefine define = defines.get(0);
+        Long id = define.getId().longValue();
+        BigDecimal groupPrice = define.getGroupPrice();
+        // 通过defineId查询拼团实例列表instanceIds
+        PageHelper.startPage(pageNum, pageSize);
+        List<Long> instanceIds = grouponMapper.selectGrouponInstanceByDefineId(id);
+        PageInfo<Long> pageInfo = new PageInfo<>(instanceIds);
+        if (instanceIds.isEmpty()) {
+            return PageResult.empty(pageInfo);
+        }
+        // groupon_instance
+        List<GrouponInstance> instances = grouponMapper.selectGrouponInstanceByIds(instanceIds);
+        Map<Long, GrouponInstance> instanceMap = toMap(instances, GrouponInstance::getId);
+        // user
+        List<Long> leaderUserIds = distinctValues(instances, GrouponInstance::getLeaderUserId);
+        Map<Integer, User> userMap = leaderUserIds.isEmpty()
+                ? Collections.emptyMap()
+                : toMap(userMapper.selectUserByIds(leaderUserIds), User::getId);
+        // 组装List<GrouponInstanceVO>
+        List<GrouponInstanceVO> voList = instanceIds.stream().map(instanceId -> {
+            GrouponInstance grouponInstance = instanceMap.get(instanceId);
+            if (grouponInstance == null) return null;
+            GrouponInstanceVO vo = new GrouponInstanceVO();
+            vo.setInstanceId(grouponInstance.getId());
+            vo.setDefineId(grouponInstance.getDefineId());
+            vo.setLeaderUserId(grouponInstance.getLeaderUserId());
+            vo.setCurrentCount(grouponInstance.getCurrentCount());
+            vo.setTargetCount(grouponInstance.getTargetCount());
+            vo.setStatus(grouponInstance.getStatus());
+            vo.setExpireAt(grouponInstance.getExpireAt());
+            vo.setGroupPrice(groupPrice != null ? groupPrice.setScale(2, RoundingMode.HALF_UP) : null);
+            Spu spu = spuMapper.getSpuById(spuId.intValue());
+            if (spu != null) vo.setSpuTitle(spu.getTitle());
+            // 团长
+            User leaderUser = userMap.get(grouponInstance.getLeaderUserId().intValue());
+            if (leaderUser != null) {
+                vo.setLeaderNickname(leaderUser.getNickname());
+            }
+            // remainCount
+            if (vo.getTargetCount() != null && vo.getCurrentCount() != null) {
+                vo.setRemainCount(Math.max(0, vo.getTargetCount() - vo.getCurrentCount()));
+            }
+            return vo;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+        return PageResult.of(pageInfo, voList);
+
+    }
 
 }

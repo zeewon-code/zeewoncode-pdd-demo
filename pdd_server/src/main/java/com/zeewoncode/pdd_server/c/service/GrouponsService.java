@@ -41,4 +41,13 @@ public interface GrouponsService {
      * @param dto
      */
     void cancelGroupon(GrouponCancelDTO dto);
+
+    /**
+     * 商品进行中的拼团（凑人页）
+     * @param id
+     * @param page
+     * @param size
+     * @return
+     */
+    PageResult<GrouponInstanceVO> getGrouponInstanceInSpu(Long id, Integer page, Integer size);
 }
