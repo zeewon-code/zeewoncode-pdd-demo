@@ -60,7 +60,7 @@ public class CouponServiceImpl implements CouponService {
         // 根据优惠券id查询优惠券是否存在
         Coupon coupon = couponMapper.selectById(id, LocalDateTime.now());
         if (coupon == null) {
-            return null;
+            throw new RuntimeException("优惠券不存在");
         }
         // 根据优惠券id对优惠券已领数量+1，每人限领一张
         int i = couponMapper.updateCouponCountById(id);
