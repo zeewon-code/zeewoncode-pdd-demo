@@ -95,7 +95,7 @@ public class OrderServiceImpl implements OrderService {
         if (req.getUserCouponId() != null) {
             Long couponId = req.getUserCouponId().longValue();
             UserCoupon userCoupon = couponMapper.selectUserCouponById(couponId);
-            Coupon coupon = couponMapper.selectById(userCoupon.getCouponId().intValue(), LocalDateTime.now());
+            Coupon coupon = couponMapper.selectById(userCoupon.getCouponId(), LocalDateTime.now());
             if (coupon.getType() == 1) {
                 // 优惠券类型为满减券
                 if (totalAmount >= coupon.getConditionAmount()) {
@@ -195,7 +195,7 @@ public class OrderServiceImpl implements OrderService {
             } else if (userCoupon.getStatus() == 2) {
                 throw new RuntimeException("优惠券已过期");
             }
-            Coupon coupon = couponMapper.selectById(userCoupon.getCouponId().intValue(), LocalDateTime.now());
+            Coupon coupon = couponMapper.selectById(userCoupon.getCouponId(), LocalDateTime.now());
             if (coupon.getType() == 1) {
                 // 优惠券类型为满减券
                 Double conditionAmount = coupon.getConditionAmount();

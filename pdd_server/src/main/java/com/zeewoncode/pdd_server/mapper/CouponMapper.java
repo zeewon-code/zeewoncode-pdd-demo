@@ -3,10 +3,9 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.entity.Coupon;
 import com.zeewoncode.entity.UserCoupon;
 import com.zeewoncode.vo.CouponVO;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,7 +17,7 @@ public interface CouponMapper {
      * @return
      */
     @Select("SELECT * FROM coupon WHERE id = #{couponId} AND valid_from <= #{now} AND valid_to >= #{now}")
-    Coupon selectById(Integer couponId, LocalDateTime now);
+    Coupon selectById(Long couponId, LocalDateTime now);
 
 
     /**
@@ -74,4 +73,29 @@ public interface CouponMapper {
      */
     List<CouponVO> selectCouponsByValidTime(LocalDateTime now);
 
+    /**
+     * 根据优惠券id对优惠券已领取数量进行加一操作
+     * @param id
+     * @return
+     */
+    @Update("UPDATE coupon SET issued = issued + 1 WHERE id = #{id} AND issued < total")
+    int updateCouponCountById(Long id);
+
+    /**
+     * 插入用户优惠券
+     * @param userCoupon
+     * @return
+     */
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    @Insert("INSERT INTO user_coupon (user_id, coupon_id, status) VALUES (#{userId}, #{couponId}, #{status})")
+    int insertUserCoupon(UserCoupon userCoupon);
+
+    /**
+     * 根据优惠券id和用户id查询用户优惠券
+     * @param couponId
+     * @param userId
+     * @return
+     */
+    @Select("SELECT * FROM user_coupon WHERE coupon_id = #{couponId} AND user_id = #{userId}")
+    UserCoupon selectUserCouponByCouponId(Long couponId, Long userId);
 }
