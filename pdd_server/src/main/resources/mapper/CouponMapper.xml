@@ -19,4 +19,11 @@
         </set>
         where id = #{id}
     </update>
+
+    <select id="selectCouponsByValidTime" resultType="com.zeewoncode.vo.CouponVO">
+        select id, title, condition_amount, discount_amount,
+               discount_rate, valid_to, (total - issued) as remain
+        from coupon
+        where valid_to &gt; #{now}
+    </select>
 </mapper>

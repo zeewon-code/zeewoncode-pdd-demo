@@ -2,11 +2,13 @@ package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.Coupon;
 import com.zeewoncode.entity.UserCoupon;
+import com.zeewoncode.vo.CouponVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Mapper
 public interface CouponMapper {
@@ -65,4 +67,11 @@ public interface CouponMapper {
      */
     @Update("UPDATE user_coupon SET order_id = NULL WHERE id = #{id}")
     void updateUserCouponSetOrderIdToNull(UserCoupon userCoupon1);
+
+    /**
+     * 根据优惠券有效期查询优惠券列表
+     * @return
+     */
+    List<CouponVO> selectCouponsByValidTime(LocalDateTime now);
+
 }
