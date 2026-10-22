@@ -26,4 +26,18 @@
         from coupon
         where valid_to &gt; #{now}
     </select>
+    <select id="selectMyUserCoupons" resultType="com.zeewoncode.vo.UserCouponVO">
+        select uc.id as id, c.title as title, c.type as type, c.condition_amount as condition_amount,
+               c.discount_amount as discount_amount, c.discount_rate as discount_rate,
+               uc.status as status, c.valid_to as valid_to
+        FROM user_coupon uc LEFT JOIN coupon c ON uc.coupon_id = c.id
+      <where>
+          <if test="status != null">
+             AND uc.status = #{status}
+          </if>
+          <if test="userId != null">
+             AND uc.user_id = #{userId}
+          </if>
+      </where>
+    </select>
 </mapper>

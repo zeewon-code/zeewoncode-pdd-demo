@@ -10,6 +10,7 @@ import com.zeewoncode.pdd_server.mapper.CouponMapper;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.vo.CouponClaimVO;
 import com.zeewoncode.vo.CouponVO;
+import com.zeewoncode.vo.UserCouponVO;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -64,23 +65,43 @@ public class CouponServiceImpl implements CouponService {
         }
         // 根据优惠券id对优惠券已领数量+1，每人限领一张
         int i = couponMapper.updateCouponCountById(id);
-        if (i > 0) {
-            // 插入用户优惠券记录
-            UserCoupon userCoupon = UserCoupon.builder()
-                    .userId(userId)
-                    .couponId(id)
-                    .status(0)
-                    .build();
-            couponMapper.insertUserCoupon(userCoupon);
-            Long userCouponId = userCoupon.getId();
-            if (userCouponId != null) {
-                return CouponClaimVO.builder()
-                        .userCouponId(userCouponId)
-                        .build();
-            }
-        } else {
-            throw new RuntimeException("优惠券领取失败");
+        if (i <= 0) throw new RuntimeException("优惠券领取失败");
+        // 插入用户优惠券记录
+        UserCoupon userCoupon = UserCoupon.builder()
+                .userId(userId)
+                .couponId(id)
+                .status(0)
+                .build();
+        couponMapper.insertUserCoupon(userCoupon);
+        Long userCouponId = userCoupon.getId();
+        if (userCouponId == null) return null;
+        CouponClaimVO vo = CouponClaimVO.builder()
+                .userCouponId(userCouponId)
+                .build();
+        return vo;
+    }
+
+    /**
+     * 获取我的优惠券列表
+     * @param status
+     * @param page
+     * @param size
+     * @return
+     */
+    @Override
+    public PageResult<UserCouponVO> getMyUserCoupons(Integer status, Integer page, Integer size) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        PageHelper.startPage(page, size);
+        List<UserCouponVO> voList = couponMapper.selectMyUserCoupons(userId, status);
+        PageInfo<UserCouponVO> userCouponVOPageInfo = new PageInfo<>(voList);
+        if (voList.isEmpty()) {
+            return PageResult.empty(userCouponVOPageInfo);
         }
-        return null;
+        for (UserCouponVO vo : voList) {
+            if (vo.getStatus() == 0) {
+                vo.setUsable(1);
+            } else vo.setUsable(0);
+        }
+        return PageResult.of(userCouponVOPageInfo, voList);
     }
 }

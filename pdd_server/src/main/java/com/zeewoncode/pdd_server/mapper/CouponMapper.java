@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.entity.Coupon;
 import com.zeewoncode.entity.UserCoupon;
 import com.zeewoncode.vo.CouponVO;
+import com.zeewoncode.vo.UserCouponVO;
 import org.apache.ibatis.annotations.*;
 
 import javax.validation.Valid;
@@ -98,4 +99,12 @@ public interface CouponMapper {
      */
     @Select("SELECT * FROM user_coupon WHERE coupon_id = #{couponId} AND user_id = #{userId}")
     UserCoupon selectUserCouponByCouponId(Long couponId, Long userId);
+
+    /**
+     * 根据用户id和状态查询用户优惠券列表
+     * @param userId
+     * @param status
+     * @return
+     */
+    List<UserCouponVO> selectMyUserCoupons(Long userId, Integer status);
 }
