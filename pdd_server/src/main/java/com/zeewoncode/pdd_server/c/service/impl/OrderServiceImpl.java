@@ -12,10 +12,7 @@ import com.zeewoncode.dto.OrderItemDTO;
 import com.zeewoncode.dto.OrderPreviewDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.utils.SnowflakeIdGenerator;
-import com.zeewoncode.vo.CountdownVO;
-import com.zeewoncode.vo.OrderCreateVO;
-import com.zeewoncode.vo.OrderPreviewVO;
-import com.zeewoncode.vo.PayVO;
+import com.zeewoncode.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -378,9 +375,10 @@ public class OrderServiceImpl implements OrderService {
         OrderDetail orderDetail = orderMapper.selectOrderDetail(userId, id);
         // 1.补充receiver类字段
         Receiver receiver = orderMapper.selectReceiverByOrderId(id);
-        // 2.补充shipment类字段
+        // 2.补充ShipVO类字段
         Shipment shipment = shipmentMapper.selectShipmentByOrderId(id);
-        orderDetail.setShipment(shipment);
+        ShipVO shipVO = ShipVO.builder().shipmentId(shipment.getId()).trackingNo(shipment.getTrackingNo()).build();
+        orderDetail.setShipVO(shipVO);
         orderDetail.setReceiver(receiver);
         return orderDetail;
     }

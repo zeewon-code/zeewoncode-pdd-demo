@@ -14,4 +14,12 @@ public interface ShipmentMapper {
      */
     @Select("SELECT * FROM shipment WHERE order_id = #{id}")
     Shipment selectShipmentByOrderId(Integer id);
+
+    /**
+     * 根据id查询物流信息
+     * @param shipmentId
+     * @return
+     */
+    @Select("SELECT * FROM shipment WHERE id = #{shipmentId}")
+    Shipment selectShipmentById(Long shipmentId);
 }

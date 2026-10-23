@@ -1,6 +1,7 @@
 package com.zeewoncode.entity;
 
 import com.zeewoncode.vo.OrderItemVO;
+import com.zeewoncode.vo.ShipVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,5 +25,5 @@ public class OrderDetail implements Serializable {
     private Double payableAmount;
     private Receiver receiver;
     private List<OrderItemVO> items;
-    private Shipment shipment;
+    private ShipVO shipVO;
 }
