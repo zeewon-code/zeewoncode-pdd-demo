@@ -37,4 +37,12 @@ public interface MerchantMapper {
             "VALUES (#{shopName}, #{logo}, #{status}, #{userId}, " +
             "#{createdAt}, #{deletedFlag})")
     int insert(Merchant merchant);
+
+    /**
+     * 根据用户ID查询商户信息
+     * @param userId
+     * @return
+     */
+    @Select("SELECT * FROM merchant WHERE user_id = #{userId}")
+    Merchant selectMerchantByUserId(Long userId);
 }
