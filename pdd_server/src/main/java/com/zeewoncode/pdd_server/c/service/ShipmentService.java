@@ -10,4 +10,10 @@ public interface ShipmentService {
      * @return
      */
     ShipmentVO getShipment(Long id);
+
+    /**
+     * 确认收货
+     * @param id
+     */
+    void receive(Long id);
 }

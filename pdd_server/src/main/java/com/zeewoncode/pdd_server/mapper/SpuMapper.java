@@ -7,6 +7,7 @@ import com.zeewoncode.entity.SpuDetail;
 import com.zeewoncode.dto.SpuListQueryDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -48,4 +49,13 @@ public interface SpuMapper {
      * @return
      */
     List<Spu> selectSpuByIds(List<Integer> spuIds);
+
+    /**
+     * 根据spuId更新商品销售量
+     * @param spuId
+     * @param totalQuantity
+     * @return
+     */
+    @Update("UPDATE spu SET sales = sales + #{totalQuantity} WHERE id = #{spuId}")
+    int updateSpuSalesById(Long spuId, Integer totalQuantity);
 }

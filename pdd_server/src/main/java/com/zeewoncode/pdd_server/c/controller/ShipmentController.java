@@ -29,4 +29,16 @@ public class ShipmentController {
         return Result.success(vo);
     }
 
+    /**
+     * 确认收货
+     * @param id
+     * @return
+     */
+    @PostMapping("/{id}/receive")
+    public Result receive(@PathVariable Long id) {
+        log.info("确认收货:{}",id);
+        shipmentService.receive(id);
+        return Result.success();
+    }
+
 }

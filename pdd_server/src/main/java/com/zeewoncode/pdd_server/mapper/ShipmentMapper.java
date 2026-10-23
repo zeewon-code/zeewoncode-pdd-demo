@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.entity.Shipment;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 @Mapper
 public interface ShipmentMapper {
@@ -22,4 +23,13 @@ public interface ShipmentMapper {
      */
     @Select("SELECT * FROM shipment WHERE id = #{shipmentId}")
     Shipment selectShipmentById(Long shipmentId);
+
+    /**
+     * 根据id和物流状态更新物流状态
+     * @param id
+     * @param status
+     * @return
+     */
+    @Update("UPDATE shipment SET status = #{status} WHERE id = #{id}")
+    int updateShipmentStatus(Long id, Integer status);
 }

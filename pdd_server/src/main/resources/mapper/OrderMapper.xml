@@ -132,7 +132,7 @@
             <if test="paidAt != null">paid_at = #{paidAt},</if>
             <if test="completedAt != null">completed_at = #{completedAt},</if>
         </set>
-        WHERE id = #{id}
+        WHERE id = #{id} AND user_id = #{userId}
     </update>
     <update id="updateOrderStatusAndCancelTypeByInstanceIdAndUserId">
         update orders
