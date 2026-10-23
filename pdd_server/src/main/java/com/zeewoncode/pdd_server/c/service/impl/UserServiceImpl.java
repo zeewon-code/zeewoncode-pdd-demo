@@ -192,6 +192,8 @@ public class UserServiceImpl implements UserService {
                 .id(userId)
                 .updatedAt(LocalDateTime.now())
                 .build();
-        userMapper.updateById(user);
+        if (userMapper.updateById(user) <= 0) {
+            throw new RuntimeException("修改密码失败, 请稍后重试");
+        }
     }
 }

@@ -8,6 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * C端-物流模块
+ */
 @RestController
 @RequestMapping("/api/shipments")
 @Slf4j

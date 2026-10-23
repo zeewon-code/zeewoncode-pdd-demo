@@ -38,7 +38,7 @@ public interface UserMapper {
      * 根据id更新用户信息
      * @param user
      */
-    void updateById(User user);
+    int updateById(User user);
 
     /**
      * 根据用户id列表查询用户信息

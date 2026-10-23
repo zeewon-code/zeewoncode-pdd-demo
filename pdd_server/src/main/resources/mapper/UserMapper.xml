@@ -16,6 +16,9 @@
             <if test="updatedAt != null">
                 updated_at = #{updatedAt},
             </if>
+            <if test="userType != null">
+                user_type = #{userType},
+            </if>
         </set>
         where id = #{id}
     </update>
