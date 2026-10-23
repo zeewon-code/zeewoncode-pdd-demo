@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.a.service.impl;
 
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.ShopApplyDTO;
+import com.zeewoncode.dto.ShopUpdateDTO;
 import com.zeewoncode.entity.Merchant;
 import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.MerchantService;
@@ -81,7 +82,7 @@ public class MerchantServiceImpl implements MerchantService {
         Long userId = BaseContext.getCurrentId().longValue();
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         if (merchant == null) {
-            throw new RuntimeException("当前用户没有店铺信息");
+            throw new RuntimeException("店铺信息异常，请稍后重试");
         }
         return MerchantVO.builder()
                 .id(merchant.getId())
@@ -90,5 +91,25 @@ public class MerchantServiceImpl implements MerchantService {
                 .status(merchant.getStatus())
                 .userId(merchant.getUserId())
                 .build();
+    }
+
+    /**
+     * 修改店铺信息
+     * @param shopUpdateDTO
+     */
+    @Override
+    public void updateShop(ShopUpdateDTO shopUpdateDTO) {
+        shopValidator.validate(shopUpdateDTO.getShopName(), shopUpdateDTO.getLogo());
+        Merchant merchantDb = merchantMapper.selectMerchantByShopName(shopUpdateDTO.getShopName());
+        if (merchantDb != null) {
+            throw new RuntimeException("店铺名称已存在");
+        }
+        Merchant merchant = new Merchant();
+        BeanUtils.copyProperties(shopUpdateDTO, merchant);
+        merchant.setUserId(BaseContext.getCurrentId().longValue());
+        int i = merchantMapper.update(merchant);
+        if (i <= 0) {
+            throw new RuntimeException("修改店铺信息异常，请稍后重试");
+        }
     }
 }

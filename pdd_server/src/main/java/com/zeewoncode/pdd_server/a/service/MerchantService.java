@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.a.service;
 
 import com.zeewoncode.dto.ShopApplyDTO;
+import com.zeewoncode.dto.ShopUpdateDTO;
 import com.zeewoncode.vo.MerchantVO;
 import com.zeewoncode.vo.ShopApplyVO;
 
@@ -18,4 +19,10 @@ public interface MerchantService {
      * @return
      */
     MerchantVO getMyShop();
+
+    /**
+     * 修改店铺信息
+     * @param shopUpdateDTO
+     */
+    void updateShop(ShopUpdateDTO shopUpdateDTO);
 }

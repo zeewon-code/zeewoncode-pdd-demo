@@ -45,4 +45,11 @@ public interface MerchantMapper {
      */
     @Select("SELECT * FROM merchant WHERE user_id = #{userId}")
     Merchant selectMerchantByUserId(Long userId);
+
+    /**
+     * 更新商户信息
+     * @param merchant
+     * @return
+     */
+    int update(Merchant merchant);
 }

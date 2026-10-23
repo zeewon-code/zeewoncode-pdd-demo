@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.a.controller;
 
 import com.zeewoncode.dto.ShopApplyDTO;
+import com.zeewoncode.dto.ShopUpdateDTO;
 import com.zeewoncode.pdd_server.a.service.MerchantService;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.MerchantVO;
@@ -43,5 +44,17 @@ public class MerchantController {
         log.info("获取我的店铺信息");
         MerchantVO merchantVO = merchantService.getMyShop();
         return Result.success(merchantVO);
+    }
+
+    /**
+     * 修改店铺信息
+     * @param shopUpdateDTO
+     * @return
+     */
+    @PutMapping("/mine")
+    public Result updateShop(@RequestBody @Valid ShopUpdateDTO shopUpdateDTO) {
+        log.info("修改店铺信息:{}", shopUpdateDTO);
+        merchantService.updateShop(shopUpdateDTO);
+        return Result.success();
     }
 }
