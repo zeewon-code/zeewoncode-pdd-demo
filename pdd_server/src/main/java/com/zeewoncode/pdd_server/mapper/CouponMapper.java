@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.Coupon;
 import com.zeewoncode.entity.UserCoupon;
+import com.zeewoncode.vo.CouponOptionVO;
 import com.zeewoncode.vo.CouponVO;
 import com.zeewoncode.vo.UserCouponVO;
 import org.apache.ibatis.annotations.*;
@@ -107,4 +108,13 @@ public interface CouponMapper {
      * @return
      */
     List<UserCouponVO> selectMyUserCoupons(Long userId, Integer status);
+
+    /**
+     * 根据总金额、当前时间和用户id查询结算页可选优惠券选项列表
+     * @param totalAmount
+     * @param now
+     * @param userId
+     * @return
+     */
+    List<CouponOptionVO> selectCouponOptions(Double totalAmount, LocalDateTime now, Long userId);
 }

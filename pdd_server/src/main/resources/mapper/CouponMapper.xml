@@ -40,4 +40,22 @@
           </if>
       </where>
     </select>
+    <select id="selectCouponOptions" resultType="com.zeewoncode.vo.CouponOptionVO">
+        select uc.id as userCouponId, c.id as couponId, c.title as title,
+               c.type as type, c.condition_amount, c.discount_amount,
+               c.discount_rate, c.valid_to as validTo
+        from coupon c inner join user_coupon uc on c.id = uc.coupon_id
+        <where>
+            uc.status = 0
+            <if test="totalAmount != null">
+                AND c.condition_amount &lt;= #{totalAmount}
+            </if>
+            <if test="userId != null">
+                AND uc.user_id = #{userId}
+            </if>
+            <if test="now != null">
+                AND c.valid_from &lt;= #{now} AND c.valid_to &gt;= #{now}
+            </if>
+        </where>
+    </select>
 </mapper>

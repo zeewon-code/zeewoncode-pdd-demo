@@ -2,8 +2,11 @@ package com.zeewoncode.pdd_server.c.service;
 
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.vo.CouponClaimVO;
+import com.zeewoncode.vo.CouponOptionVO;
 import com.zeewoncode.vo.CouponVO;
 import com.zeewoncode.vo.UserCouponVO;
+
+import java.util.List;
 
 public interface CouponService {
     /**
@@ -29,4 +32,11 @@ public interface CouponService {
      * @return
      */
     PageResult<UserCouponVO> getMyUserCoupons(Integer status, Integer page, Integer size);
+
+    /**
+     * 结算页可选券
+     * @param totalAmount
+     * @return
+     */
+    List<CouponOptionVO> getCouponOptions(Double totalAmount);
 }

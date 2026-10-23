@@ -9,9 +9,11 @@ import com.zeewoncode.pdd_server.c.service.CouponService;
 import com.zeewoncode.pdd_server.mapper.CouponMapper;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.vo.CouponClaimVO;
+import com.zeewoncode.vo.CouponOptionVO;
 import com.zeewoncode.vo.CouponVO;
 import com.zeewoncode.vo.UserCouponVO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -52,6 +54,7 @@ public class CouponServiceImpl implements CouponService {
      * @return
      */
     @Override
+    @Transactional
     public CouponClaimVO claimCoupon(Long id) {
         Long userId = BaseContext.getCurrentId().longValue();
         // 判断用户是否已经领取过该优惠券
@@ -103,5 +106,17 @@ public class CouponServiceImpl implements CouponService {
             } else vo.setUsable(0);
         }
         return PageResult.of(userCouponVOPageInfo, voList);
+    }
+
+    /**
+     * 结算页可选券
+     * @param totalAmount
+     * @return
+     */
+    @Override
+    public List<CouponOptionVO> getCouponOptions(Double totalAmount) {
+        // 过滤满减门槛不满足、已过期或已使用的券。
+        List<CouponOptionVO> couponOptionVOList = couponMapper.selectCouponOptions(totalAmount, LocalDateTime.now(), BaseContext.getCurrentId().longValue());
+        return couponOptionVOList;
     }
 }

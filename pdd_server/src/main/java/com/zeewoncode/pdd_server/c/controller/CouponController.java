@@ -4,11 +4,14 @@ import com.zeewoncode.pdd_server.c.service.CouponService;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CouponClaimVO;
+import com.zeewoncode.vo.CouponOptionVO;
 import com.zeewoncode.vo.CouponVO;
 import com.zeewoncode.vo.UserCouponVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * C端-优惠券模块
@@ -64,5 +67,17 @@ public class CouponController {
         log.info("获取我的优惠券:状态{}, 页码{}, 每页数量{}", status, page, size);
         PageResult<UserCouponVO> pageResult = couponService.getMyUserCoupons(status, page, size);
         return Result.success(pageResult);
+    }
+
+    /**
+     * 结算页可选券
+     * @param totalAmount
+     * @return
+     */
+    @GetMapping("/user-coupons/options")
+    public Result<List<CouponOptionVO>> getCouponOptions(@RequestParam Double totalAmount) {
+        log.info("结算页可选券,总金额：{}", totalAmount);
+        List<CouponOptionVO> couponOptionVOList = couponService.getCouponOptions(totalAmount);
+        return Result.success(couponOptionVOList);
     }
 }
