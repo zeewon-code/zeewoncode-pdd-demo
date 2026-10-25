@@ -112,4 +112,26 @@ public class MerchantServiceImpl implements MerchantService {
             throw new RuntimeException("修改店铺信息异常，请稍后重试");
         }
     }
+
+    /**
+     * 修改店铺状态
+     * @param status
+     */
+    @Override
+    public void updateShopStatus(Integer status) {
+        // 根据当前用户id查询店铺信息
+        Long userId = BaseContext.getCurrentId().longValue();
+        Merchant merchantDb = merchantMapper.selectMerchantByUserId(userId);
+        if (merchantDb == null) {
+            throw new RuntimeException("店铺信息异常，请稍后重试");
+        }
+        if (merchantDb.getStatus().equals(status)) {
+            throw new RuntimeException("店铺状态已为指定状态");
+        }
+        Merchant merchant = Merchant.builder().userId(userId).status(status).build();
+        int i = merchantMapper.update(merchant);
+        if (i <= 0) {
+            throw new RuntimeException("修改店铺状态异常，请稍后重试");
+        }
+    }
 }

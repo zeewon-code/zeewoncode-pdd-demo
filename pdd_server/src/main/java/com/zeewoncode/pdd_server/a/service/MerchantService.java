@@ -25,4 +25,10 @@ public interface MerchantService {
      * @param shopUpdateDTO
      */
     void updateShop(ShopUpdateDTO shopUpdateDTO);
+
+    /**
+     * 修改店铺状态
+     * @param status
+     */
+    void updateShopStatus(Integer status);
 }

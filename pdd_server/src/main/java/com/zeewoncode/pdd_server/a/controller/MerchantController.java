@@ -57,4 +57,16 @@ public class MerchantController {
         merchantService.updateShop(shopUpdateDTO);
         return Result.success();
     }
+
+    /**
+     * 修改店铺状态
+     * @param status
+     * @return
+     */
+    @PutMapping("/mine/status")
+    public Result updateShopStatus(@RequestParam Integer status) {
+        log.info("修改店铺状态:{}", status);
+        merchantService.updateShopStatus(status);
+        return Result.success();
+    }
 }
