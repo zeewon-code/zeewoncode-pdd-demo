@@ -6,6 +6,7 @@ import com.zeewoncode.pdd_server.c.service.AddressesService;
 import com.zeewoncode.dto.AddressDTO;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.AddressVO;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ import java.util.List;
 public class AddressesController {
 
     @Autowired
-    private AddressesService addressesService;
+    private com.zeewoncode.pdd_server.c.service.AddressesService addressesService;
 
     /**
      * 获取收货地址列表

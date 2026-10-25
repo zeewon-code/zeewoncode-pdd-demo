@@ -9,6 +9,7 @@ import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.GrouponInitiateVO;
 import com.zeewoncode.vo.GrouponInstanceVO;
 import com.zeewoncode.vo.GrouponJoinVO;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ import javax.validation.constraints.NotNull;
 public class GrouponsController {
 
     @Autowired
-    private GrouponsService grouponsService;
+    private com.zeewoncode.pdd_server.c.service.GrouponsService grouponsService;
 
 
     /**

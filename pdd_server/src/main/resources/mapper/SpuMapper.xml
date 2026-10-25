@@ -68,4 +68,19 @@
             #{spuId}
         </foreach>
     </select>
+    <select id="selectSpuByMerchantId" resultType="com.zeewoncode.entity.Spu">
+        SELECT id, title, main_image, sales
+        FROM spu
+        WHERE merchant_id = #{merchantId}
+        <if test="keyword != null and keyword != ''">
+            AND title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="categoryId != null">
+            AND category_id = #{categoryId}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        Order by created_at DESC
+    </select>
 </mapper>

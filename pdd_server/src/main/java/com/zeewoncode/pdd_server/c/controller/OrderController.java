@@ -10,6 +10,7 @@ import com.zeewoncode.vo.CountdownVO;
 import com.zeewoncode.vo.OrderCreateVO;
 import com.zeewoncode.vo.OrderPreviewVO;
 import com.zeewoncode.vo.PayVO;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     @Autowired
-    private OrderService orderService;
+    private com.zeewoncode.pdd_server.c.service.OrderService orderService;
 
     /**
      * 提交订单

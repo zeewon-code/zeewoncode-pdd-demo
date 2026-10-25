@@ -111,4 +111,11 @@ public interface GrouponMapper {
      */
     @Select("select id from groupon_instance where define_id = #{defineId}")
     List<Long> selectGrouponInstanceByDefineId(Long defineId);
+
+    /**
+     * 根据spu_id列表查询拼团活动
+     * @param spuIds
+     * @return
+     */
+    List<GrouponDefine> selectGrouponDefineListBySpuIds(List<Long> spuIds);
 }

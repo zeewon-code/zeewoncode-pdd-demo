@@ -7,6 +7,7 @@ import com.zeewoncode.vo.CouponClaimVO;
 import com.zeewoncode.vo.CouponOptionVO;
 import com.zeewoncode.vo.CouponVO;
 import com.zeewoncode.vo.UserCouponVO;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ import java.util.List;
 public class CouponController {
 
     @Autowired
-    private CouponService couponService;
+    private com.zeewoncode.pdd_server.c.service.CouponService couponService;
 
     /**
      * 获取优惠券列表

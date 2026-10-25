@@ -7,6 +7,7 @@ import com.zeewoncode.dto.SpuListQueryDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CategoryNodeVO;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ import java.util.List;
 public class SpuController {
 
     @Autowired
-    private SpuService spuService;
+    private com.zeewoncode.pdd_server.c.service.SpuService spuService;
 
     /**
      * 获取商品分类树

@@ -6,6 +6,7 @@ import com.zeewoncode.dto.CartQuantityDTO;
 import com.zeewoncode.dto.CartSelectDTO;
 import com.zeewoncode.vo.CartVO;
 import com.zeewoncode.result.Result;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
 
     @Autowired
-    private CartService cartService;
+    private com.zeewoncode.pdd_server.c.service.CartService cartService;
 
     /**
      * 查看购物车列表

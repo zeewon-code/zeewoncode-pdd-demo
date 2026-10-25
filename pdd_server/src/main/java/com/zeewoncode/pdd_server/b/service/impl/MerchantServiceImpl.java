@@ -1,11 +1,11 @@
-package com.zeewoncode.pdd_server.a.service.impl;
+package com.zeewoncode.pdd_server.b.service.impl;
 
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.dto.ShopUpdateDTO;
 import com.zeewoncode.entity.Merchant;
 import com.zeewoncode.entity.User;
-import com.zeewoncode.pdd_server.a.service.MerchantService;
+import com.zeewoncode.pdd_server.b.service.MerchantService;
 import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.utils.ShopValidator;

@@ -1,11 +1,12 @@
-package com.zeewoncode.pdd_server.a.controller;
+package com.zeewoncode.pdd_server.b.controller;
 
 import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.dto.ShopUpdateDTO;
-import com.zeewoncode.pdd_server.a.service.MerchantService;
+import com.zeewoncode.pdd_server.b.service.MerchantService;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.MerchantVO;
 import com.zeewoncode.vo.ShopApplyVO;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ import javax.validation.Valid;
 public class MerchantController {
 
     @Autowired
-    private MerchantService merchantService;
+    private com.zeewoncode.pdd_server.b.service.MerchantService merchantService;
 
     /**
      * 申请开店

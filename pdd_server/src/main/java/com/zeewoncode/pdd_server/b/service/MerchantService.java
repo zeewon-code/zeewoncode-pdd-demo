@@ -1,4 +1,4 @@
-package com.zeewoncode.pdd_server.a.service;
+package com.zeewoncode.pdd_server.b.service;
 
 import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.dto.ShopUpdateDTO;

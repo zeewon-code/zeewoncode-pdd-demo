@@ -58,4 +58,14 @@ public interface SpuMapper {
      */
     @Update("UPDATE spu SET sales = sales + #{totalQuantity} WHERE id = #{spuId}")
     int updateSpuSalesById(Long spuId, Integer totalQuantity);
+
+    /**
+     * 根据merchantId查询商品
+     * @param merchantId
+      * @param keyword
+      * @param categoryId
+      * @param status
+     * @return
+     */
+    List<Spu> selectSpuByMerchantId(Long merchantId, String keyword, Long categoryId, Integer status);
 }

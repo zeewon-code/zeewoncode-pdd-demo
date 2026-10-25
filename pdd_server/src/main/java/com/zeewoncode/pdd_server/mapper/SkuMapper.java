@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.Sku;
 import com.zeewoncode.dto.OrderItemDTO;
+import com.zeewoncode.entity.SpuCard;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -52,4 +53,11 @@ public interface SkuMapper {
      */
     @Update("update sku set stock = stock - #{quantity}, locked_stock = locked_stock - #{quantity} where id = #{skuId} and stock >= #{quantity}")
     void reduceStockAndLockStock(Long skuId, Integer quantity);
+
+    /**
+     * 根据spu_id列表查询sku列表
+     * @param spuIds
+     * @return
+     */
+    List<SpuCard> selectSkuMinPriceAndMaxPriceBySpuIds(List<Long> spuIds);
 }

@@ -10,6 +10,7 @@ import com.zeewoncode.dto.ReviewsListQueryDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.result.ReviewCreateResult;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
 
     @Autowired
-    private ReviewService reviewService;
-
+    private com.zeewoncode.pdd_server.c.service.ReviewService reviewService;
 
     /**
      * 获取评价列表

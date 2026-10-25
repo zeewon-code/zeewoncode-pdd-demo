@@ -2,9 +2,6 @@ package com.zeewoncode.utils;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.regex.Pattern;
 
 /**

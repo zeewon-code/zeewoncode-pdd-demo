@@ -55,4 +55,14 @@
             #{defineId}
         </foreach>
     </select>
+    <select id="selectGrouponDefineListBySpuIds" resultType="com.zeewoncode.entity.GrouponDefine">
+        SELECT spu_id, MIN(group_price) as group_price
+        FROM groupon_define
+        WHERE spu_id IN
+        <foreach item="spuId" collection="spuIds" separator="," open="(" close=")">
+            #{spuId}
+        </foreach>
+        AND status = 1
+        GROUP BY spu_id
+    </select>
 </mapper>

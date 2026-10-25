@@ -11,6 +11,7 @@ import com.zeewoncode.dto.RegisterDTO;
 import com.zeewoncode.dto.UpdateProfileDTO;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.UserVO;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     @Autowired
-    private UserService userService;
+    private com.zeewoncode.pdd_server.c.service.UserService userService;
 
     /**
      * 用户注册
