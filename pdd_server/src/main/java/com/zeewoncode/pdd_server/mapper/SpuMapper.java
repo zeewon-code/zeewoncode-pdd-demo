@@ -5,9 +5,7 @@ import com.zeewoncode.entity.Spu;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
 import com.zeewoncode.dto.SpuListQueryDTO;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -68,4 +66,10 @@ public interface SpuMapper {
      * @return
      */
     List<Spu> selectSpuByMerchantId(Long merchantId, String keyword, Long categoryId, Integer status);
+
+    /**
+     * 插入商品
+     * @param spu
+     */
+    int insert(Spu spu);
 }

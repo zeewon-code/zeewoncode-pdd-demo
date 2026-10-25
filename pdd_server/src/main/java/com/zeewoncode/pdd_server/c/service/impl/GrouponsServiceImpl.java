@@ -12,6 +12,7 @@ import com.zeewoncode.pdd_server.c.service.GrouponsService;
 import com.zeewoncode.pdd_server.mapper.*;
 import com.zeewoncode.pdd_server.mapper.po.InstanceRef;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.utils.SafeCollectors;
 import com.zeewoncode.utils.SnowflakeIdGenerator;
 import com.zeewoncode.vo.GrouponInitiateVO;
 import com.zeewoncode.vo.GrouponInstanceVO;
@@ -314,18 +315,6 @@ public class GrouponsServiceImpl implements GrouponsService {
 
     }
 
-    //安全的 List 转 Map
-    private <E, K> Map<K, E> toMap(List<E> list, Function<E, K> keyFn) {
-        if (list == null || list.isEmpty()) return Collections.emptyMap();
-        return list.stream().collect(Collectors.toMap(keyFn, Function.identity(), (a, b) -> a));
-    }
-
-    //安全的字段提取 + 去重
-    private <E, V> List<V> distinctValues(Collection<E> src, Function<E, V> fn) {
-        if (src == null || src.isEmpty()) return Collections.emptyList();
-        return src.stream().map(fn).filter(Objects::nonNull).distinct().collect(Collectors.toList());
-    }
-
     // 涉及表：groupon_instance, user, spu, groupon_define, orders
     /**
      * 获取我的拼团实例列表
@@ -343,24 +332,24 @@ public class GrouponsServiceImpl implements GrouponsService {
         }
         //2. 批量补查 5 张表=====
         // groupon_instance
-        List<Long> instanceIds = distinctValues(refs, InstanceRef::getInstanceId);
+        List<Long> instanceIds = SafeCollectors.distinctValues(refs, InstanceRef::getInstanceId);
         List<GrouponInstance> instances = grouponMapper.selectGrouponInstanceByIds(instanceIds);
-        Map<Long, GrouponInstance> instanceMap = toMap(instances, GrouponInstance::getId);
+        Map<Long, GrouponInstance> instanceMap = SafeCollectors.toMap(instances, GrouponInstance::getId);
         // groupon_define
-        List<Long> defineIds = distinctValues(instances, GrouponInstance::getDefineId);
+        List<Long> defineIds = SafeCollectors.distinctValues(instances, GrouponInstance::getDefineId);
         Map<Integer, GrouponDefine> defineMap = defineIds.isEmpty()
                 ? Collections.emptyMap()
-                : toMap(grouponMapper.selectGrouponDefineByIds(defineIds), GrouponDefine::getId);
+                : SafeCollectors.toMap(grouponMapper.selectGrouponDefineByIds(defineIds), GrouponDefine::getId);
         // spu
-        List<Integer> spuIds = distinctValues(defineMap.values(), GrouponDefine::getSpuId);
+        List<Integer> spuIds = SafeCollectors.distinctValues(defineMap.values(), GrouponDefine::getSpuId);
         Map<Long, Spu> spuMap = spuIds.isEmpty()
                 ? Collections.emptyMap()
-                : toMap(spuMapper.selectSpuByIds(spuIds), Spu::getId);
+                : SafeCollectors.toMap(spuMapper.selectSpuByIds(spuIds), Spu::getId);
         // user
-        List<Long> leaderUserIds = distinctValues(instances, GrouponInstance::getLeaderUserId);
+        List<Long> leaderUserIds = SafeCollectors.distinctValues(instances, GrouponInstance::getLeaderUserId);
         Map<Integer, User> userMap = leaderUserIds.isEmpty()
                 ? Collections.emptyMap()
-                : toMap(userMapper.selectUserByIds(leaderUserIds), User::getId);
+                : SafeCollectors.toMap(userMapper.selectUserByIds(leaderUserIds), User::getId);
         // orders
 //        一次把「团长订单」和「我自己的订单」都捞出来
         List<Order> orders = orderMapper.selectOrderByInstanceIdsAndUserIds(instanceIds, userId, leaderUserIds);
@@ -433,12 +422,12 @@ public class GrouponsServiceImpl implements GrouponsService {
         }
         // groupon_instance
         List<GrouponInstance> instances = grouponMapper.selectGrouponInstanceByIds(instanceIds);
-        Map<Long, GrouponInstance> instanceMap = toMap(instances, GrouponInstance::getId);
+        Map<Long, GrouponInstance> instanceMap = SafeCollectors.toMap(instances, GrouponInstance::getId);
         // user
-        List<Long> leaderUserIds = distinctValues(instances, GrouponInstance::getLeaderUserId);
+        List<Long> leaderUserIds = SafeCollectors.distinctValues(instances, GrouponInstance::getLeaderUserId);
         Map<Integer, User> userMap = leaderUserIds.isEmpty()
                 ? Collections.emptyMap()
-                : toMap(userMapper.selectUserByIds(leaderUserIds), User::getId);
+                : SafeCollectors.toMap(userMapper.selectUserByIds(leaderUserIds), User::getId);
         // 组装List<GrouponInstanceVO>
         List<GrouponInstanceVO> voList = instanceIds.stream().map(instanceId -> {
             GrouponInstance grouponInstance = instanceMap.get(instanceId);

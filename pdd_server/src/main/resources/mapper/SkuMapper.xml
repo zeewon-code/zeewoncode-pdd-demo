@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.zeewoncode.pdd_server.mapper.SkuMapper">
+    <insert id="insertBatch" parameterType="java.util.List" >
+        INSERT INTO sku
+        <foreach collection="activeFields" item="field" open="(" close=")" separator=",">
+            ${field}
+        </foreach>
+        VALUES
+        <trim suffixOverrides=",">
+            <foreach collection="skuList" item="sku" separator=",">
+                (
+                <trim suffixOverrides=",">
+                    <!-- 按 activeFields 的顺序逐个判断并输出，保证列值对齐 -->
+                    <foreach collection="activeFields" item="field" separator=",">
+                        <choose>
+                            <when test="field == 'spu_id'">#{sku.spuId}</when>
+                            <when test="field == 'specs'">#{sku.specs}</when>
+                            <when test="field == 'price'">#{sku.price}</when>
+                            <when test="field == 'stock'">#{sku.stock}</when>
+                            <when test="field == 'image'">#{sku.image}</when>
+                        </choose>
+                    </foreach>
+                </trim>
+                )
+            </foreach>
+        </trim>
+    </insert>
 
 
     <update id="lockStock">

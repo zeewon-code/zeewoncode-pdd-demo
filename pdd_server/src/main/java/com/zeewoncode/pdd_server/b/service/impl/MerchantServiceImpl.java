@@ -8,7 +8,7 @@ import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.b.service.MerchantService;
 import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
-import com.zeewoncode.utils.ShopValidator;
+import com.zeewoncode.utils.InfoValidator;
 import com.zeewoncode.vo.MerchantVO;
 import com.zeewoncode.vo.ShopApplyVO;
 import org.springframework.beans.BeanUtils;
@@ -17,13 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
 public class MerchantServiceImpl implements MerchantService {
 
-    @Autowired
-    private ShopValidator shopValidator;
     @Autowired
     private MerchantMapper merchantMapper;
     @Autowired
@@ -46,7 +46,8 @@ public class MerchantServiceImpl implements MerchantService {
             throw new RuntimeException("当前用户已经开店了或者该用户是管理员身份");
         }
         // 对 shopApplyDTO 进行校验
-        shopValidator.validate(shopApplyDTO.getShopName(), shopApplyDTO.getLogo());
+        InfoValidator.validateName(shopApplyDTO.getShopName());
+        InfoValidator.validateAvatarUrl(shopApplyDTO.getLogo());
         Merchant merchantDb = merchantMapper.selectMerchantByShopName(shopApplyDTO.getShopName());
         if (merchantDb != null) {
             throw new RuntimeException("店铺名称已存在");
@@ -99,7 +100,8 @@ public class MerchantServiceImpl implements MerchantService {
      */
     @Override
     public void updateShop(ShopUpdateDTO shopUpdateDTO) {
-        shopValidator.validate(shopUpdateDTO.getShopName(), shopUpdateDTO.getLogo());
+        InfoValidator.validateName(shopUpdateDTO.getShopName());
+        InfoValidator.validateAvatarUrl(shopUpdateDTO.getLogo());
         Merchant merchantDb = merchantMapper.selectMerchantByShopName(shopUpdateDTO.getShopName());
         if (merchantDb != null) {
             throw new RuntimeException("店铺名称已存在");

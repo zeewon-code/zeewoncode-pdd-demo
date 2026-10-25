@@ -1,7 +1,9 @@
 package com.zeewoncode.pdd_server.b.service;
 
+import com.zeewoncode.dto.SpuCreateDTO;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.vo.SpuCreateVO;
 
 public interface SpuService {
     /**
@@ -14,4 +16,11 @@ public interface SpuService {
      * @return
      */
     PageResult<SpuCard> listSpuCards(Integer page, Integer size, String keyword, Long categoryId, Integer status);
+
+    /**
+     * 新建商品
+     * @param dto
+     * @return
+     */
+    SpuCreateVO addSpu(SpuCreateDTO dto);
 }

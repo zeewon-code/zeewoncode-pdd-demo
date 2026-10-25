@@ -16,6 +16,7 @@
         </where>
     </sql>
 
+
     <!-- 2. 核心查询逻辑 (使用 CTE 派生表预聚合) -->
     <select id="selectSpuList" parameterType="com.zeewoncode.dto.SpuListQueryDTO" resultType="com.zeewoncode.entity.SpuCard">
         WITH sku_agg AS (
@@ -83,4 +84,31 @@
         </if>
         Order by created_at DESC
     </select>
+
+    <insert id="insert" parameterType="com.zeewoncode.entity.Spu" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO spu
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">title,</if>
+            <if test="subtitle != null">subtitle,</if>
+            <if test="merchantId != null">merchant_id,</if>
+            <if test="categoryId != null">category_id,</if>
+            <if test="status != null">status,</if>
+            <if test="mainImage != null">main_image,</if>
+            <if test="images != null">images,</if>
+            <if test="details != null">details,</if>
+            <if test="deletedFlag != null">deleted_flag,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">#{title},</if>
+            <if test="subtitle != null">#{subtitle},</if>
+            <if test="merchantId != null">#{merchantId},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="mainImage != null">#{mainImage},</if>
+            <if test="images != null">#{images},</if>
+            <if test="details != null">#{details},</if>
+            <if test="deletedFlag != null">#{deletedFlag},</if>
+        </trim>
+    </insert>
 </mapper>

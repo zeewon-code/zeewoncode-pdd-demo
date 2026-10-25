@@ -60,4 +60,11 @@ public interface SkuMapper {
      * @return
      */
     List<SpuCard> selectSkuMinPriceAndMaxPriceBySpuIds(List<Long> spuIds);
+
+    /**
+     *
+     * @param skuList
+     * @param activeFields
+     */
+    int insertBatch(List<Sku> skuList, List<String> activeFields);
 }

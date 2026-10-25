@@ -3,18 +3,21 @@ package com.zeewoncode.pdd_server.b.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
+import com.zeewoncode.dto.SkuDTO;
+import com.zeewoncode.dto.SpuCreateDTO;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.SpuService;
-import com.zeewoncode.pdd_server.mapper.GrouponMapper;
-import com.zeewoncode.pdd_server.mapper.MerchantMapper;
-import com.zeewoncode.pdd_server.mapper.SkuMapper;
-import com.zeewoncode.pdd_server.mapper.SpuMapper;
+import com.zeewoncode.pdd_server.mapper.*;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.utils.InfoValidator;
+import com.zeewoncode.utils.SafeCollectors;
+import com.zeewoncode.vo.SpuCreateVO;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +31,8 @@ public class SpuServiceImpl implements SpuService {
     private SkuMapper skuMapper;
     @Autowired
     private GrouponMapper grouponMapper;
+    @Autowired
+    private CategoryMapper categoryMapper;
 
     /**
      * 我的商品列表
@@ -55,12 +60,12 @@ public class SpuServiceImpl implements SpuService {
         // 批量查表sku,groupon_define
         // 差minPrice,maxPrice,groupPrice,hasGroupon字段
         // sku
-        List<Long> spuIds = distinctValues(spuList, Spu::getId);
+        List<Long> spuIds = SafeCollectors.distinctValues(spuList, Spu::getId);
         List<SpuCard> skuList = skuMapper.selectSkuMinPriceAndMaxPriceBySpuIds(spuIds);
-        Map<Integer, SpuCard> skuMap = toMap(skuList, SpuCard::getId);
+        Map<Integer, SpuCard> skuMap = SafeCollectors.toMap(skuList, SpuCard::getId);
         // groupon_define
         List<GrouponDefine> grouponDefineList = grouponMapper.selectGrouponDefineListBySpuIds(spuIds);
-        Map<Integer, GrouponDefine> grouponDefineMap = toMap(grouponDefineList, GrouponDefine::getSpuId);
+        Map<Integer, GrouponDefine> grouponDefineMap = SafeCollectors.toMap(grouponDefineList, GrouponDefine::getSpuId);
         List<SpuCard> spuCardList = spuList.stream().map(spu -> {
             Integer id = spu.getId().intValue();
             SpuCard spuCard = new SpuCard();
@@ -78,15 +83,68 @@ public class SpuServiceImpl implements SpuService {
         return PageResult.of(info, spuCardList);
     }
 
-    //安全的 List 转 Map
-    private <E, K> Map<K, E> toMap(List<E> list, Function<E, K> keyFn) {
-        if (list == null || list.isEmpty()) return Collections.emptyMap();
-        return list.stream().collect(Collectors.toMap(keyFn, Function.identity(), (a, b) -> a));
+    /**
+     * 新建商品
+     * @param dto
+     * @return
+     */
+    @Override
+    @Transactional
+    public SpuCreateVO addSpu(SpuCreateDTO dto) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        // 判断是否有资格新建商品
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        if (merchant == null) {
+            throw new RuntimeException("没有此权限进行新建商品");
+        }
+        // 对信息进行校验
+        InfoValidator.validateName(dto.getTitle());
+        if (dto.getSubtitle() != null) InfoValidator.validateName(dto.getSubtitle());
+        if (dto.getMainImage() != null) InfoValidator.validateAvatarUrl(dto.getMainImage());
+        if (dto.getImages() != null) InfoValidator.validateAvatarUrlList(dto.getImages());
+        if (categoryMapper.selectCategoryById(dto.getCategoryId()) == null) {
+            throw new RuntimeException("新建商品失败, 该分类不存在");
+        }
+        // 涉及到的数据表，spu,sku
+        List<String> images = dto.getImages();
+        Spu spu = Spu.builder()
+                .title(dto.getTitle())
+                .subtitle(dto.getSubtitle())
+                .mainImage(dto.getMainImage())
+                .images(images != null ? images.toString() : null)
+                .merchantId(merchant.getId())
+                .categoryId(dto.getCategoryId())
+                .details(dto.getDetails())
+                .status(0)
+                .deletedFlag(0)
+                .build();
+        if (spuMapper.insert(spu) == 0) {
+            throw new RuntimeException("新建商品失败, 请检查信息是否正常");
+        }
+        List<Sku> skuList = new ArrayList<>();
+        for (SkuDTO skuDTO : dto.getSkus()) {
+            Sku sku = new Sku();
+            BeanUtils.copyProperties(skuDTO, sku);
+            sku.setSpuId(spu.getId().intValue());
+            sku.setLockedStock(0);
+            sku.setStatus(0);
+            sku.setDeletedFlag(0);
+            skuList.add(sku);
+        }
+        // 收集所有出现过的非空字段
+        Set<String> activeFields = new LinkedHashSet<>();
+        for (Sku sku : skuList) {
+            if (sku.getSpuId() != null) activeFields.add("spu_id");
+            if (sku.getSpecs() != null && !sku.getSpecs().isEmpty()) activeFields.add("specs");
+            if (sku.getPrice() != null) activeFields.add("price");
+            if (sku.getStock() != null) activeFields.add("stock");
+            if (sku.getImage() != null && !sku.getImage().isEmpty()) activeFields.add("image");
+        }
+        if (skuMapper.insertBatch(skuList, new ArrayList<>(activeFields)) == 0) {
+            throw new RuntimeException("新建商品失败, 请检查信息是否正常");
+        }
+        return SpuCreateVO.builder().spuId(spu.getId()).build();
     }
 
-    //安全的字段提取 + 去重
-    private <E, V> List<V> distinctValues(Collection<E> src, Function<E, V> fn) {
-        if (src == null || src.isEmpty()) return Collections.emptyList();
-        return src.stream().map(fn).filter(Objects::nonNull).distinct().collect(Collectors.toList());
-    }
+
 }
