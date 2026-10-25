@@ -128,7 +128,6 @@ public class SpuServiceImpl implements SpuService {
             sku.setSpuId(spu.getId().intValue());
             sku.setLockedStock(0);
             sku.setStatus(0);
-            sku.setDeletedFlag(0);
             skuList.add(sku);
         }
         // 收集所有出现过的非空字段
@@ -144,6 +143,38 @@ public class SpuServiceImpl implements SpuService {
             throw new RuntimeException("新建商品失败, 请检查信息是否正常");
         }
         return SpuCreateVO.builder().spuId(spu.getId()).build();
+    }
+
+    /**
+     * 获取商品详情
+     * @param id
+     * @return
+     */
+    @Override
+    public SpuDetail getSpuDetail(Long id) {
+        SpuDetail spuDetail = spuMapper.getSpuDetailById(id.intValue());
+        List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id.intValue())));
+        String images = spus.get(0).getImages();
+        if (images != null) {
+            List<String> imagesList = Arrays.stream(images.split(","))
+                    .filter(item -> !item.isEmpty())
+                    .collect(Collectors.toList());
+            spuDetail.setImages(imagesList);
+        }
+        spuDetail.setShopName(merchantMapper.selectMerchantById(spuDetail.getMerchantId()).getShopName());
+        if (spuDetail == null) {
+            throw new RuntimeException("该商品详情不存在");
+        }
+        List<Sku> skus = skuMapper.selectSkuListBySpuId(id.intValue());
+        if (skus == null) {
+            throw new RuntimeException("该商品规格不存在");
+        }
+        List<GrouponDefine> defines = grouponMapper.selectGrouponDefineListBySpuId(id.intValue());
+        SpuDetail detailVO = new SpuDetail();
+        BeanUtils.copyProperties(spuDetail, detailVO);
+        detailVO.setSkus(skus);
+        detailVO.setGroupons(defines);
+        return detailVO;
     }
 
 

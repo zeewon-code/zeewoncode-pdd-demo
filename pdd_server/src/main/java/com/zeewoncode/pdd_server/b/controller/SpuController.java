@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.b.controller;
 
 import com.zeewoncode.dto.SpuCreateDTO;
 import com.zeewoncode.entity.SpuCard;
+import com.zeewoncode.entity.SpuDetail;
 import com.zeewoncode.pdd_server.b.service.SpuService;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
@@ -55,5 +56,17 @@ public class SpuController {
         log.info("新建商品: {}", dto);
         SpuCreateVO vo = spuService.addSpu(dto);
         return Result.success(vo);
+    }
+
+    /**
+     * 商品详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public Result<SpuDetail> getSpuDetail(@PathVariable Long id) {
+        log.info("商品详情: {}", id);
+        SpuDetail detail = spuService.getSpuDetail(id);
+        return Result.success(detail);
     }
 }

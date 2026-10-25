@@ -14,10 +14,8 @@ import com.zeewoncode.vo.CategoryNodeVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *  C端-商品浏览模块
@@ -122,6 +120,15 @@ public class SpuServiceImpl implements SpuService {
         // b. 根据spuid查询拼团活动定义，封装成groupons集合
         List<GrouponDefine> groupons = grouponMapper.selectGrouponDefineListBySpuId(id);
         SpuDetail spuDetail = spuMapper.getSpuDetailById(id);
+        List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id)));
+        Spu spu = spus.get(0);
+        String images = spu.getImages();
+        if (images != null) {
+            List<String> list = Arrays.stream(images.split(","))
+                    .filter(item -> !item.isEmpty())
+                    .collect(Collectors.toList());
+            spuDetail.setImages(list);
+        }
         Merchant merchant = merchantMapper.selectMerchantById(spuDetail.getMerchantId());
         spuDetail.setShopName(merchant.getShopName());
         spuDetail.setSkus(skus);
