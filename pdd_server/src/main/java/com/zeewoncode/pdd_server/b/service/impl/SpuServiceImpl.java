@@ -96,7 +96,7 @@ public class SpuServiceImpl implements SpuService {
         // 判断是否有资格新建商品
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         if (merchant == null) {
-            throw new RuntimeException("没有此权限进行新建商品");
+            throw new RuntimeException("没有此权限进行新增商品");
         }
         // 对信息进行校验
         InfoValidator.validateName(dto.getTitle());
@@ -187,12 +187,11 @@ public class SpuServiceImpl implements SpuService {
     public void editSpu(Long id, SpuEditDTO dto) {
         Long userId = BaseContext.getCurrentId().longValue();
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        if (merchant == null) {
+        Spu spuById = spuMapper.getSpuById(id.intValue());
+        if (merchant.getId() != spuById.getMerchantId()) {
             throw new RuntimeException("没有此权限进行编辑商品");
         }
-        List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id.intValue())));
-        Spu spuDb = spus.get(0);
-        if (spuDb == null) {
+        if (spuById == null) {
             throw new RuntimeException("该商品不存在");
         }
         if (dto.getCategoryId() != null && categoryMapper.selectCategoryById(dto.getCategoryId()) == null) {
@@ -213,6 +212,29 @@ public class SpuServiceImpl implements SpuService {
         int i = spuMapper.update(spu);
         if (i == 0) {
             throw new RuntimeException("编辑商品失败, 请检查信息是否正常");
+        }
+    }
+
+    /**
+     * 软删除商品
+     * @param id
+     */
+    @Override
+    public void softDeleteSpu(Long id) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        Spu spuById = spuMapper.getSpuById(id.intValue());
+        if (merchant.getId() != spuById.getMerchantId()) {
+            throw new RuntimeException("没有此权限进行删除商品");
+        }
+        if (spuById == null) {
+            throw new RuntimeException("该商品不存在");
+        }
+        if (spuById.getDeletedFlag() == 1) {
+            throw new RuntimeException("该商品已删除");
+        }
+        if (spuMapper.softDeleteSpu(id) == 0) {
+            throw new RuntimeException("软删除商品失败, 请检查信息是否正常");
         }
     }
 

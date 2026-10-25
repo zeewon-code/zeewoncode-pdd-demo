@@ -39,4 +39,10 @@ public interface SpuService {
      * @param dto
      */
     void editSpu(Long id, SpuEditDTO dto);
+
+    /**
+     * 软删除商品
+     * @param id
+     */
+    void softDeleteSpu(Long id);
 }

@@ -86,4 +86,16 @@ public class SpuController {
         spuService.editSpu(id, dto);
         return Result.success();
     }
+
+    /**
+     * 软删除商品
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/{id}")
+    public Result softDeleteSpu(@PathVariable Long id) {
+        log.info("软删除商品: {}", id);
+        spuService.softDeleteSpu(id);
+        return Result.success();
+    }
 }

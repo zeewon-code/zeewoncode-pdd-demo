@@ -79,4 +79,12 @@ public interface SpuMapper {
      * @return
      */
     int update(Spu spu);
+
+    /**
+     * 软删除商品
+     * @param id
+     * @return
+     */
+    @Delete("UPDATE spu SET deleted_flag = 1 WHERE id = #{id}")
+    int softDeleteSpu(Long id);
 }
