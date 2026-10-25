@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.SkuDTO;
 import com.zeewoncode.dto.SpuCreateDTO;
+import com.zeewoncode.dto.SpuEditDTO;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.SpuService;
 import com.zeewoncode.pdd_server.mapper.*;
@@ -175,6 +176,44 @@ public class SpuServiceImpl implements SpuService {
         detailVO.setSkus(skus);
         detailVO.setGroupons(defines);
         return detailVO;
+    }
+
+    /**
+     * 编辑商品
+     * @param id
+     * @param dto
+     */
+    @Override
+    public void editSpu(Long id, SpuEditDTO dto) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        if (merchant == null) {
+            throw new RuntimeException("没有此权限进行编辑商品");
+        }
+        List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id.intValue())));
+        Spu spuDb = spus.get(0);
+        if (spuDb == null) {
+            throw new RuntimeException("该商品不存在");
+        }
+        if (dto.getCategoryId() != null && categoryMapper.selectCategoryById(dto.getCategoryId()) == null) {
+            throw new RuntimeException("编辑商品失败, 该分类不存在");
+        }
+        if (dto.getTitle() != null) InfoValidator.validateName(dto.getTitle());
+        if (dto.getSubtitle() != null) InfoValidator.validateName(dto.getSubtitle());
+        if (dto.getMainImage() != null) InfoValidator.validateAvatarUrl(dto.getMainImage());
+        String images = null;
+        if (dto.getImages() != null && dto.getImages().size() > 0) {
+            InfoValidator.validateAvatarUrlList(dto.getImages());
+            images = dto.getImages().toString();
+        }
+        Spu spu = new Spu();
+        BeanUtils.copyProperties(dto, spu);
+        spu.setImages(images);
+        spu.setId(id);
+        int i = spuMapper.update(spu);
+        if (i == 0) {
+            throw new RuntimeException("编辑商品失败, 请检查信息是否正常");
+        }
     }
 
 

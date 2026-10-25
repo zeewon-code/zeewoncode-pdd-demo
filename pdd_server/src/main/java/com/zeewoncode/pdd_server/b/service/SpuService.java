@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.b.service;
 
 import com.zeewoncode.dto.SpuCreateDTO;
+import com.zeewoncode.dto.SpuEditDTO;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
 import com.zeewoncode.result.PageResult;
@@ -31,4 +32,11 @@ public interface SpuService {
      * @return
      */
     SpuDetail getSpuDetail(Long id);
+
+    /**
+     * 编辑商品
+     * @param id
+     * @param dto
+     */
+    void editSpu(Long id, SpuEditDTO dto);
 }

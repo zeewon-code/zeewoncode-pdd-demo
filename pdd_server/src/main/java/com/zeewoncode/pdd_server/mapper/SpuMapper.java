@@ -72,4 +72,11 @@ public interface SpuMapper {
      * @param spu
      */
     int insert(Spu spu);
+
+    /**
+     * 更新商品
+     * @param spu
+     * @return
+     */
+    int update(Spu spu);
 }

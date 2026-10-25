@@ -79,7 +79,8 @@ public class InfoValidator {
 
 
     private static boolean isImageFile(String url) {
-        String lower = url.toLowerCase().split("\\?")[0];
+//        String lower = url.toLowerCase().split("\\?")[0];
+        String lower = url.toLowerCase();
         return lower.endsWith(".jpg") || lower.endsWith(".jpeg")
                 || lower.endsWith(".png") || lower.endsWith(".webp")
                 || lower.endsWith(".gif");

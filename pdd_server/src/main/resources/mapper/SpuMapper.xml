@@ -111,4 +111,18 @@
             <if test="deletedFlag != null">#{deletedFlag},</if>
         </trim>
     </insert>
+
+    <update id="update" parameterType="com.zeewoncode.entity.Spu">
+        UPDATE spu
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="subtitle != null">subtitle = #{subtitle},</if>
+            <if test="mainImage != null">main_image = #{mainImage},</if>
+            <if test="images != null">images = #{images},</if>
+            <if test="details != null">details = #{details},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
 </mapper>
