@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.b.service;
 
+import com.zeewoncode.dto.SkuDTO;
 import com.zeewoncode.dto.SpuCreateDTO;
 import com.zeewoncode.dto.SpuEditDTO;
 import com.zeewoncode.dto.SpuStatusDTO;
@@ -53,4 +54,11 @@ public interface SpuService {
      * @param dto
      */
     void listAndDelist(Long id, SpuStatusDTO dto);
+
+    /**
+     * 新建SKU
+     * @param id
+     * @param dto
+     */
+    void addSku(Long id, SkuDTO dto);
 }

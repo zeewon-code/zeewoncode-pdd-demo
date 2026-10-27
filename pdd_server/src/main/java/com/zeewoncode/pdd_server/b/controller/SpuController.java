@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.b.controller;
 
+import com.zeewoncode.dto.SkuDTO;
 import com.zeewoncode.dto.SpuCreateDTO;
 import com.zeewoncode.dto.SpuEditDTO;
 import com.zeewoncode.dto.SpuStatusDTO;
@@ -113,6 +114,22 @@ public class SpuController {
     ) {
         log.info("更新商品状态: {}, {}", id, dto);
         spuService.listAndDelist(id, dto);
+        return Result.success();
+    }
+
+    /**
+     * 新建SKU
+     * @param id
+     * @param dto
+     * @return
+     */
+    @PostMapping("/{id}/skus")
+    public Result addSku(
+            @PathVariable Long id,
+            @RequestBody @Valid SkuDTO dto
+    ) {
+        log.info("新建SKU: {}, {}", id, dto);
+        spuService.addSku(id, dto);
         return Result.success();
     }
 }

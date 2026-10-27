@@ -249,6 +249,35 @@ public class SpuServiceImpl implements SpuService {
     }
 
     /**
+     * 新增商品规格
+     * @param id
+     * @param dto
+     */
+    @Override
+    public void addSku(Long id, SkuDTO dto) {
+        if (!isMerchantPermisson(id)) throw new RuntimeException("没有此权限进行新增商品规格");
+        List<Sku> skuList = skuMapper.selectSkuListBySpuId(id.intValue());
+        for (Sku skuDb : skuList) {
+            if (skuDb.getSpecs().equals(dto.getSpecs())) {
+                throw new RuntimeException("该商品已存在同规格");
+            }
+        }
+        if (dto.getImage() != null) InfoValidator.validateAvatarUrl(dto.getImage());
+        Sku sku = Sku.builder()
+                .spuId(id.intValue())
+                .specs(dto.getSpecs())
+                .price(dto.getPrice())
+                .stock(dto.getStock())
+                .image(dto.getImage())
+                .status(0)
+                .deletedFlag(0)
+                .build();
+        if (skuMapper.insert(sku) == 0) {
+            throw new RuntimeException("新增商品规格失败, 请检查信息是否正常");
+        }
+    }
+
+    /**
      * 判断当前用户是否有权限进行商品操作
      * @param id
      * @return

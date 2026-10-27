@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.entity.Sku;
 import com.zeewoncode.dto.OrderItemDTO;
 import com.zeewoncode.entity.SpuCard;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -62,9 +63,18 @@ public interface SkuMapper {
     List<SpuCard> selectSkuMinPriceAndMaxPriceBySpuIds(List<Long> spuIds);
 
     /**
-     *
+     * 批量插入
      * @param skuList
      * @param activeFields
      */
     int insertBatch(List<Sku> skuList, List<String> activeFields);
+
+    /**
+     * 插入sku
+     * @param sku
+     * @return
+     */
+    @Insert("insert into sku (spu_id, specs, price, stock, image, status) " +
+            "values (#{spuId}, #{specs}, #{price}, #{stock}, #{image}, #{status})")
+    int insert(Sku sku);
 }
