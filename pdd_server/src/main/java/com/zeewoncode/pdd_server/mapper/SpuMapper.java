@@ -87,4 +87,13 @@ public interface SpuMapper {
      */
     @Delete("UPDATE spu SET deleted_flag = 1 WHERE id = #{id}")
     int softDeleteSpu(Long id);
+
+    /**
+     * 上下架商品
+     * @param id
+     * @param status
+     * @return
+     */
+    @Update("UPDATE spu SET status = #{status} WHERE id = #{id} AND deleted_flag = 0")
+    int listAndDelist(Long id, Integer status);
 }

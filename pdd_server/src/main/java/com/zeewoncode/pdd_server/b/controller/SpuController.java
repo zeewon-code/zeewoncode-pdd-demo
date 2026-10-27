@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.b.controller;
 
 import com.zeewoncode.dto.SpuCreateDTO;
 import com.zeewoncode.dto.SpuEditDTO;
+import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
 import com.zeewoncode.pdd_server.b.service.SpuService;
@@ -96,6 +97,22 @@ public class SpuController {
     public Result softDeleteSpu(@PathVariable Long id) {
         log.info("软删除商品: {}", id);
         spuService.softDeleteSpu(id);
+        return Result.success();
+    }
+
+    /**
+     * 上架/下架商品
+     * @param id
+     * @param dto
+     * @return
+     */
+    @PutMapping("/{id}/status")
+    public Result listAndDelist(
+            @PathVariable Long id,
+            @RequestBody SpuStatusDTO dto
+    ) {
+        log.info("更新商品状态: {}, {}", id, dto);
+        spuService.listAndDelist(id, dto);
         return Result.success();
     }
 }
