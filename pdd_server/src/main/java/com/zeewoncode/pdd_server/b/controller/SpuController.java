@@ -6,17 +6,17 @@ import com.zeewoncode.dto.SpuEditDTO;
 import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
-import com.zeewoncode.pdd_server.b.service.SpuService;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.SpuCreateVO;
-import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+
+
+
 
 /**
  * B端-商品模块
@@ -57,7 +57,7 @@ public class SpuController {
      * @return
      */
     @PostMapping
-    public Result<SpuCreateVO> addSpu(@RequestBody @Valid SpuCreateDTO dto) {
+    public Result<SpuCreateVO> addSpu(@Valid @RequestBody SpuCreateDTO dto) {
         log.info("新建商品: {}", dto);
         SpuCreateVO vo = spuService.addSpu(dto);
         return Result.success(vo);
@@ -83,7 +83,7 @@ public class SpuController {
      */
     @PutMapping("/{id}")
     public Result editSpu(@PathVariable Long id,
-                            @RequestBody(required = false) @Valid SpuEditDTO dto) {
+                          @Valid @RequestBody(required = false) SpuEditDTO dto) {
         log.info("编辑商品: {}, {}", id, dto);
         spuService.editSpu(id, dto);
         return Result.success();
@@ -126,7 +126,7 @@ public class SpuController {
     @PostMapping("/{id}/skus")
     public Result addSku(
             @PathVariable Long id,
-            @RequestBody @Valid SkuDTO dto
+            @Valid @RequestBody SkuDTO dto
     ) {
         log.info("新建SKU: {}, {}", id, dto);
         spuService.addSku(id, dto);

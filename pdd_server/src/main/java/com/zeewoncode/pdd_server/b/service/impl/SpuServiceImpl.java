@@ -266,7 +266,7 @@ public class SpuServiceImpl implements SpuService {
         Sku sku = Sku.builder()
                 .spuId(id.intValue())
                 .specs(dto.getSpecs())
-                .price(dto.getPrice())
+                .price(dto.getPrice().doubleValue())
                 .stock(dto.getStock())
                 .image(dto.getImage())
                 .status(0)
