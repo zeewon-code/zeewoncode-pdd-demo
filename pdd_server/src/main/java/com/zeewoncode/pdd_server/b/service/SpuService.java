@@ -1,9 +1,6 @@
 package com.zeewoncode.pdd_server.b.service;
 
-import com.zeewoncode.dto.SkuDTO;
-import com.zeewoncode.dto.SpuCreateDTO;
-import com.zeewoncode.dto.SpuEditDTO;
-import com.zeewoncode.dto.SpuStatusDTO;
+import com.zeewoncode.dto.*;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
 import com.zeewoncode.result.PageResult;
@@ -61,4 +58,11 @@ public interface SpuService {
      * @param dto
      */
     void addSku(Long id, SkuDTO dto);
+
+    /**
+     * 编辑SKU
+     * @param id
+     * @param dto
+     */
+    void editSku(Long id, SkuUpdateDTO dto);
 }

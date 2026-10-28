@@ -98,7 +98,7 @@ public class CartServiceImpl implements CartService {
             throw new RuntimeException("该商品规格已售罄或已下架");
         }
         // 2. 对spu表的status和deleted_flag进行校验
-        Spu spuDetail = spuMapper.getSpuById(sku.getSpuId());
+        Spu spuDetail = spuMapper.getSpuById(sku.getSpuId().longValue());
         if (spuDetail.getStatus() != 1 || spuDetail.getDeletedFlag() != 0) {
             throw new RuntimeException("该商品已下架");
         }

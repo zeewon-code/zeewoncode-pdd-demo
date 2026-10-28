@@ -47,6 +47,7 @@
             </foreach>
         END
     </update>
+
     <select id="selectSkuMinPriceAndMaxPriceBySpuIds" resultType="com.zeewoncode.entity.SpuCard">
         SELECT spu_id as id, MIN(price) as minPrice, MAX(price) as maxPrice
         FROM sku
@@ -57,4 +58,19 @@
         AND deleted_flag = 0
         GROUP BY spu_id
     </select>
+
+    <update id="update" parameterType="com.zeewoncode.entity.Sku">
+        UPDATE sku
+        <set>
+            <if test="specs != null and specs != ''">specs = #{specs},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="image != null and image != ''">image = #{image},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="deletedFlag != null">deleted_flag = #{deletedFlag},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="lockedStock != null">locked_stock = #{lockedStock},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
 </mapper>

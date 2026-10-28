@@ -67,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
         order.setUserId(userId.longValue());
         // 填充merchantId
         Sku sku = skuMapper.selectSkuById(req.getItems().get(0).getSkuId().longValue());
-        Spu spu = spuMapper.getSpuById(sku.getSpuId());
+        Spu spu = spuMapper.getSpuById(sku.getSpuId().longValue());
         order.setMerchantId(spu.getMerchantId());
         // 填充addressId
         order.setAddressId(req.getAddressId().longValue());
@@ -135,7 +135,7 @@ public class OrderServiceImpl implements OrderService {
             Sku skuDB = skuMapper.selectSkuById(orderItem.getSkuId().longValue());
             Long spuId = skuDB.getSpuId().longValue();
             item.setSpuId(spuId);
-            Spu spuById = spuMapper.getSpuById(spuId.intValue());
+            Spu spuById = spuMapper.getSpuById(spuId);
             item.setTitle(spuById.getTitle());
             item.setSpecs(skuDB.getSpecs());
             item.setImage(skuDB.getImage());

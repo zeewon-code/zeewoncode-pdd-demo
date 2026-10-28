@@ -3,10 +3,7 @@ package com.zeewoncode.pdd_server.b.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
-import com.zeewoncode.dto.SkuDTO;
-import com.zeewoncode.dto.SpuCreateDTO;
-import com.zeewoncode.dto.SpuEditDTO;
-import com.zeewoncode.dto.SpuStatusDTO;
+import com.zeewoncode.dto.*;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.SpuService;
 import com.zeewoncode.pdd_server.mapper.*;
@@ -188,12 +185,15 @@ public class SpuServiceImpl implements SpuService {
         if (!isMerchantPermisson(id)) {
             throw new RuntimeException("没有此权限进行删除商品");
         }
-        Spu spuById = spuMapper.getSpuById(id.intValue());
+        Spu spuById = spuMapper.getSpuById(id);
         if (spuById == null) {
             throw new RuntimeException("该商品不存在");
         }
         if (dto.getCategoryId() != null && categoryMapper.selectCategoryById(dto.getCategoryId()) == null) {
             throw new RuntimeException("编辑商品失败, 该分类不存在");
+        }
+        if (dto.getTitle().equals(spuById.getTitle())) {
+            throw new RuntimeException("该商品标题在店铺商品已存在相同标题, 请重新修改商品标题");
         }
         if (dto.getTitle() != null) InfoValidator.validateName(dto.getTitle());
         if (dto.getSubtitle() != null) InfoValidator.validateName(dto.getSubtitle());
@@ -222,7 +222,7 @@ public class SpuServiceImpl implements SpuService {
         if (!isMerchantPermisson(id)) {
             throw new RuntimeException("没有此权限进行删除商品");
         }
-        Spu spuById = spuMapper.getSpuById(id.intValue());
+        Spu spuById = spuMapper.getSpuById(id);
         if (spuById == null) {
             throw new RuntimeException("该商品不存在");
         }
@@ -242,7 +242,7 @@ public class SpuServiceImpl implements SpuService {
     @Override
     public void listAndDelist(Long id, SpuStatusDTO dto) {
         if (!isMerchantPermisson(id)) throw new RuntimeException("没有此权限进行上架/下架商品");
-        Spu spu = spuMapper.getSpuById(id.intValue());
+        Spu spu = spuMapper.getSpuById(id);
         if (spu == null) throw new RuntimeException("该商品不存在");
         if (spu.getStatus().equals(dto.getStatus())) throw new RuntimeException("该商品已经处于该状态");
         if (spuMapper.listAndDelist(id, dto.getStatus()) == (0)) throw new RuntimeException("上架/下架商品失败, 请检查信息是否正常");
@@ -256,6 +256,8 @@ public class SpuServiceImpl implements SpuService {
     @Override
     public void addSku(Long id, SkuDTO dto) {
         if (!isMerchantPermisson(id)) throw new RuntimeException("没有此权限进行新增商品规格");
+        Spu spuById = spuMapper.getSpuById(id);
+        if (spuById == null) throw new RuntimeException("该商品不存在");
         List<Sku> skuList = skuMapper.selectSkuListBySpuId(id.intValue());
         for (Sku skuDb : skuList) {
             if (skuDb.getSpecs().equals(dto.getSpecs())) {
@@ -278,6 +280,37 @@ public class SpuServiceImpl implements SpuService {
     }
 
     /**
+     * 编辑商品规格
+     * @param id
+     * @param dto
+     */
+    @Override
+    public void editSku(Long id, SkuUpdateDTO dto) {
+        Long spuId = skuMapper.selectById(id).getSpuId().longValue();
+        if (!isMerchantPermisson(spuId)) throw new RuntimeException("没有此权限进行编辑商品规格");
+        if (spuMapper.getSpuById(spuId) == null) throw new RuntimeException("该商品不存在");
+        if (dto.getImage() != null) InfoValidator.validateAvatarUrl(dto.getImage());
+        List<Sku> skuList = skuMapper.selectSkuListBySpuId(spuId.intValue());
+        for (Sku skuDb : skuList) {
+            if (skuDb.getSpecs().equals(dto.getSpecs()) && skuDb.getId().longValue() != id) {
+                throw new RuntimeException("该商品已存在同规格");
+            }
+        }
+        if (dto.getPrice() != null && dto.getPrice().doubleValue() <= 0) {
+            throw new RuntimeException("价格不能为负数或0");
+        }
+        Sku sku = Sku.builder()
+                .id(id.intValue())
+                .price(dto.getPrice().doubleValue())
+                .image(dto.getImage())
+                .specs(dto.getSpecs())
+                .build();
+        if (skuMapper.update(sku) == 0) {
+            throw new RuntimeException("编辑商品规格失败, 请稍后重试");
+        }
+    }
+
+    /**
      * 判断当前用户是否有权限进行商品操作
      * @param id
      * @return
@@ -285,7 +318,7 @@ public class SpuServiceImpl implements SpuService {
     public Boolean isMerchantPermisson(Long id) {
         Long userId = BaseContext.getCurrentId().longValue();
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        Spu spuById = spuMapper.getSpuById(id.intValue());
+        Spu spuById = spuMapper.getSpuById(id);
         if (merchant.getId() != spuById.getMerchantId()) {
             return false;
         }

@@ -131,7 +131,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         Order order = new Order();
         order.setUserId(userId);
         order.setOrderNo(String.valueOf(snowflakeIdGenerator.nextId()));
-        Long merchantId = spuMapper.getSpuById(define.getSpuId()).getMerchantId();
+        Long merchantId = spuMapper.getSpuById(define.getSpuId().longValue()).getMerchantId();
         order.setMerchantId(merchantId);
         order.setAddressId(addressId);
         UserAddress userAddress = addressesMapper.selectById(addressId);
@@ -162,7 +162,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         orderItem.setOrderId(order.getId());
         orderItem.setSkuId(define.getSkuId().longValue());
         orderItem.setSpuId(define.getSpuId().longValue());
-        Spu spuById = spuMapper.getSpuById(define.getSpuId());
+        Spu spuById = spuMapper.getSpuById(define.getSpuId().longValue());
         orderItem.setTitle(spuById.getTitle());
         Sku sku = skuMapper.selectSkuById(define.getSkuId().longValue());
         orderItem.setSpecs(sku.getSpecs());
@@ -441,7 +441,7 @@ public class GrouponsServiceImpl implements GrouponsService {
             vo.setStatus(grouponInstance.getStatus());
             vo.setExpireAt(grouponInstance.getExpireAt());
             vo.setGroupPrice(groupPrice != null ? groupPrice.setScale(2, RoundingMode.HALF_UP) : null);
-            Spu spu = spuMapper.getSpuById(spuId.intValue());
+            Spu spu = spuMapper.getSpuById(spuId);
             if (spu != null) vo.setSpuTitle(spu.getTitle());
             // 团长
             User leaderUser = userMap.get(grouponInstance.getLeaderUserId().intValue());

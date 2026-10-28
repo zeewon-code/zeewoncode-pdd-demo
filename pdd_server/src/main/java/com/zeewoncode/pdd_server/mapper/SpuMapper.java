@@ -39,7 +39,7 @@ public interface SpuMapper {
      * @return
      */
     @Select("SELECT * FROM spu WHERE id = #{spuId}")
-    Spu getSpuById(Integer spuId);
+    Spu getSpuById(Long spuId);
 
     /**
      * 根据spuIds查询商品

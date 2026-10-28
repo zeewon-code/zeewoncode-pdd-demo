@@ -25,7 +25,7 @@ public interface SkuMapper {
     List<Sku> selectSkuListBySpuId(Integer id);
 
     /**
-     * 根据id查询sku
+     * 根据id查询sku(启售的)
      * @param skuId
      * @return
      */
@@ -77,4 +77,19 @@ public interface SkuMapper {
     @Insert("insert into sku (spu_id, specs, price, stock, image, status) " +
             "values (#{spuId}, #{specs}, #{price}, #{stock}, #{image}, #{status})")
     int insert(Sku sku);
+
+    /**
+     * 更新sku
+     * @param sku
+     * @return
+     */
+    int update(Sku sku);
+
+    /**
+     * 根据id查询sku
+     * @param id
+     * @return
+     */
+    @Select("select * from sku where id = #{id} and deleted_flag = 0")
+    Sku selectById(Long id);
 }
