@@ -11,6 +11,7 @@ import com.zeewoncode.result.PageResult;
 import com.zeewoncode.utils.InfoValidator;
 import com.zeewoncode.utils.SafeCollectors;
 import com.zeewoncode.vo.SpuCreateVO;
+import io.netty.util.collection.LongObjectHashMap;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,8 @@ public class SpuServiceImpl implements SpuService {
     private GrouponMapper grouponMapper;
     @Autowired
     private CategoryMapper categoryMapper;
+    @Autowired
+    private OrderMapper orderMapper;
 
     /**
      * 我的商品列表
@@ -218,6 +221,7 @@ public class SpuServiceImpl implements SpuService {
      * @param id
      */
     @Override
+    @Transactional
     public void softDeleteSpu(Long id) {
         if (!isMerchantPermisson(id)) {
             throw new RuntimeException("没有此权限进行删除商品");
@@ -229,8 +233,10 @@ public class SpuServiceImpl implements SpuService {
         if (spuById.getDeletedFlag() == 1) {
             throw new RuntimeException("该商品已删除");
         }
-        if (spuMapper.softDeleteSpu(id) == 0) {
-            throw new RuntimeException("软删除商品失败, 请检查信息是否正常");
+        int result = spuMapper.softDeleteSpu(id);
+        int resultSku = skuMapper.softDeleteSku(id);
+        if (result == 0 || resultSku == 0) {
+            throw new RuntimeException("删除商品失败, 请稍后重试");
         }
     }
 
@@ -311,6 +317,37 @@ public class SpuServiceImpl implements SpuService {
     }
 
     /**
+     * 删除商品规格
+     * @param id
+     */
+    @Override
+    @Transactional
+    public void deleteSku(Long id) {
+        Long spuId = skuMapper.selectById(id).getSpuId().longValue();
+        if (!isMerchantPermisson(spuId)) throw new RuntimeException("没有此权限进行编辑商品规格");
+        if (skuMapper.deleteSku(id) == 0) {
+            throw new RuntimeException("删除商品规格失败, 请稍后重试");
+        }
+        // 该商品规格的拼团活动（设置停用）及修改实例(拼团中)状态，以及修改（拼团中）拼团订单状态及退款
+        // 该商品规格的拼团活动（设置停用）
+        GrouponDefine define = grouponMapper.selectGrouponDefineBySkuId(id);
+        if (define != null) {
+            Long defineId = define.getId().longValue();
+            grouponMapper.updateGrouponDefineStatus(define.getId().longValue(), 0);
+            List<GrouponInstance> instanceList = grouponMapper.selectGrouponInstanceByDefineIdAndStatus(defineId, 0);
+            List<Long> instanceIds = instanceList.stream().map(GrouponInstance::getId).toList();
+            // 修改实例(拼团中)状态
+            // 修改（拼团中）拼团订单状态及退款
+            if (!instanceIds.isEmpty()) {
+                grouponMapper.updateGrouponInstanceStatusByInstanceIds(instanceIds, 3);
+                // 修改订单状态status为4（已取消）和cancelType为3（拼团失败）
+                for (Long instanceId : instanceIds)
+                    orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId, null, 4, 3);
+            }
+        }
+    }
+
+    /**
      * 判断当前用户是否有权限进行商品操作
      * @param id
      * @return
@@ -318,11 +355,16 @@ public class SpuServiceImpl implements SpuService {
     public Boolean isMerchantPermisson(Long id) {
         Long userId = BaseContext.getCurrentId().longValue();
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        if (merchant == null) {
+            throw new RuntimeException("商家不存在，请重新登录");
+        }
         Spu spuById = spuMapper.getSpuById(id);
         if (merchant.getId() != spuById.getMerchantId()) {
             return false;
         }
         return true;
     }
+
+
 
 }

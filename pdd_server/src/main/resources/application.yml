@@ -20,3 +20,9 @@ mybatis:
 jwt:
   secret: abcdefghijklmnopqrstuvwxyz1234567890abcdefgh
   expire-time: 7200000
+
+logging:
+  level:
+    root: info
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"

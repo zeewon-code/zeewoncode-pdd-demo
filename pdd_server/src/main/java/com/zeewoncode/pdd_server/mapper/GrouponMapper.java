@@ -118,4 +118,42 @@ public interface GrouponMapper {
      * @return
      */
     List<GrouponDefine> selectGrouponDefineListBySpuIds(List<Long> spuIds);
+
+    /**
+     * 根据sku_id查询拼团活动
+     * @param id
+     * @return
+     */
+    @Select("select * from groupon_define where sku_id = #{id}")
+    GrouponDefine selectGrouponDefineBySkuId(Long id);
+
+    /**
+     * 根据拼团活动id更新拼团活动状态
+     * @param id
+     * @param status
+     */
+    @Update("update groupon_define set status = #{status} where id = #{id}")
+    int updateGrouponDefineStatus(Long id, int status);
+
+    /**
+     * 根据拼团活动id和状态删除拼团实例
+     * @param defineId
+     * @param status
+     */
+    int deleteGrouponInstanceByDefineIdAndStatus(Long defineId, int status);
+
+    /**
+     * 根据拼团活动id和状态查询拼团实例
+     * @param defineId
+     * @param status
+     * @return
+     */
+    List<GrouponInstance> selectGrouponInstanceByDefineIdAndStatus(Long defineId, int status);
+
+    /**
+     * 根据拼团实例id列表更新拼团实例状态
+     * @param instanceIds
+     * @param status
+     */
+    void updateGrouponInstanceStatusByInstanceIds(List<Long> instanceIds, int status);
 }

@@ -57,9 +57,19 @@ public class OrderServiceImpl implements OrderService {
     public OrderCreateVO createOrder(OrderCreateDTO req) {
         Integer userId = BaseContext.getCurrentId();
         // 1.预占库存
-        boolean isLockStock = skuMapper.lockStock(req.getItems());
-        if (!isLockStock) {
-            throw new RuntimeException("该商品库存不足");
+        int isLockStock = skuMapper.lockStock(req.getItems());
+        int size = req.getItems().size();
+        if (isLockStock != size) {
+            throw new RuntimeException("库存不足");
+        }
+        // 判断下单的sku属于的spu是否存在
+        for (OrderItemDTO item : req.getItems()) {
+            Long skuId = item.getSkuId().longValue();
+            Sku sku = skuMapper.selectSkuById(skuId);
+            Spu spuById = spuMapper.getSpuById(sku.getSpuId().longValue());
+            if (spuById.getDeletedFlag() == 1) {
+                throw new RuntimeException("该商品已下架");
+            }
         }
         // 2.插入订单表orders
         Order order = new Order();
@@ -289,6 +299,7 @@ public class OrderServiceImpl implements OrderService {
     public PayVO orderPay(Long id) {
         // 1.检查待付款时间是否超时
         // 超时
+        Long userId = BaseContext.getCurrentId().longValue();
         Order order = orderMapper.selectOrderById(id);
         if (order == null) {
             throw new RuntimeException("订单不存在");
@@ -325,7 +336,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         paymentMapper.insert(payment);
         // 4.订单状态修改为1 （待发货）
-        Order build = Order.builder().id(id).status(1).build();
+        Order build = Order.builder().id(id).status(1).userId(userId).build();
         orderMapper.update(build);
         // 5.扣减库存跟释放预占库存
         List<OrderItem> orderItems = orderMapper.selectItemsByOrderId(id);

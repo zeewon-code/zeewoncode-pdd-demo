@@ -18,6 +18,7 @@
           AND status = 0
           AND current_count &lt; target_count
     </update>
+
     <select id="selectMyGrouponRefs" resultType="com.zeewoncode.pdd_server.mapper.po.InstanceRef">
         SELECT instance_id, role, join_time
         FROM (
@@ -65,4 +66,29 @@
         AND status = 1
         GROUP BY spu_id
     </select>
+    <select id="selectGrouponInstanceByDefineIdAndStatus" resultType="com.zeewoncode.entity.GrouponInstance">
+        SELECT * FROM groupon_instance
+        WHERE define_id = #{defineId}
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+    </select>
+
+    <delete id="deleteGrouponInstanceByDefineIdAndStatus">
+        DELETE FROM groupon_instance
+        WHERE define_id = #{defineId}
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+    </delete>
+
+    <update id="updateGrouponInstanceStatusByInstanceIds">
+        UPDATE groupon_instance
+        SET status = #{status}
+        WHERE id IN
+        <foreach item="instanceId" collection="instanceIds" separator="," open="(" close=")">
+            #{instanceId}
+        </foreach>
+    </update>
+
 </mapper>

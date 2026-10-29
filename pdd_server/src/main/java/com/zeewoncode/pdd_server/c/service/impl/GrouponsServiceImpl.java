@@ -87,8 +87,8 @@ public class GrouponsServiceImpl implements GrouponsService {
                 .skuId(define.getSkuId())
                 .quantity(grouponInitiateDTO.getQuantity())
                 .build());
-        boolean lock = skuMapper.lockStock(list);
-        if (!lock) {
+        int lock = skuMapper.lockStock(list);
+        if (lock == 0) {
             throw new RuntimeException("库存不足");
         }
         // 创建拼团实例
@@ -208,8 +208,8 @@ public class GrouponsServiceImpl implements GrouponsService {
                 .skuId(define.getSkuId())
                 .quantity(grouponJoinDTO.getQuantity())
                 .build());
-        boolean lock = skuMapper.lockStock(list);
-        if (!lock) {
+        int lock = skuMapper.lockStock(list);
+        if (lock == 0) {
             throw new RuntimeException("库存不足");
         }
         // 乐观锁解决超员问题， 更新拼团实例当前拼团人数

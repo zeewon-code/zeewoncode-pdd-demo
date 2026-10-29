@@ -65,4 +65,10 @@ public interface SpuService {
      * @param dto
      */
     void editSku(Long id, SkuUpdateDTO dto);
+
+    /**
+     * 删除SKU
+     * @param id
+     */
+    void deleteSku(Long id);
 }

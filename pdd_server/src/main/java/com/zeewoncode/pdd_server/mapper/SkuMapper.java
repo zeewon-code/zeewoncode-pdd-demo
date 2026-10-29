@@ -3,10 +3,7 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.entity.Sku;
 import com.zeewoncode.dto.OrderItemDTO;
 import com.zeewoncode.entity.SpuCard;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -37,7 +34,7 @@ public interface SkuMapper {
      * @param items
      * @return
      */
-    boolean lockStock(List<OrderItemDTO> items);
+    int lockStock(List<OrderItemDTO> items);
 
     /**
      * 待付款订单取消导致预占库存减少
@@ -92,4 +89,20 @@ public interface SkuMapper {
      */
     @Select("select * from sku where id = #{id} and deleted_flag = 0")
     Sku selectById(Long id);
+
+    /**
+     * 软删除sku
+     * @param id
+     * @return
+     */
+    @Update("update sku set deleted_flag = 1 where spu_id = #{id}")
+    int softDeleteSku(Long id);
+
+    /**
+     * 删除sku
+     * @param id
+     * @return
+     */
+    @Delete("delete from sku where id = #{id}")
+    int deleteSku(Long id);
 }

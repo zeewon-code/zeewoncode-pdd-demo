@@ -7,8 +7,10 @@ import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.SpuCreateVO;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -141,6 +143,19 @@ public class SpuController {
     ) {
         log.info("编辑 SKU: {}, {}", id, dto);
         spuService.editSku(id, dto);
+        return Result.success();
+    }
+
+    /**
+     * 删除 SKU
+     * @param id
+     * @return
+     */
+    @Validated
+    @DeleteMapping("/skus/{id}")
+    public Result deleteSku(@PathVariable @NotNull(message = "ID不能为空") Long id) {
+        log.info("删除 SKU: {}", id);
+        spuService.deleteSku(id);
         return Result.success();
     }
 }
