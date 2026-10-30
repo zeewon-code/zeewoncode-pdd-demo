@@ -52,23 +52,5 @@ public interface SpuService {
      */
     void listAndDelist(Long id, SpuStatusDTO dto);
 
-    /**
-     * 新建SKU
-     * @param id
-     * @param dto
-     */
-    void addSku(Long id, SkuDTO dto);
 
-    /**
-     * 编辑SKU
-     * @param id
-     * @param dto
-     */
-    void editSku(Long id, SkuUpdateDTO dto);
-
-    /**
-     * 删除SKU
-     * @param id
-     */
-    void deleteSku(Long id);
 }

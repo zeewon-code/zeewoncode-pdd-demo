@@ -7,10 +7,8 @@ import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.SpuCreateVO;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -18,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
  * B端-商品模块
  */
 @RestController
-@RequestMapping("/api/b")
+@RequestMapping("/api/b/spu")
 @Slf4j
 public class SpuController {
 
@@ -34,7 +32,7 @@ public class SpuController {
      * @param status
      * @return
      */
-    @GetMapping("/spu")
+    @GetMapping
     public Result<PageResult<SpuCard>> listSpuCards(
             @RequestParam(defaultValue = "1", required = false) Integer page,
             @RequestParam(defaultValue = "10", required = false) Integer size,
@@ -52,7 +50,7 @@ public class SpuController {
      * @param dto
      * @return
      */
-    @PostMapping("/spu")
+    @PostMapping
     public Result<SpuCreateVO> addSpu(@Valid @RequestBody SpuCreateDTO dto) {
         log.info("新建商品: {}", dto);
         SpuCreateVO vo = spuService.addSpu(dto);
@@ -64,7 +62,7 @@ public class SpuController {
      * @param id
      * @return
      */
-    @GetMapping("/spu/{id}")
+    @GetMapping("/{id}")
     public Result<SpuDetail> getSpuDetail(@PathVariable Long id) {
         log.info("商品详情: {}", id);
         SpuDetail detail = spuService.getSpuDetail(id);
@@ -77,7 +75,7 @@ public class SpuController {
      * @param dto
      * @return
      */
-    @PutMapping("/spu/{id}")
+    @PutMapping("/{id}")
     public Result editSpu(@PathVariable Long id,
                           @Valid @RequestBody(required = false) SpuEditDTO dto) {
         log.info("编辑商品: {}, {}", id, dto);
@@ -90,7 +88,7 @@ public class SpuController {
      * @param id
      * @return
      */
-    @DeleteMapping("/spu/{id}")
+    @DeleteMapping("/{id}")
     public Result softDeleteSpu(@PathVariable Long id) {
         log.info("软删除商品: {}", id);
         spuService.softDeleteSpu(id);
@@ -103,7 +101,7 @@ public class SpuController {
      * @param dto
      * @return
      */
-    @PutMapping("/spu/{id}/status")
+    @PutMapping("/{id}/status")
     public Result listAndDelist(
             @PathVariable Long id,
             @RequestBody SpuStatusDTO dto
@@ -113,49 +111,5 @@ public class SpuController {
         return Result.success();
     }
 
-    /**
-     * 新增SKU
-     * @param id
-     * @param dto
-     * @return
-     */
-    @PostMapping("/skus/{id}")
-    public Result addSku(
-            @PathVariable Long id,
-            @Valid @RequestBody SkuDTO dto
-    ) {
-        log.info("新建SKU: {}, {}", id, dto);
-        spuService.addSku(id, dto);
-        return Result.success();
-    }
 
-
-    /**
-     * 编辑 SKU（价格/规格/图）
-     * @param id
-     * @param dto
-     * @return
-     */
-    @PutMapping("/skus/{id}")
-    public Result editSku(
-            @PathVariable Long id,
-            @Valid @RequestBody SkuUpdateDTO dto
-    ) {
-        log.info("编辑 SKU: {}, {}", id, dto);
-        spuService.editSku(id, dto);
-        return Result.success();
-    }
-
-    /**
-     * 删除 SKU
-     * @param id
-     * @return
-     */
-    @Validated
-    @DeleteMapping("/skus/{id}")
-    public Result deleteSku(@PathVariable @NotNull(message = "ID不能为空") Long id) {
-        log.info("删除 SKU: {}", id);
-        spuService.deleteSku(id);
-        return Result.success();
-    }
 }
