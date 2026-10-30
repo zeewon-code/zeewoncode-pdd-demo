@@ -28,6 +28,8 @@ public class SkuServiceImpl implements SkuService {
     private GrouponMapper grouponMapper;
     @Autowired
     private OrderMapper orderMapper;
+    @Autowired
+    private ShipmentMapper shipmentMapper;
 
     /**
      * 新增商品规格
@@ -138,6 +140,7 @@ public class SkuServiceImpl implements SkuService {
      * @param dto
      */
     @Override
+    @Transactional
     public void updateSkuStatus(Long id, SpuStatusDTO dto) {
         Sku skuById = skuMapper.selectSkuById(id);
         if (!isMerchantPermisson(skuById.getSpuId().longValue())) throw new RuntimeException("没有此权限进行商品规格状态的更新");
@@ -162,8 +165,14 @@ public class SkuServiceImpl implements SkuService {
             if (!instanceIds.isEmpty()) {
                 grouponMapper.updateGrouponInstanceStatusByInstanceIds(instanceIds, 3);
                 // 修改订单状态status为4（已取消）和cancelType为3（拼团失败）
-                for (Long instanceId : instanceIds)
-                    orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId, null, 4, 3);
+                if (orderMapper.updateOrderStatusAndCancelTypeByInstanceIds(instanceIds, 4, 3) == 0) {
+                    throw new RuntimeException("订单状态更新失败, 请稍后重试");
+                }
+                // 修改订单对应的未发货物流信息状态为4（status = 4）
+                List<Long> orderIds = orderMapper.selectOrderIdsByInstanceIds(instanceIds);
+                if (shipmentMapper.updateShipmentStatusByOrderIds(orderIds, 4) == 0) {
+                    throw new RuntimeException("物流信息状态更新失败, 请稍后重试");
+                }
             }
         }
     }

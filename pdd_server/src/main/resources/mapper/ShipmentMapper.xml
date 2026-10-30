@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeewoncode.pdd_server.mapper.ShipmentMapper">
+    <insert id="insert" parameterType="com.zeewoncode.entity.Shipment" useGeneratedKeys="true" keyProperty="id">
+        insert into shipment(order_id, tracking_no, carrier, status, shipped_at)
+        values (#{orderId}, #{trackingNo}, #{carrier}, #{status}, #{shippedAt})
+    </insert>
+
+
+    <update id="updateShipmentStatusByOrderIds">
+        UPDATE shipment
+        SET status = #{status}
+        WHERE order_id IN
+        <foreach item="orderId" collection="orderIds" separator="," open="(" close=")">
+            #{orderId}
+        </foreach>
+    </update>
+
+    <select id="selectShipmentsByOrderIds" resultType="com.zeewoncode.entity.Shipment">
+        SELECT * FROM shipment WHERE order_id IN
+        <foreach item="orderId" collection="orderIds" separator="," open="(" close=")">
+            #{orderId}
+        </foreach>
+    </select>
+</mapper>

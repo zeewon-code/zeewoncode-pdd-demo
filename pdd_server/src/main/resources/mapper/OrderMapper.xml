@@ -137,7 +137,10 @@
             <if test="paidAt != null">paid_at = #{paidAt},</if>
             <if test="completedAt != null">completed_at = #{completedAt},</if>
         </set>
-        WHERE id = #{id} AND user_id = #{userId}
+        <where> id = #{id}
+            <if test="userId != null">AND user_id = #{userId}</if>
+        </where>
+
     </update>
     <update id="updateOrderStatusAndCancelTypeByInstanceIdAndUserId">
         update orders
@@ -147,6 +150,7 @@
             <if test="instanceId != null">AND groupon_instance_id = #{instanceId}</if>
         </where>
     </update>
+
 
     <select id="selectOrderByInstanceIdsAndUserIds" resultType="com.zeewoncode.entity.Order">
         SELECT * FROM orders
@@ -177,6 +181,37 @@
             <if test="instanceId != null">AND groupon_instance_id = #{instanceId}</if>
         </where>
     </select>
+    <select id="selectOrderIdsByInstanceIds" resultType="java.lang.Long">
+        SELECT id
+        FROM orders
+        WHERE groupon_instance_id IN
+        <foreach item="grouponInstanceId" collection="instanceIds" open="(" separator="," close=")">
+            #{grouponInstanceId}
+        </foreach>
+    </select>
 
+    <update id="updateOrderStatusAndCancelTypeByInstanceIds">
+        UPDATE orders
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="cancelType != null">cancel_type = #{cancelType},</if>
+        </set>
+        WHERE groupon_instance_id IN
+        <foreach item="grouponInstanceId" collection="instanceIds" open="(" separator="," close=")">
+            #{grouponInstanceId}
+        </foreach>
+    </update>
+    <update id="updateOrderStatusAndCancelTypeByOrderIds">
+        UPDATE orders
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="cancelType != null">cancel_type = #{cancelType},</if>
+        </set>
+        WHERE id IN
+        <foreach item="orderId" collection="orderIds" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+        AND status = 0;
+    </update>
 
 </mapper>

@@ -1,8 +1,10 @@
 package com.zeewoncode.pdd_server.b.service;
 
+import com.zeewoncode.dto.ShipDTO;
 import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.OrderDetail;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.vo.ShipVO;
 
 public interface OrderService {
     /**
@@ -20,4 +22,12 @@ public interface OrderService {
      * @return
      */
     OrderDetail getOrderDetail(Long orderId);
+
+    /**
+     * 订单发货
+      * @param orderId
+     * @param dto
+     * @return
+     */
+    ShipVO ship(Long orderId, ShipDTO dto);
 }

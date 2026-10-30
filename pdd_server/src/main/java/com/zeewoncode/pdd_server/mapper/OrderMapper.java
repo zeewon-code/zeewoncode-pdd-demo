@@ -62,7 +62,7 @@ public interface OrderMapper {
      * 更新订单
      * @param order
      */
-    void update(Order order);
+    int update(Order order);
 
 
     /**
@@ -136,4 +136,23 @@ public interface OrderMapper {
      * @return
      */
     List<Long> selectOrderIdsByInstanceIdAndUserId(Long instanceId, Long userId);
+
+    /**
+     * 根据团购实例id列表查询订单id列表
+     * @param instanceIds
+     * @return
+     */
+    List<Long> selectOrderIdsByInstanceIds(List<Long> instanceIds);
+
+    /**
+     * 根据团购实例id列表更新订单状态和取消类型
+     * @param instanceIds
+     * @param status
+     * @param cancelType
+     * @return
+     */
+    int updateOrderStatusAndCancelTypeByInstanceIds(List<Long> instanceIds, int status, int cancelType);
+
+
+
 }

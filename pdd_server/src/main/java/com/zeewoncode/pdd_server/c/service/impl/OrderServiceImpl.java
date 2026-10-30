@@ -296,6 +296,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
+    @Transactional
     public PayVO orderPay(Long id) {
         // 1.检查待付款时间是否超时
         // 超时

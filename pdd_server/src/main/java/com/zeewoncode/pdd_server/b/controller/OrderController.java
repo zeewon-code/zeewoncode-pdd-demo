@@ -1,10 +1,12 @@
 package com.zeewoncode.pdd_server.b.controller;
 
 
+import com.zeewoncode.dto.ShipDTO;
 import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.OrderDetail;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
+import com.zeewoncode.vo.ShipVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +48,22 @@ public class OrderController {
     public Result<OrderDetail> getOrderDetail(@PathVariable Long id) {
         log.info("获取本店订单详情: 订单id{}", id);
         OrderDetail result = orderService.getOrderDetail(id);
+        return Result.success(result);
+    }
+
+    /**
+     * 订单发货
+     * @param id
+     * @param dto
+     * @return
+     */
+    @PostMapping("/{id}/ship")
+    public Result<ShipVO> ship(
+            @PathVariable Long id,
+            @RequestBody ShipDTO dto
+    ) {
+        log.info("订单发货: 订单id{}, 发货信息{}", id, dto);
+        ShipVO result = orderService.ship(id, dto);
         return Result.success(result);
     }
 }

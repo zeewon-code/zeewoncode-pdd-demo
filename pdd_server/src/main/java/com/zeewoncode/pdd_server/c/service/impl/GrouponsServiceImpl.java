@@ -50,6 +50,8 @@ public class GrouponsServiceImpl implements GrouponsService {
     private RouterFunctionMapping routerFunctionMapping;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private ShipmentMapper shipmentMapper;
 
     /**
      * 拼团发起（团长下单）
@@ -312,7 +314,6 @@ public class GrouponsServiceImpl implements GrouponsService {
         // 通过拼团实例id找到拼团活动define，找到skuId,然后到sku表进行预占库存的释放
         Long skuId = grouponMapper.selectGrouponDefineById(instance.getDefineId()).getSkuId().longValue();
         skuMapper.releaseLockStock(skuId, quantity);
-
     }
 
     // 涉及表：groupon_instance, user, spu, groupon_define, orders
