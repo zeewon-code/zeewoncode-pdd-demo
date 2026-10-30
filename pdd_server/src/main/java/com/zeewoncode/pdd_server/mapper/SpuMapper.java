@@ -96,4 +96,13 @@ public interface SpuMapper {
      */
     @Update("UPDATE spu SET status = #{status} WHERE id = #{id} AND deleted_flag = 0")
     int listAndDelist(Long id, Integer status);
+
+    /**
+     * 根据merchantId查询商品id
+     * @param merchantId
+     * @return
+     */
+    @Select("SELECT id FROM spu " +
+            "WHERE merchant_id = #{merchantId} AND deleted_flag = 0")
+    List<Long> selectIdByMerchantId(Long merchantId);
 }

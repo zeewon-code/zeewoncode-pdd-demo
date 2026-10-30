@@ -91,4 +91,40 @@
         </foreach>
     </update>
 
+    <select id="selectGrouponDefinesBySpuIdAndStatus" resultType="com.zeewoncode.entity.GrouponDefine">
+        SELECT id, sku_id, spu_id, group_price, target_count, status, start_time, end_time
+        FROM groupon_define
+        WHERE spu_id IN
+        <foreach item="spuId" collection="spuIds" separator="," open="(" close=")">
+            #{spuId}
+        </foreach>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY start_time DESC
+    </select>
+
+
+    <select id="selectDefineCountByInstanceIds"
+            resultType="com.zeewoncode.pdd_server.mapper.po.GrouponInstancesCount">
+        SELECT define_id,
+               COUNT(CASE WHEN status = 0 THEN 1 END) AS running_count,
+               COUNT(CASE WHEN status = 1 THEN 1 END) AS success_count,
+               COUNT(CASE WHEN status = 2 OR status = 3 THEN 1 END) AS fail_count
+        FROM groupon_instance
+        WHERE id IN
+        <foreach item="grouponInstanceId" collection="grouponInstanceIds" separator="," open="(" close=")">
+            #{grouponInstanceId}
+        </foreach>
+        GROUP BY define_id
+    </select>
+    <select id="selectGrouponInstanceIdsByDefineIds" resultType="java.lang.Long">
+        SELECT id
+        FROM groupon_instance
+        WHERE define_id IN
+        <foreach item="defineId" collection="defineIdsList" separator="," open="(" close=")">
+            #{defineId}
+        </foreach>
+    </select>
+
 </mapper>

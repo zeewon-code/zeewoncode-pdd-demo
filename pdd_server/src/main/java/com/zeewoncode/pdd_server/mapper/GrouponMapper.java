@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.entity.GrouponDefine;
 import com.zeewoncode.entity.GrouponInstance;
 import com.zeewoncode.entity.Order;
+import com.zeewoncode.pdd_server.mapper.po.GrouponInstancesCount;
 import com.zeewoncode.pdd_server.mapper.po.InstanceRef;
 import org.apache.ibatis.annotations.*;
 
@@ -156,4 +157,25 @@ public interface GrouponMapper {
      * @param status
      */
     void updateGrouponInstanceStatusByInstanceIds(List<Long> instanceIds, int status);
+
+    /**
+     * 根据spu_id列表查询拼团活动
+     * @param spuIds
+     * @return
+     */
+    List<GrouponDefine> selectGrouponDefinesBySpuIdAndStatus(List<Long> spuIds, Integer status);
+
+    /**
+     * 根据拼团活动id列表查询拼团实例数量
+     * @param grouponInstanceIds
+     * @return
+     */
+    List<GrouponInstancesCount> selectDefineCountByInstanceIds(List<Long> grouponInstanceIds);
+
+    /**
+     * 根据拼团活动id列表查询拼团实例id列表
+     * @param defineIdsList
+     * @return
+     */
+    List<Long> selectGrouponInstanceIdsByDefineIds(List<Long> defineIdsList);
 }
