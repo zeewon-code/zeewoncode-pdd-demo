@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.b.service;
 
 import com.zeewoncode.dto.SkuDTO;
 import com.zeewoncode.dto.SkuUpdateDTO;
+import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.dto.StockDTO;
 
 public interface SkuService {
@@ -14,4 +15,6 @@ public interface SkuService {
     void deleteSku(Long id);
 
     void updateStock(Long id, StockDTO dto);
+
+    void updateSkuStatus(Long id, SpuStatusDTO dto);
 }

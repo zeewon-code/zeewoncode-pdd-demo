@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.b.controller;
 
 import com.zeewoncode.dto.SkuDTO;
 import com.zeewoncode.dto.SkuUpdateDTO;
+import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.dto.StockDTO;
 import com.zeewoncode.result.Result;
 import jakarta.validation.Valid;
@@ -82,6 +83,21 @@ public class SkuController {
         log.info("调整库存: {}, {}", id, dto);
         skuService.updateStock(id, dto);
         return Result.success();
+    }
 
+    /**
+     * 商品规格可售/禁售
+     * @param id
+     * @param dto
+     * @return
+     */
+    @PutMapping("/{id}/status")
+    public Result updateSkuStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody SpuStatusDTO dto
+    ) {
+        log.info("更新商品状态: {}, {}", id, dto);
+        skuService.updateSkuStatus(id, dto);
+        return Result.success();
     }
 }

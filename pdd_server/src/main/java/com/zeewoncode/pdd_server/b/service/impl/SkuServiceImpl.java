@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.b.service.impl;
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.SkuDTO;
 import com.zeewoncode.dto.SkuUpdateDTO;
+import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.dto.StockDTO;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.SkuService;
@@ -97,27 +98,18 @@ public class SkuServiceImpl implements SkuService {
     @Override
     @Transactional
     public void deleteSku(Long id) {
-        Long spuId = skuMapper.selectById(id).getSpuId().longValue();
+        Sku skuDb = skuMapper.selectById(id);
+        if (skuDb == null || skuDb.getDeletedFlag() == 1) {
+            throw new RuntimeException("该商品规格不存在");
+        }
+        Long spuId = skuDb.getSpuId().longValue();
         if (!isMerchantPermisson(spuId)) throw new RuntimeException("没有此权限进行编辑商品规格");
+        // 判断当前该sku是否禁售了
+        if (skuDb.getStatus() == 1) {
+            throw new RuntimeException("该商品规格未禁售，无法进行删除操作");
+        }
         if (skuMapper.deleteSku(id) == 0) {
             throw new RuntimeException("删除商品规格失败, 请稍后重试");
-        }
-        // 该商品规格的拼团活动（设置停用）及修改实例(拼团中)状态，以及修改（拼团中）拼团订单状态及退款
-        // 该商品规格的拼团活动（设置停用）
-        GrouponDefine define = grouponMapper.selectGrouponDefineBySkuId(id);
-        if (define != null) {
-            Long defineId = define.getId().longValue();
-            grouponMapper.updateGrouponDefineStatus(define.getId().longValue(), 0);
-            List<GrouponInstance> instanceList = grouponMapper.selectGrouponInstanceByDefineIdAndStatus(defineId, 0);
-            List<Long> instanceIds = instanceList.stream().map(GrouponInstance::getId).toList();
-            // 修改实例(拼团中)状态
-            // 修改（拼团中）拼团订单状态及退款
-            if (!instanceIds.isEmpty()) {
-                grouponMapper.updateGrouponInstanceStatusByInstanceIds(instanceIds, 3);
-                // 修改订单状态status为4（已取消）和cancelType为3（拼团失败）
-                for (Long instanceId : instanceIds)
-                    orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId, null, 4, 3);
-            }
         }
     }
 
@@ -137,6 +129,42 @@ public class SkuServiceImpl implements SkuService {
         Sku sku = Sku.builder().id(id.intValue()).stock(dto.getStock()).build();
         if (skuMapper.update(sku) == 0) {
             throw new RuntimeException("更新商品库存失败, 请稍后重试");
+        }
+    }
+
+    /**
+     * 商品规格可售/禁售
+     * @param id
+     * @param dto
+     */
+    @Override
+    public void updateSkuStatus(Long id, SpuStatusDTO dto) {
+        Sku skuById = skuMapper.selectSkuById(id);
+        if (!isMerchantPermisson(skuById.getSpuId().longValue())) throw new RuntimeException("没有此权限进行商品规格状态的更新");
+        Sku skuDb = skuMapper.selectById(id);
+        if (skuDb == null) {
+            throw new RuntimeException("该商品规格不存在");
+        }
+        Sku sku = Sku.builder().id(id.intValue()).status(dto.getStatus()).build();
+        if (skuMapper.update(sku) == 0) {
+            throw new RuntimeException("商品规格状态更新失败, 请稍后重试");
+        }
+        // 该商品规格的拼团活动（设置停用）及修改实例(拼团中)状态，以及修改（拼团中）拼团订单状态及退款
+        // 该商品规格的拼团活动（设置停用）
+        GrouponDefine define = grouponMapper.selectGrouponDefineBySkuId(id);
+        if (define != null) {
+            Long defineId = define.getId().longValue();
+            grouponMapper.updateGrouponDefineStatus(define.getId().longValue(), 0);
+            List<GrouponInstance> instanceList = grouponMapper.selectGrouponInstanceByDefineIdAndStatus(defineId, 0);
+            List<Long> instanceIds = instanceList.stream().map(GrouponInstance::getId).toList();
+            // 修改实例(拼团中)状态
+            // 修改（拼团中）拼团订单状态及退款
+            if (!instanceIds.isEmpty()) {
+                grouponMapper.updateGrouponInstanceStatusByInstanceIds(instanceIds, 3);
+                // 修改订单状态status为4（已取消）和cancelType为3（拼团失败）
+                for (Long instanceId : instanceIds)
+                    orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId, null, 4, 3);
+            }
         }
     }
 

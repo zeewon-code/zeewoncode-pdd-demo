@@ -1,5 +1,6 @@
 package com.zeewoncode.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,5 +14,6 @@ import java.io.Serializable;
 @Builder
 public class SpuStatusDTO implements Serializable {
 
+    @NotNull(message = "状态不能为空")
     private Integer status;
 }

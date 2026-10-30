@@ -227,8 +227,12 @@ public class SpuServiceImpl implements SpuService {
             throw new RuntimeException("没有此权限进行删除商品");
         }
         Spu spuById = spuMapper.getSpuById(id);
-        if (spuById == null) {
+        if (spuById == null || spuById.getDeletedFlag() == 1) {
             throw new RuntimeException("该商品不存在");
+        }
+        // 判断该商品是否已下架再进行删除
+        if (spuById.getStatus() == 1) {
+            throw new RuntimeException("该商品还在上架中，请先下架之后，再进行删除");
         }
         if (spuById.getDeletedFlag() == 1) {
             throw new RuntimeException("该商品已删除");
