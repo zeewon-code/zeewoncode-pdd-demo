@@ -79,9 +79,14 @@
                    END AS status_text
         FROM orders
         <where>
-            user_id = #{userId}
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
             <if test="status != null">
                 AND status = #{status}
+            </if>
+            <if test="merchantId != null">
+                AND merchant_id = #{merchantId}
             </if>
         </where>
         ORDER BY created_at DESC

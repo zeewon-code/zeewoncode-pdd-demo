@@ -84,9 +84,10 @@ public interface OrderMapper {
      * 根据用户id和订单状态查询订单列表
      * @param userId
      * @param status
+     * @param merchantId
      * @return
      */
-    List<OrderCard> selectOrderList(Long userId, Integer status);
+    List<OrderCard> selectOrderList(Long userId, Integer status, Long merchantId);
 
     /**
      * 根据用户id和订单id查询订单详情
