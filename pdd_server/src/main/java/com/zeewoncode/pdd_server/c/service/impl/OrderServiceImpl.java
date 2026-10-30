@@ -387,9 +387,15 @@ public class OrderServiceImpl implements OrderService {
         Receiver receiver = orderMapper.selectReceiverByOrderId(id);
         // 2.补充ShipVO类字段
         Shipment shipment = shipmentMapper.selectShipmentByOrderId(id);
-        ShipVO shipVO = ShipVO.builder().shipmentId(shipment.getId()).trackingNo(shipment.getTrackingNo()).build();
+        ShipVO shipVO = new ShipVO();
+        if (shipment != null) {
+            shipVO = ShipVO.builder()
+                    .shipmentId(shipment.getId() != null ? shipment.getId() : null)
+                    .trackingNo(shipment.getTrackingNo() != null ? shipment.getTrackingNo() : null)
+                    .build();
+        }
         orderDetail.setShipVO(shipVO);
-        orderDetail.setReceiver(receiver);
+        orderDetail.setReceiver(receiver != null ? receiver : null);
         return orderDetail;
     }
 }

@@ -3,14 +3,14 @@ package com.zeewoncode.pdd_server.b.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
-import com.zeewoncode.entity.Merchant;
-import com.zeewoncode.entity.OrderCard;
-import com.zeewoncode.entity.User;
+import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.OrderService;
 import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.OrderMapper;
+import com.zeewoncode.pdd_server.mapper.ShipmentMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.vo.ShipVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +25,8 @@ public class OrderServiceImpl implements OrderService {
     private MerchantMapper merchantMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private ShipmentMapper shipmentMapper;
 
     /**
      * 获取本店订单列表
@@ -54,6 +56,39 @@ public class OrderServiceImpl implements OrderService {
             return PageResult.empty(pageInfo);
         }
         return PageResult.of(pageInfo, pageInfo.getList());
+    }
+
+    /**
+     * 获取本店订单详情
+     * @param orderId
+     * @return
+     */
+    @Override
+    public OrderDetail getOrderDetail(Long orderId) {
+        Integer userId = BaseContext.getCurrentId();
+        User user = userMapper.selectById(userId);
+        if (user == null || user.getUserType() != 2) {
+            throw new RuntimeException("当前用户不存在或者当前用户不是店铺的管理员，没有该权限进行相关操作");
+        }
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+        if (merchant == null) {
+            throw new RuntimeException("当前用户没有绑定店铺，没有该权限进行相关操作");
+        }
+        OrderDetail orderDetail = orderMapper.selectOrderDetail(userId.longValue(), orderId.intValue());
+        // 1.补充receiver类字段
+        Receiver receiver = orderMapper.selectReceiverByOrderId(orderId.intValue());
+        // 2.补充ShipVO类字段
+        Shipment shipment = shipmentMapper.selectShipmentByOrderId(orderId.intValue());
+        ShipVO shipVO = new ShipVO();
+        if (shipment != null) {
+            shipVO = ShipVO.builder()
+                    .shipmentId(shipment.getId() != null ? shipment.getId() : null)
+                    .trackingNo(shipment.getTrackingNo() != null ? shipment.getTrackingNo() : null)
+                    .build();
+        }
+        orderDetail.setShipVO(shipVO);
+        orderDetail.setReceiver(receiver != null ? receiver : null);
+        return orderDetail;
     }
 
 //    /**
