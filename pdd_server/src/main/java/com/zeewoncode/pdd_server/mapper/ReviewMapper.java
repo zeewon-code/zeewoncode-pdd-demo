@@ -41,4 +41,11 @@ public interface ReviewMapper {
      * @return
      */
     List<Review> selectReviewListBySpuIds(List<Long> spuIds, Integer rating);
+
+    /**
+     * 根据spuIds获取评分列表
+     * @param spuIds
+     * @return
+     */
+    List<Integer> selectRatingBySpuIds(List<Long> spuIds);
 }

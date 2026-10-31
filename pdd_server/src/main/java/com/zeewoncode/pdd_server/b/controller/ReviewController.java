@@ -2,7 +2,9 @@ package com.zeewoncode.pdd_server.b.controller;
 
 
 import com.zeewoncode.entity.Review;
+import com.zeewoncode.entity.ReviewStat;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,5 +39,16 @@ public class ReviewController {
     ) {
         log.info("spuId:{}, rating:{}, page:{}, size:{}", spuId, rating, page, size);
         return reviewService.getReviewList(spuId, rating, page, size);
+    }
+
+    /**
+     * 本店商品评价统计
+     * @return
+     */
+    @GetMapping("/stat")
+    public Result<ReviewStat> getReviewStat() {
+        log.info("本店商品评价统计");
+        Result<ReviewStat> result = reviewService.getReviewStat();
+        return result;
     }
 }

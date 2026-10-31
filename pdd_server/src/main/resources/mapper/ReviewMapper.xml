@@ -42,4 +42,16 @@
         </where>
         ORDER BY r.created_at DESC
     </select>
+    <select id="selectRatingBySpuIds" resultType="java.lang.Integer">
+        select rating
+        from product_review
+        <where>
+            <if test="spuIds != null and spuIds.size > 0">
+                spu_id IN
+                <foreach item="spuId" collection="spuIds" separator="," open="(" close=")">
+                    #{spuId}
+                </foreach>
+            </if>
+        </where>
+    </select>
 </mapper>

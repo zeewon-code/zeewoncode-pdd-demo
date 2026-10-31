@@ -2,21 +2,23 @@ package com.zeewoncode.pdd_server.b.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.RatingConstant;
 import com.zeewoncode.context.BaseContext;
-import com.zeewoncode.entity.Merchant;
-import com.zeewoncode.entity.Review;
-import com.zeewoncode.entity.Spu;
-import com.zeewoncode.entity.User;
+import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.ReviewService;
 import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.ReviewMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
@@ -69,6 +71,39 @@ public class ReviewServiceImpl implements ReviewService {
             return PageResult.empty(pageInfo);
         }
         return PageResult.of(pageInfo, pageInfo.getList());
+    }
+
+    /**
+     * 本店商品评价统计
+     * @return
+     */
+    @Override
+    public Result<ReviewStat> getReviewStat() {
+        Long userId = BaseContext.getCurrentId().longValue();
+        Integer result = isMerchantAdmin(userId.intValue());
+        if (result != 4) {
+            throw new RuntimeException("当前用户没有权限进行相关操作");
+        }
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        List<Spu> spus = spuMapper.selectSpuByMerchantId(merchant.getId(), null, null, null);
+        List<Long> spuIds = spus.stream().map(Spu::getId).toList();
+        List<Integer> ratings = reviewMapper.selectRatingBySpuIds(spuIds);
+        ReviewStat reviewStat = new ReviewStat();
+        reviewStat.setTotal(ratings.size());
+        double ratingSum = ratings.stream()
+                .mapToDouble(Integer::doubleValue)
+                .sum();
+        reviewStat.setAvgRating(ratingSum / ratings.size());
+        Map<Integer, Long> countMap = ratings.stream()
+                .collect(Collectors.groupingBy(r -> r, Collectors.counting()));
+        Map<String, Integer> ratingDist = new HashMap<>();
+        ratingDist.put(RatingConstant.RATING_1, countMap.getOrDefault(1, 0L).intValue());
+        ratingDist.put(RatingConstant.RATING_2, countMap.getOrDefault(2, 0L).intValue());
+        ratingDist.put(RatingConstant.RATING_3, countMap.getOrDefault(3, 0L).intValue());
+        ratingDist.put(RatingConstant.RATING_4, countMap.getOrDefault(4, 0L).intValue());
+        ratingDist.put(RatingConstant.RATING_5, countMap.getOrDefault(5, 0L).intValue());
+        reviewStat.setRatingDist(ratingDist);
+        return Result.success(reviewStat);
     }
 
     /**

@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
@@ -66,22 +67,14 @@ public class ReviewServiceImpl implements ReviewService {
                 .mapToDouble(Review::getRating)
                 .sum();
         reviewStat.setAvgRating(ratingSum / ratingList.size());
+        Map<Integer, Long> countMap = ratingList.stream()
+                .collect(Collectors.groupingBy(r -> r.getRating(), Collectors.counting()));
         Map<String, Integer> ratingDist = new HashMap<>();
-        ratingDist.put(RatingConstant.RATING_1, (int) ratingList.stream().
-                filter(r -> Integer.valueOf(1).equals(r.getRating()))
-                .count());
-        ratingDist.put(RatingConstant.RATING_2, (int) ratingList.stream().
-                filter(r -> Integer.valueOf(2).equals(r.getRating()))
-                .count());
-        ratingDist.put(RatingConstant.RATING_3, (int) ratingList.stream()
-                .filter(r -> Integer.valueOf(3).equals(r.getRating()))
-                .count());
-        ratingDist.put(RatingConstant.RATING_4, (int) ratingList.stream()
-                .filter(r -> Integer.valueOf(4).equals(r.getRating()))
-                .count());
-        ratingDist.put(RatingConstant.RATING_5, (int) ratingList.stream()
-                .filter(r -> Integer.valueOf(5).equals(r.getRating()))
-                .count());
+        ratingDist.put(RatingConstant.RATING_1, countMap.getOrDefault(1, 0L).intValue());
+        ratingDist.put(RatingConstant.RATING_2, countMap.getOrDefault(2, 0L).intValue());
+        ratingDist.put(RatingConstant.RATING_3, countMap.getOrDefault(3, 0L).intValue());
+        ratingDist.put(RatingConstant.RATING_4, countMap.getOrDefault(4, 0L).intValue());
+        ratingDist.put(RatingConstant.RATING_5, countMap.getOrDefault(5, 0L).intValue());
         reviewStat.setRatingDist(ratingDist);
         return reviewStat;
     }
