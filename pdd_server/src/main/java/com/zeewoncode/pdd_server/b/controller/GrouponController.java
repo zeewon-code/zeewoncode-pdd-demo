@@ -1,14 +1,14 @@
 package com.zeewoncode.pdd_server.b.controller;
 
+import com.zeewoncode.dto.GrouponCreateDTO;
 import com.zeewoncode.pdd_server.b.service.GrouponService;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.GrouponAdminItemVO;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * B端-拼团活动
@@ -36,5 +36,16 @@ public class GrouponController {
     ) {
         log.info("status:{}, page:{}, size:{}", status, page, size);
         return grouponService.getGrouponsList(status, page, size);
+    }
+
+    /**
+     * 店家创建拼团活动
+     * @param grouponCreateDTO
+     * @return
+     */
+    @PostMapping
+    public Result createGroupon(@Valid @RequestBody GrouponCreateDTO grouponCreateDTO) {
+        log.info("店家创建拼团活动：{}", grouponCreateDTO);
+        return grouponService.createGroupon(grouponCreateDTO);
     }
 }

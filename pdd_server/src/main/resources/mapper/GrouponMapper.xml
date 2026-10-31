@@ -105,16 +105,16 @@
     </select>
 
 
-    <select id="selectDefineCountByInstanceIds"
+    <select id="selectDefineCountByDefineIds"
             resultType="com.zeewoncode.pdd_server.mapper.po.GrouponInstancesCount">
         SELECT define_id,
                COUNT(CASE WHEN status = 0 THEN 1 END) AS running_count,
                COUNT(CASE WHEN status = 1 THEN 1 END) AS success_count,
                COUNT(CASE WHEN status = 2 OR status = 3 THEN 1 END) AS fail_count
         FROM groupon_instance
-        WHERE id IN
-        <foreach item="grouponInstanceId" collection="grouponInstanceIds" separator="," open="(" close=")">
-            #{grouponInstanceId}
+        WHERE define_id IN
+        <foreach item="defineId" collection="defineIds" separator="," open="(" close=")">
+            #{defineId}
         </foreach>
         GROUP BY define_id
     </select>

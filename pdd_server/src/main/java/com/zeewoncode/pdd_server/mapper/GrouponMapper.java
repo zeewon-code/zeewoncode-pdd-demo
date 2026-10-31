@@ -167,15 +167,19 @@ public interface GrouponMapper {
 
     /**
      * 根据拼团活动id列表查询拼团实例数量
-     * @param grouponInstanceIds
+     * @param defineIds
      * @return
      */
-    List<GrouponInstancesCount> selectDefineCountByInstanceIds(List<Long> grouponInstanceIds);
+    List<GrouponInstancesCount> selectDefineCountByDefineIds(List<Long> defineIds);
 
     /**
-     * 根据拼团活动id列表查询拼团实例id列表
-     * @param defineIdsList
+     * 插入拼团活动
+     * @param define
      * @return
      */
-    List<Long> selectGrouponInstanceIdsByDefineIds(List<Long> defineIdsList);
+    @Insert("insert into groupon_define (spu_id, sku_id, group_price, target_count, " +
+            "expire_hours, start_time, end_time, status, created_at) " +
+            "values (#{spuId}, #{skuId}, #{groupPrice}, #{targetCount}, " +
+            "#{expireHours}, #{startTime}, #{endTime}, #{status}, #{createdAt})")
+    int insertGrouponDefine(GrouponDefine define);
 }

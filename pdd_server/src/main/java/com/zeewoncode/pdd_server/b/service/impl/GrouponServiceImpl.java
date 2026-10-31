@@ -2,22 +2,20 @@ package com.zeewoncode.pdd_server.b.service.impl;
 
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
-import com.zeewoncode.entity.GrouponDefine;
-import com.zeewoncode.entity.Merchant;
-import com.zeewoncode.entity.Spu;
-import com.zeewoncode.entity.User;
+import com.zeewoncode.dto.GrouponCreateDTO;
+import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.GrouponService;
-import com.zeewoncode.pdd_server.mapper.GrouponMapper;
-import com.zeewoncode.pdd_server.mapper.MerchantMapper;
-import com.zeewoncode.pdd_server.mapper.SpuMapper;
-import com.zeewoncode.pdd_server.mapper.UserMapper;
+import com.zeewoncode.pdd_server.mapper.*;
 import com.zeewoncode.pdd_server.mapper.po.GrouponInstancesCount;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import com.zeewoncode.utils.SafeCollectors;
 import com.zeewoncode.vo.GrouponAdminItemVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +33,8 @@ public class GrouponServiceImpl implements GrouponService {
     private SpuMapper spuMapper;
     @Autowired
     private GrouponMapper grouponMapper;
+    @Autowired
+    private SkuMapper skuMapper;
 
     /**
      * 店家获取店铺拼团列表
@@ -74,8 +74,7 @@ public class GrouponServiceImpl implements GrouponService {
         // runningCount successCount failCount (groupon_instance)
         List<Integer> defineIds = SafeCollectors.distinctValues(grouponDefines, GrouponDefine::getId);
         List<Long> defineIdsList = defineIds.stream().map(Integer::longValue).toList();
-        List<Long> grouponInstanceIds = grouponMapper.selectGrouponInstanceIdsByDefineIds(defineIdsList);
-        List<GrouponInstancesCount> grouponInstancesCounts = grouponMapper.selectDefineCountByInstanceIds(grouponInstanceIds);
+        List<GrouponInstancesCount> grouponInstancesCounts = grouponMapper.selectDefineCountByDefineIds(defineIdsList);
         Map<Long, GrouponInstancesCount> countMap = defineIdsList.isEmpty()
                 ? Collections.emptyMap()
                 : SafeCollectors.toMap(grouponInstancesCounts, GrouponInstancesCount::getDefineId);
@@ -101,7 +100,63 @@ public class GrouponServiceImpl implements GrouponService {
             return grouponAdminItemVO;
         }).filter(Objects::nonNull).collect(Collectors.toList());
         return PageResult.of(pageInfo, vos);
-    };
+    }
+
+    /**
+     * 创建拼团
+     * @param grouponCreateDTO
+     * @return
+     */
+    @Override
+    public Result createGroupon(GrouponCreateDTO grouponCreateDTO) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        Integer result = isMerchantAdmin(userId.intValue());
+        if (result != 4) {
+            throw new RuntimeException("当前用户没有权限进行相关操作");
+        }
+        // 校验参数
+        Sku sku = skuMapper.selectSkuById(grouponCreateDTO.getSkuId());
+        if (sku == null) {
+            return Result.error("当前商品规格不存在或该商品规格未启售，无法创建拼团活动");
+        }
+        // 校验sku属于当前店铺
+        Spu spuById = spuMapper.getSpuById(sku.getSpuId().longValue());
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        if (!spuById.getMerchantId().equals(merchant.getId())) {
+            return Result.error("当前商品规格不属于当前店铺，无法创建拼团活动");
+        }
+        // groupPrice 必须小于等于 sku本来的价格
+        if (grouponCreateDTO.getGroupPrice() >= sku.getPrice()) {
+            return Result.error("拼团价格必须小于商品规格价格");
+        }
+        // 校验startTime,endTime
+        LocalDateTime startTime = grouponCreateDTO.getStartTime();
+        LocalDateTime endTime = grouponCreateDTO.getEndTime();
+        Integer expireHours = grouponCreateDTO.getExpireHours();
+        if (!(startTime.isAfter(LocalDateTime.now()) && startTime.isBefore(endTime)
+                && endTime.isAfter(startTime.plusHours(expireHours)))){
+            return Result.error("成团期限或拼团活动时间设置错误，请重新设置");
+        }
+        // 创建拼团活动
+        GrouponDefine define = GrouponDefine.builder()
+                .skuId(grouponCreateDTO.getSkuId().intValue())
+                .spuId(sku.getSpuId())
+                .groupPrice(new BigDecimal(String.valueOf(grouponCreateDTO.getGroupPrice())))
+                .targetCount(grouponCreateDTO.getTargetCount())
+                .expireHours(grouponCreateDTO.getExpireHours())
+                .startTime(grouponCreateDTO.getStartTime())
+                .endTime(grouponCreateDTO.getEndTime())
+                .status(1)
+                .createdAt(LocalDateTime.now())
+                .build();
+        int i = grouponMapper.insertGrouponDefine(define);
+        if (i == 0) {
+            return Result.error("创建拼团活动失败，请稍后重试");
+        }
+        return Result.success("创建拼团活动成功");
+    }
+
+    ;
 
 
 
