@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.b.service.impl;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.GrouponCreateDTO;
+import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.GrouponService;
 import com.zeewoncode.pdd_server.mapper.*;
@@ -13,6 +14,7 @@ import com.zeewoncode.utils.SafeCollectors;
 import com.zeewoncode.vo.GrouponAdminItemVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -35,6 +37,10 @@ public class GrouponServiceImpl implements GrouponService {
     private GrouponMapper grouponMapper;
     @Autowired
     private SkuMapper skuMapper;
+    @Autowired
+    private OrderMapper orderMapper;
+    @Autowired
+    private ShipmentMapper shipmentMapper;
 
     /**
      * 店家获取店铺拼团列表
@@ -157,7 +163,7 @@ public class GrouponServiceImpl implements GrouponService {
     }
 
     /**
-     * 获取拼团详情
+     * 获取拼团活动详情
      * @param defineId
      * @return
      */
@@ -202,8 +208,62 @@ public class GrouponServiceImpl implements GrouponService {
         return Result.success(grouponAdminItemVO);
     }
 
-
-
+    /**
+     * 启用 / 停用拼团活动
+     * @param defineId
+     * @param dto
+     * @return
+     */
+    @Override
+    @Transactional
+    public Result updateGrouponDefineStatus(Long defineId, SpuStatusDTO dto) {
+        // 1.判断当前用户是否是店铺的管理员
+        Long userId = BaseContext.getCurrentId().longValue();
+        Integer result = isMerchantAdmin(userId.intValue());
+        if (result != 4) {
+            throw new RuntimeException("当前用户没有权限进行相关操作");
+        }
+        // 2.校验该sku是否属于当前店铺
+        GrouponDefine define = grouponMapper.selectGrouponDefineById(defineId);
+        Integer spuId = define.getSpuId();
+        Spu spuById = spuMapper.getSpuById(define.getSpuId().longValue());
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        if (!spuById.getMerchantId().equals(merchant.getId())) {
+            return Result.error("当前商品规格不属于当前店铺，无法查询该拼团活动详情");
+        }
+        // 3.查询拼团活动是否存在
+        GrouponDefine grouponDefine = grouponMapper.selectGrouponDefineById(defineId);
+        if (grouponDefine == null) {
+            return Result.error("当前拼团活动不存在");
+        }
+        if (grouponDefine.getStatus() == dto.getStatus()) {
+            return Result.success("当前拼团活动状态已为" + (dto.getStatus() == 1 ? "启用" : "停用"));
+        }
+        // 4.更新拼团活动状态
+        int i = grouponMapper.updateGrouponDefineStatus(defineId, dto.getStatus());
+        if (i == 0) {
+            return Result.error("拼团活动状态更新失败，请稍后重试");
+        }
+        if (dto.getStatus() == 0) {
+            List<GrouponInstance> instanceList = grouponMapper.selectGrouponInstanceByDefineIdAndStatus(defineId, 0);
+            List<Long> instanceIds = instanceList.stream().map(GrouponInstance::getId).toList();
+            // 修改实例(拼团中)状态
+            // 修改（拼团中）拼团订单状态及退款
+            if (!instanceIds.isEmpty()) {
+                grouponMapper.updateGrouponInstanceStatusByInstanceIds(instanceIds, 3);
+                // 修改订单状态status为4（已取消）和cancelType为3（拼团失败）
+                if (orderMapper.updateOrderStatusAndCancelTypeByInstanceIds(instanceIds, 4, 3) == 0) {
+                    throw new RuntimeException("订单状态更新失败, 请稍后重试");
+                }
+                // 修改订单对应的未发货物流信息状态为4（status = 4）
+                List<Long> orderIds = orderMapper.selectOrderIdsByInstanceIds(instanceIds);
+                if (shipmentMapper.updateShipmentStatusByOrderIds(orderIds, 4) == 0) {
+                    throw new RuntimeException("物流信息状态更新失败, 请稍后重试");
+                }
+            }
+        }
+        return Result.success("拼团活动状态更新成功");
+    }
 
 
     /**

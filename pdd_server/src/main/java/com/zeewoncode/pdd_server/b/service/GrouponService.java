@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.b.service;
 
 import com.zeewoncode.dto.GrouponCreateDTO;
+import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.GrouponAdminItemVO;
@@ -28,4 +29,12 @@ public interface GrouponService {
      * @return
      */
     Result<GrouponAdminItemVO> getGrouponDetail(Long defineId);
+
+    /**
+     * 启用 / 停用拼团活动
+     * @param defineId
+     * @param dto
+     * @return
+     */
+    Result updateGrouponDefineStatus(Long defineId, SpuStatusDTO dto);
 }

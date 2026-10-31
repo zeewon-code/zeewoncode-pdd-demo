@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.b.controller;
 
 import com.zeewoncode.dto.GrouponCreateDTO;
+import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.pdd_server.b.service.GrouponService;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
@@ -58,5 +59,20 @@ public class GrouponController {
     public Result<GrouponAdminItemVO> getGrouponDetail(@PathVariable Long id) {
         log.info("店铺获取拼团活动详情：{}", id);
         return grouponService.getGrouponDetail(id);
+    }
+
+    /**
+     * 启用 / 停用拼团活动
+     * @param id
+     * @param dto
+     * @return
+     */
+    @PutMapping("/{id}/status")
+    public Result updateGrouponDefineStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody SpuStatusDTO dto
+    ) {
+        log.info("启用 / 停用拼团活动: {}, {}", id, dto);
+        return grouponService.updateGrouponDefineStatus(id, dto);
     }
 }
