@@ -72,7 +72,7 @@
     <select id="selectSpuByMerchantId" resultType="com.zeewoncode.entity.Spu">
         SELECT id, title, main_image, sales
         FROM spu
-        WHERE merchant_id = #{merchantId}
+        WHERE merchant_id = #{merchantId} AND deleted_flag = 0
         <if test="keyword != null and keyword != ''">
             AND title LIKE CONCAT('%', #{keyword}, '%')
         </if>

@@ -19,7 +19,7 @@ import java.util.List;
 public class Review implements Serializable {
     private Integer id;
     private String nickname;
-    private String avator;
+    private String avatar;
     private Integer rating;
     private String content;
     private List<String> images;

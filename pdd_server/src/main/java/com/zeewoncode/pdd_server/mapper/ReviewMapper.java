@@ -13,10 +13,10 @@ public interface ReviewMapper {
     /**
      * 根据spuId和查询条件获取评论列表
      * @param spuId
-     * @param req
+     * @param dto
      * @return
      */
-    List<Review> selectReviewList(Integer spuId, ReviewsListQueryDTO req);
+    List<Review> selectReviewList(Integer spuId, ReviewsListQueryDTO dto);
 
 
     /**
@@ -33,4 +33,12 @@ public interface ReviewMapper {
      * @return
      */
     void insert(ProductReview productReview);
+
+    /**
+     * 根据spuIds和评分获取评论列表
+     * @param spuIds
+     * @param rating
+     * @return
+     */
+    List<Review> selectReviewListBySpuIds(List<Long> spuIds, Integer rating);
 }

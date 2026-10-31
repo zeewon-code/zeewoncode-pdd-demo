@@ -15,8 +15,29 @@
             <if test="spuId != null">
                 AND r.spu_id = #{spuId}
             </if>
-            <if test="req.rating != null">
-                AND r.rating = #{req.rating}
+            <if test="dto.rating != null">
+                AND r.rating = #{dto.rating}
+            </if>
+        </where>
+        ORDER BY r.created_at DESC
+    </select>
+
+    <resultMap id="reviewResultMap" type="com.zeewoncode.entity.Review">
+        <result property="images" column="images" typeHandler="com.zeewoncode.utils.StringListTypeHandler"/>
+    </resultMap>
+    <select id="selectReviewListBySpuIds" resultMap="reviewResultMap">
+        select r.id AS id, u.nickname AS nickname, u.avatar AS avatar, r.rating AS rating, r.content AS content,
+        r.images AS images, r.created_at AS createdAt
+        from product_review r left join user u on r.user_id = u.id
+        <where>
+            <if test="spuIds != null and spuIds.size > 0">
+                r.spu_id IN
+                <foreach item="spuId" collection="spuIds" separator="," open="(" close=")">
+                    #{spuId}
+                </foreach>
+            </if>
+            <if test="rating != null">
+                AND r.rating = #{rating}
             </if>
         </where>
         ORDER BY r.created_at DESC
