@@ -58,6 +58,17 @@
         AND deleted_flag = 0
         GROUP BY spu_id
     </select>
+    <select id="selectLowStockSkus" resultType="com.zeewoncode.vo.LowStockSkus">
+        SELECT sk.id, sk.spu_id, sp.title, sk.specs, sk.stock
+        FROM sku sk LEFT JOIN spu sp ON sk.spu_id = sp.id
+        WHERE sk.spu_id IN
+            <foreach collection="spuIds" item="spuId" separator="," open="(" close=")">
+                #{spuId}
+            </foreach>
+        AND sk.deleted_flag = 0
+        AND sk.status = 1
+        AND sk.stock &lt;= 10
+    </select>
 
     <update id="update" parameterType="com.zeewoncode.entity.Sku">
         UPDATE sku

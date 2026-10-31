@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.entity.Sku;
 import com.zeewoncode.dto.OrderItemDTO;
 import com.zeewoncode.entity.SpuCard;
+import com.zeewoncode.vo.LowStockSkus;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -105,4 +106,11 @@ public interface SkuMapper {
      */
     @Delete("delete from sku where id = #{id}")
     int deleteSku(Long id);
+
+    /**
+     * 根据spu_id列表查询库存较低的sku
+     * @param spuIds
+     * @return
+     */
+    List<LowStockSkus> selectLowStockSkus(List<Long> spuIds);
 }

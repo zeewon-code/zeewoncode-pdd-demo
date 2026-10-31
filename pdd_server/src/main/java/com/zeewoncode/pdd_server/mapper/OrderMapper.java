@@ -153,6 +153,11 @@ public interface OrderMapper {
      */
     int updateOrderStatusAndCancelTypeByInstanceIds(List<Long> instanceIds, int status, int cancelType);
 
-
-
+    /**
+     * 根据商户id查询订单列表
+     * @param merchantId
+     * @return
+     */
+    @Select("SELECT * FROM orders WHERE merchant_id = #{merchantId}")
+    List<Order> selectOrderByMerchantId(Long merchantId);
 }

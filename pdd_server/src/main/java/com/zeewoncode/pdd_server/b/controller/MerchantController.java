@@ -4,6 +4,7 @@ import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.dto.ShopUpdateDTO;
 import com.zeewoncode.pdd_server.b.service.MerchantService;
 import com.zeewoncode.result.Result;
+import com.zeewoncode.vo.BDashboard;
 import com.zeewoncode.vo.MerchantVO;
 import com.zeewoncode.vo.ShopApplyVO;
 import jakarta.annotation.Resource;
@@ -69,5 +70,16 @@ public class MerchantController {
         log.info("修改店铺状态:{}", status);
         merchantService.updateShopStatus(status);
         return Result.success();
+    }
+
+    /**
+     * 商家经营看板
+     * @return
+     */
+    @GetMapping("/dashboard")
+    public Result<BDashboard> getBDashboard() {
+        log.info("获取商家经营看板数据");
+        BDashboard bDashboard = merchantService.getBDashboard();
+        return Result.success(bDashboard);
     }
 }

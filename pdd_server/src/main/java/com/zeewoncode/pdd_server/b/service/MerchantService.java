@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.b.service;
 
 import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.dto.ShopUpdateDTO;
+import com.zeewoncode.vo.BDashboard;
 import com.zeewoncode.vo.MerchantVO;
 import com.zeewoncode.vo.ShopApplyVO;
 
@@ -31,4 +32,11 @@ public interface MerchantService {
      * @param status
      */
     void updateShopStatus(Integer status);
+
+    /**
+     * 商家经营看板
+     * @return
+     */
+    BDashboard getBDashboard();
+
 }
