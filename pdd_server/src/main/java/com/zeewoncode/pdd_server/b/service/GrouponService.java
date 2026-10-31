@@ -21,4 +21,11 @@ public interface GrouponService {
      * @return
      */
     Result createGroupon(GrouponCreateDTO grouponCreateDTO);
+
+    /**
+     * 店家获取拼团活动详情
+     * @param defineId
+     * @return
+     */
+    Result<GrouponAdminItemVO> getGrouponDetail(Long defineId);
 }

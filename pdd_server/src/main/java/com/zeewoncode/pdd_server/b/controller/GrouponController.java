@@ -48,4 +48,15 @@ public class GrouponController {
         log.info("店家创建拼团活动：{}", grouponCreateDTO);
         return grouponService.createGroupon(grouponCreateDTO);
     }
+
+    /**
+     * 店铺获取拼团活动详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public Result<GrouponAdminItemVO> getGrouponDetail(@PathVariable Long id) {
+        log.info("店铺获取拼团活动详情：{}", id);
+        return grouponService.getGrouponDetail(id);
+    }
 }

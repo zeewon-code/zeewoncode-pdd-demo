@@ -156,7 +156,53 @@ public class GrouponServiceImpl implements GrouponService {
         return Result.success("创建拼团活动成功");
     }
 
-    ;
+    /**
+     * 获取拼团详情
+     * @param defineId
+     * @return
+     */
+    @Override
+    public Result<GrouponAdminItemVO> getGrouponDetail(Long defineId) {
+        // 1.判断当前用户是否是店铺的管理员
+        Long userId = BaseContext.getCurrentId().longValue();
+        Integer result = isMerchantAdmin(userId.intValue());
+        if (result != 4) {
+            throw new RuntimeException("当前用户没有权限进行相关操作");
+        }
+        // 2.校验该sku是否属于当前店铺
+        GrouponDefine define = grouponMapper.selectGrouponDefineById(defineId);
+        Integer spuId = define.getSpuId();
+        Spu spuById = spuMapper.getSpuById(define.getSpuId().longValue());
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        if (!spuById.getMerchantId().equals(merchant.getId())) {
+            return Result.error("当前商品规格不属于当前店铺，无法查询该拼团活动详情");
+        }
+        // 3.查询拼团详情
+        GrouponDefine grouponDefine = grouponMapper.selectGrouponDefineById(defineId);
+        if (grouponDefine == null) {
+            return Result.error("当前拼团活动不存在");
+        }
+        // title, runningCount, successCount, failCount
+        List<GrouponInstancesCount> grouponInstancesCounts = grouponMapper.selectDefineCountByDefineIds(List.of(defineId));
+        GrouponInstancesCount grouponInstancesCount = grouponInstancesCounts.get(0);
+        GrouponAdminItemVO grouponAdminItemVO = GrouponAdminItemVO.builder()
+                .id(grouponDefine.getId().longValue())
+                .spuId(grouponDefine.getSpuId().longValue())
+                .skuId(grouponDefine.getSkuId().longValue())
+                .groupPrice(grouponDefine.getGroupPrice().doubleValue())
+                .targetCount(grouponDefine.getTargetCount())
+                .status(grouponDefine.getStatus())
+                .startTime(grouponDefine.getStartTime())
+                .endTime(grouponDefine.getEndTime())
+                .title(spuById.getTitle())
+                .runningCount(grouponInstancesCount.getRunningCount())
+                .successCount(grouponInstancesCount.getSuccessCount())
+                .failCount(grouponInstancesCount.getFailCount())
+                .build();
+        return Result.success(grouponAdminItemVO);
+    }
+
+
 
 
 
