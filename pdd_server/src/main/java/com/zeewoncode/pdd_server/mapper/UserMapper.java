@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.User;
+import com.zeewoncode.vo.UserVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -46,4 +47,17 @@ public interface UserMapper {
      * @return
      */
     List<User> selectUserByIds(List<Long> leaderUserIds);
+
+    /**
+     * 根据用户类型、状态、手机号关键字、昵称关键字查询用户信息
+     * @param userType
+     * @param status
+     * @param phoneKeyword
+     * @param nicknameKeyword
+     * @return
+     */
+    List<UserVO> selectUsers(Integer userType, Integer status, String phoneKeyword, String nicknameKeyword);
+
+
+
 }

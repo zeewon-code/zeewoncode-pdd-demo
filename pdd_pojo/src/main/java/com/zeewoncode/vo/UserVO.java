@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * 用户视图类，用于用户信息的传输
  */
@@ -13,9 +15,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserVO {
+public class UserVO implements Serializable {
 
-    private Integer id; // 用户id
+    private Long id; // 用户id
     private String nickname; // 昵称
     private String phone; // 手机号
     private String avatar; // 头像url

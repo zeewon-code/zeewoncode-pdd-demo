@@ -29,4 +29,22 @@
         </foreach>
     </select>
 
+    <select id="selectUsers" resultType="com.zeewoncode.vo.UserVO">
+        SELECT * FROM user
+        <where>
+            <if test="status != null">
+                status = #{status}
+            </if>
+            <if test="userType != null">
+                AND user_type = #{userType}
+            </if>
+            <if test="phoneKeyword != null">
+                AND phone LIKE CONCAT('%', #{phoneKeyword}, '%')
+            </if>
+            <if test="nicknameKeyword != null">
+                AND nickname LIKE CONCAT('%', #{nicknameKeyword}, '%')
+            </if>
+        </where>
+    </select>
+
 </mapper>

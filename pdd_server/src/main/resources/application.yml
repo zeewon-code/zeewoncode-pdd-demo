@@ -26,3 +26,10 @@ logging:
     root: info
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+
+# application.yml
+pagehelper:
+  helper-dialect: mysql      # 必须指定数据库方言
+  reasonable: true           # 可选
+  support-methods-arguments: false
+  log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 打印完整SQL（含分页）
