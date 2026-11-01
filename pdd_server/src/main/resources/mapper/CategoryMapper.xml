@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zeewoncode.pdd_server.mapper.CategoryMapper">
+
+
+    <select id="selectCategoryTreeRows" resultType="com.zeewoncode.pdd_server.mapper.po.CategoryTreeRows">
+        SELECT c.id,
+               c.parent_id,
+               c.name,
+               c.level,
+               c.sort,
+               COUNT(s.id) AS spuCount
+        FROM category c
+        LEFT JOIN spu s
+            ON s.category_id = c.id
+            AND s.deleted_flag = 0
+        GROUP BY c.id
+        ORDER BY c.sort ASC, c.id ASC
+    </select>
+</mapper>
