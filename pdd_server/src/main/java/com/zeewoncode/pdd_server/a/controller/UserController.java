@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.a.controller;
 
 
+import com.zeewoncode.dto.StatusDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.UserVO;
@@ -53,5 +54,20 @@ public class UserController {
     public Result<UserVO> getUserInfo(@PathVariable Long id) {
         log.info("查询用户详情：userId:{}", id);
         return userService.getUserInfo(id);
+    }
+
+    /**
+     * 冻结 / 解冻用户
+     * @param id
+     * @param dto
+     * @return
+     */
+    @PutMapping("/{id}")
+    public Result updateUserStatus(
+            @PathVariable Long id,
+            @RequestBody StatusDTO dto
+    ) {
+        log.info("冻结 / 解冻用户：userId:{}, status:{}", id, dto.getStatus());
+        return userService.updateUserStatus(id, dto.getStatus());
     }
 }

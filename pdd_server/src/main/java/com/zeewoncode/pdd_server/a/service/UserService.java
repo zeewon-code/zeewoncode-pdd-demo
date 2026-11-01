@@ -25,4 +25,12 @@ public interface UserService {
      * @return
      */
     Result<UserVO> getUserInfo(Long userId);
+
+    /**
+     *冻结 / 解冻用户
+     * @param userId
+     * @param status
+     * @return
+     */
+    Result updateUserStatus(Long userId, Integer status);
 }

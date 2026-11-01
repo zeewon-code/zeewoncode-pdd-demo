@@ -11,7 +11,6 @@ import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -71,6 +70,27 @@ public class UserServiceImpl implements UserService {
         }
         UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
         return Result.success(userVO);
+    }
+
+    /**
+     * 冻结 / 解冻用户
+     * @param userId
+     * @param status
+     * @return
+     */
+    @Override
+    public Result updateUserStatus(Long userId, Integer status) {
+        Long id = BaseContext.getCurrentId().longValue();
+        if (!(isAdmin(id))) {
+            return Result.error("无权限访问");
+        }
+        User user = userMapper.selectById(userId.intValue());
+        if (user == null) {
+            return Result.error("该用户信息不存在");
+        }
+        user.setStatus(status);
+        int i = userMapper.updateById(user);
+        return i > 0 ? Result.success() : Result.error("更新用户状态失败");
     }
 
     // 校验当前用户是否为管理员
