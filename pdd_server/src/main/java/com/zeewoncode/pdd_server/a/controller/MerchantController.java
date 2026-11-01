@@ -1,13 +1,11 @@
 package com.zeewoncode.pdd_server.a.controller;
 
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.MerchantVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * A端-店铺管理
@@ -38,5 +36,17 @@ public class MerchantController {
         log.info("店铺列表：status:{}, keyword:{}, page:{}, size:{}", status, keyword, page, size);
         PageResult<MerchantVO> result = merchantService.getMerchantsList(status, keyword, page, size);
         return result;
+    }
+
+    /**
+     * 店铺详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public Result<MerchantVO> merchantDetail(@PathVariable Long id) {
+        log.info("店铺详情：id:{}", id);
+        MerchantVO result = merchantService.getMerchantDetail(id);
+        return Result.success(result);
     }
 }

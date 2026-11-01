@@ -1,13 +1,16 @@
 package com.zeewoncode.pdd_server.a.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
+import com.zeewoncode.entity.Merchant;
 import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.MerchantService;
 import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.MerchantVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +46,25 @@ public class MerchantServiceImpl implements MerchantService {
             return PageResult.empty(pageInfo);
         }
         return PageResult.of(pageInfo, merchantVOList);
+    }
+
+    /**
+     * 获取店铺详情
+     * @param id
+     * @return
+     */
+    @Override
+    public MerchantVO getMerchantDetail(Long id) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        if (!isAdmin(userId)) {
+            throw new RuntimeException("无访问权限");
+        }
+        Merchant merchant = merchantMapper.selectMerchantById(id);
+        if (merchant == null || merchant.getDeletedFlag() != 0) {
+            throw new RuntimeException("店铺不存在");
+        }
+        MerchantVO merchantVO = BeanUtil.copyProperties(merchant, MerchantVO.class);
+        return merchantVO;
     }
 
     // 校验当前用户是否为管理员

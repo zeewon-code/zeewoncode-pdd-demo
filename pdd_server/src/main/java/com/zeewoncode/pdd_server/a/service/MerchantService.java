@@ -14,4 +14,11 @@ public interface MerchantService {
      * @return
      */
     PageResult<MerchantVO> getMerchantsList(Integer status, String keyword, Integer page, Integer size);
+
+    /**
+     * 获取店铺详情
+     * @param id
+     * @return
+     */
+    MerchantVO getMerchantDetail(Long id);
 }
