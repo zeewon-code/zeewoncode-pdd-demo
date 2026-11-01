@@ -21,4 +21,16 @@
             AND id = #{id}
         </if>
     </update>
+    <select id="selectList" resultType="com.zeewoncode.vo.MerchantVO">
+        SELECT * FROM merchant
+        <where>
+            deleted_flag = 0
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="keyword != null">
+                AND shop_name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+    </select>
 </mapper>

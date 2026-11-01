@@ -3,10 +3,13 @@ package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.entity.Merchant;
+import com.zeewoncode.vo.MerchantVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 @Mapper
 public interface MerchantMapper {
@@ -52,4 +55,12 @@ public interface MerchantMapper {
      * @return
      */
     int update(Merchant merchant);
+
+    /**
+     * 根据店铺状态和店铺名关键字查询商户列表
+     * @param status
+     * @param keyword
+     * @return
+     */
+    List<MerchantVO> selectList(Integer status, String keyword);
 }
