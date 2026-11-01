@@ -18,4 +18,11 @@ public interface UserService {
      */
     PageResult<UserVO> getUsersList(Integer userType, Integer status, String phoneKeyword,
                                     String nicknameKeyword, Integer page, Integer size);
+
+    /**
+     * 获取用户信息
+     * @param userId
+     * @return
+     */
+    Result<UserVO> getUserInfo(Long userId);
 }

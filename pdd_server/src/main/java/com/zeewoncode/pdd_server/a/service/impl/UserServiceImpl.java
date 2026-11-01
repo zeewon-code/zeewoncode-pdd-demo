@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.a.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
@@ -7,8 +8,10 @@ import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.UserService;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,6 +52,25 @@ public class UserServiceImpl implements UserService {
             return PageResult.empty(userVOPageInfo);
         }
         return PageResult.of(userVOPageInfo, userVOS);
+    }
+
+    /**
+     * 获取用户信息
+     * @param userId
+     * @return
+     */
+    @Override
+    public Result<UserVO> getUserInfo(Long userId) {
+        Long id = BaseContext.getCurrentId().longValue();
+        if (!(isAdmin(id))) {
+            return Result.error("无权限访问");
+        }
+        User user = userMapper.selectById(userId.intValue());
+        if (user == null) {
+            return Result.error("该用户信息不存在");
+        }
+        UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
+        return Result.success(userVO);
     }
 
     // 校验当前用户是否为管理员

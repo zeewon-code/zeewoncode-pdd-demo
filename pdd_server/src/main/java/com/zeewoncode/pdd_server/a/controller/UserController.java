@@ -6,10 +6,7 @@ import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * A端-账号管理
@@ -45,5 +42,16 @@ public class UserController {
         log.info("查询用户列表：userType:{}, status:{}, phoneKeyword:{}, nicknameKeyword:{}, page:{}, size:{}",
                 userType, status, phoneKeyword, nicknameKeyword, page, size);
         return userService.getUsersList(userType, status, phoneKeyword, nicknameKeyword, page, size);
+    }
+
+    /**
+     * 用户详情
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public Result<UserVO> getUserInfo(@PathVariable Long id) {
+        log.info("查询用户详情：userId:{}", id);
+        return userService.getUserInfo(id);
     }
 }
