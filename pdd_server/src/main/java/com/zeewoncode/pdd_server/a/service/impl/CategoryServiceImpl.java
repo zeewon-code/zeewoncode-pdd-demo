@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.a.service.impl;
 
 import com.zeewoncode.context.BaseContext;
+import com.zeewoncode.dto.CategoryCreateDTO;
 import com.zeewoncode.entity.Category;
 import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.CategoryService;
@@ -12,6 +13,7 @@ import com.zeewoncode.vo.CategoryAdminNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,6 +59,32 @@ public class CategoryServiceImpl implements CategoryService {
         roots.forEach(root -> root.setSpuCount(root.getSpuCount()
                 + root.getChildren().stream().mapToInt(CategoryAdminNode::getSpuCount).sum()));
         return roots;
+    }
+
+    /**
+     * 新增分类
+     * @param dto
+     */
+    @Override
+    public void addCategory(CategoryCreateDTO dto) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        if (!isAdmin(userId)) {
+            throw new RuntimeException("无权限访问");
+        }
+        Category category = new Category();
+        category.setName(dto.getName());
+        category.setParentId(dto.getParentId());
+        if (dto.getSort() == null) {
+            // 前端没传sort，默认是当前分类的sort的最大值+1
+            Integer maxSort = categoryMapper.selectMaxSortGroupByParentId(dto.getParentId());
+            if (maxSort == null) category.setSort(1);
+            else category.setSort(maxSort + 1);
+        }
+        category.setLevel(dto.getParentId() == 0 ? 1 : 2);
+        category.setCreatedAt(LocalDateTime.now());
+        if (categoryMapper.insert(category) == 0) {
+            throw new RuntimeException("新增分类失败");
+        }
     }
 
     // 校验当前用户是否为管理员

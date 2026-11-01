@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.Category;
 import com.zeewoncode.pdd_server.mapper.po.CategoryTreeRows;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -23,4 +24,20 @@ public interface CategoryMapper {
 
     List<CategoryTreeRows> selectCategoryTreeRows();
 
+    /**
+     * 根据parentId查找同一分类下排序基准的最大值
+     * @param parentId
+     * @return
+     */
+    @Select("select MAX(sort) from category where parent_id = #{parentId} group by parent_id")
+    Integer selectMaxSortGroupByParentId(Long parentId);
+
+    /**
+     * 新增分类
+     * @param category
+     * @return
+     */
+    @Insert("insert into category (parent_id, name, level, sort, created_at) " +
+            "values (#{parentId}, #{name}, #{level}, #{sort}, #{createdAt})")
+    int insert(Category category);
 }
