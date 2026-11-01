@@ -21,4 +21,11 @@ public interface MerchantService {
      * @return
      */
     MerchantVO getMerchantDetail(Long id);
+
+    /**
+     * 关店 / 恢复营业
+     * @param merchantId
+     * @param status
+     */
+    void updateMerchantStatus(Long merchantId, Integer status);
 }

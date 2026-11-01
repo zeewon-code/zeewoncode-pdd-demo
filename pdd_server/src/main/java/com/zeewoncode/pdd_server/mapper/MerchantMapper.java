@@ -4,10 +4,7 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.entity.Merchant;
 import com.zeewoncode.vo.MerchantVO;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -63,4 +60,13 @@ public interface MerchantMapper {
      * @return
      */
     List<MerchantVO> selectList(Integer status, String keyword);
+
+    /**
+     * 根据商户ID和状态更新商户状态
+     * @param merchantId
+     * @param status
+     * @return
+     */
+    @Update("UPDATE merchant SET status = #{status} WHERE id = #{merchantId}")
+    int updateMerchantStatus(Long merchantId, Integer status);
 }

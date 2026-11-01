@@ -11,6 +11,15 @@
     <artifactId>pdd_pojo</artifactId>
     <dependencies>
         <dependency>
+            <groupId>com.zeewon-code</groupId>
+            <artifactId>pdd_common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>

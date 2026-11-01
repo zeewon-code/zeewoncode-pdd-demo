@@ -1,10 +1,13 @@
 package com.zeewoncode.pdd_server.a.controller;
 
+import com.zeewoncode.dto.StatusDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.MerchantVO;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -48,5 +51,21 @@ public class MerchantController {
         log.info("店铺详情：id:{}", id);
         MerchantVO result = merchantService.getMerchantDetail(id);
         return Result.success(result);
+    }
+
+    /**
+     * 关店 / 恢复营业
+     * @param merchantId
+     * @param dto
+     * @return
+     */
+    @PutMapping("/{id}")
+    public Result updateMerchantStatus(
+            @PathVariable("id") Long merchantId,
+            @RequestBody @Valid StatusDTO dto
+    ) {
+        log.info("更新店铺状态：merchantId:{}, status:{}", merchantId, dto.getStatus());
+        merchantService.updateMerchantStatus(merchantId, dto.getStatus());
+        return Result.success();
     }
 }

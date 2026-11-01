@@ -67,6 +67,26 @@ public class MerchantServiceImpl implements MerchantService {
         return merchantVO;
     }
 
+    /**
+     * 关店 / 恢复营业
+     * @param merchantId
+     * @param status
+     */
+    @Override
+    public void updateMerchantStatus(Long merchantId, Integer status) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        if (!isAdmin(userId)) {
+            throw new RuntimeException("无访问权限");
+        }
+        Merchant merchant = merchantMapper.selectMerchantById(merchantId);
+        if (merchant == null || merchant.getDeletedFlag() != 0) {
+            throw new RuntimeException("店铺不存在");
+        }
+        if (merchantMapper.updateMerchantStatus(merchantId, status) == 0) {
+            throw new RuntimeException("更新店铺状态失败");
+        }
+    }
+
     // 校验当前用户是否为管理员
     private boolean isAdmin(Long userId) {
         User user = userMapper.selectById(userId.intValue());
