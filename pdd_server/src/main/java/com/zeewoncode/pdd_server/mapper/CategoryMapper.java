@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.Category;
 import com.zeewoncode.pdd_server.mapper.po.CategoryTreeRows;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -47,4 +48,20 @@ public interface CategoryMapper {
      * @return
      */
     int update(Category category);
+
+    /**
+     * 查询该分类下是否存在子类
+     * @param id
+     * @return
+     */
+    @Select("select count(*) from category where parent_id = #{id} ")
+    int selectIsParentIdById(Long id);
+
+    /**
+     * 删除分类
+     * @param id
+     * @return
+     */
+    @Delete("delete from category where id = #{id}")
+    int delete(Long id);
 }

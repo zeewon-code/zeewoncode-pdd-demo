@@ -7,6 +7,7 @@ import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CategoryAdminNode;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,6 +60,18 @@ public class CategoryController {
     ) {
         log.info("修改分类：{}, {}", id, dto);
         categoryService.updateCategory(id, dto);
+        return Result.success();
+    }
+
+    /**
+     * 删除分类（有子类或挂商品则冲突）
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/{id}")
+    public Result deleteCategory(@PathVariable Long id) {
+        log.info("删除分类：{}", id);
+        categoryService.delete(id);
         return Result.success();
     }
 }

@@ -114,4 +114,12 @@ public interface SpuMapper {
     @Select("SELECT id FROM spu " +
             "WHERE merchant_id = #{merchantId} AND deleted_flag = 0")
     List<Long> selectIdsByMerchantId(Long merchantId);
+
+    /**
+     * 根据分类id查询商品行数
+     * @param id
+     * @return
+     */
+    @Select("select count(*) from spu where category_id = #{id} AND deleted_flag = 0")
+    int selectSpuCountByCategoryId(Long id);
 }

@@ -108,6 +108,29 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    /**
+     * 删除分类（有子类或挂商品则冲突）
+     * @param id
+     */
+    @Override
+    public void delete(Long id) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        if (!isAdmin(userId)) {
+            throw new RuntimeException("无权限访问");
+        }
+        // 查询是否有子类
+        if (categoryMapper.selectIsParentIdById(id) > 0) {
+            throw new RuntimeException("该分类下有子类，无法删除");
+        }
+        // 查询该分类是否有挂商品
+        if (spuMapper.selectSpuCountByCategoryId(id) > 0) {
+            throw new RuntimeException("该分类下有商品，无法删除");
+        }
+        if (categoryMapper.delete(id) == 0) {
+            throw new RuntimeException("删除分类失败");
+        }
+    }
+
     // 校验当前用户是否为管理员
     private boolean isAdmin(Long userId) {
         User user = userMapper.selectById(userId.intValue());
