@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.a.service.impl;
 
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.CategoryCreateDTO;
+import com.zeewoncode.dto.CategoryUpdateDTO;
 import com.zeewoncode.entity.Category;
 import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.CategoryService;
@@ -84,6 +85,26 @@ public class CategoryServiceImpl implements CategoryService {
         category.setCreatedAt(LocalDateTime.now());
         if (categoryMapper.insert(category) == 0) {
             throw new RuntimeException("新增分类失败");
+        }
+    }
+
+    /**
+     * 修改分类（改名/排序）
+     * @param id
+     * @param dto
+     */
+    @Override
+    public void updateCategory(Long id, CategoryUpdateDTO dto) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        if (!isAdmin(userId)) {
+            throw new RuntimeException("无权限访问");
+        }
+        Category category = new Category();
+        category.setId(id);
+        category.setName(dto.getName());
+        category.setSort(dto.getSort());
+        if (categoryMapper.update(category) == 0) {
+            throw new RuntimeException("修改分类失败");
         }
     }
 

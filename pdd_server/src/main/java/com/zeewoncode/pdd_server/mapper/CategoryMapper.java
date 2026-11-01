@@ -40,4 +40,11 @@ public interface CategoryMapper {
     @Insert("insert into category (parent_id, name, level, sort, created_at) " +
             "values (#{parentId}, #{name}, #{level}, #{sort}, #{createdAt})")
     int insert(Category category);
+
+    /**
+     * 修改分类（改名/排序）
+     * @param category
+     * @return
+     */
+    int update(Category category);
 }

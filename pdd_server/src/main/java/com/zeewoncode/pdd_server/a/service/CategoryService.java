@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.a.service;
 
 import com.zeewoncode.dto.CategoryCreateDTO;
+import com.zeewoncode.dto.CategoryUpdateDTO;
 import com.zeewoncode.vo.CategoryAdminNode;
 
 import java.util.List;
@@ -17,4 +18,11 @@ public interface CategoryService {
      * @param dto
      */
     void addCategory(CategoryCreateDTO dto);
+
+    /**
+     * 修改分类（改名/排序）
+     * @param id
+     * @param dto
+     */
+    void updateCategory(Long id, CategoryUpdateDTO dto);
 }

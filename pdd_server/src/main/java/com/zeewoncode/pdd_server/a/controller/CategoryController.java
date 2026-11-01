@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.a.controller;
 
 import com.zeewoncode.dto.CategoryCreateDTO;
+import com.zeewoncode.dto.CategoryUpdateDTO;
 import com.zeewoncode.pdd_server.a.service.CategoryService;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CategoryAdminNode;
@@ -42,6 +43,22 @@ public class CategoryController {
     public Result addCategory(@RequestBody @Valid CategoryCreateDTO dto) {
         log.info("新增分类：{}", dto);
         categoryService.addCategory(dto);
+        return Result.success();
+    }
+
+    /**
+     * 修改分类（改名/排序）
+     * @param id
+     * @param dto
+     * @return
+     */
+    @PutMapping("/{id}")
+    public Result updateCategory(
+            @PathVariable Long id,
+            @RequestBody CategoryUpdateDTO dto
+    ) {
+        log.info("修改分类：{}, {}", id, dto);
+        categoryService.updateCategory(id, dto);
         return Result.success();
     }
 }
