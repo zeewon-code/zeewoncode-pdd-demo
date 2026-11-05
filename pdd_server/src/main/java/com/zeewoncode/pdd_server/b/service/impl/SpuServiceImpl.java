@@ -154,7 +154,7 @@ public class SpuServiceImpl implements SpuService {
     @Override
     public SpuDetail getSpuDetail(Long id) {
         SpuDetail spuDetail = spuMapper.getSpuDetailById(id.intValue());
-        List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id.intValue())));
+        List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id)));
         String images = spus.get(0).getImages();
         if (images != null) {
             List<String> imagesList = Arrays.stream(images.split(","))

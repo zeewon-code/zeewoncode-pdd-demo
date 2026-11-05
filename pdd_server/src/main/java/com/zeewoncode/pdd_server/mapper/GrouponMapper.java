@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.entity.GrouponDefine;
 import com.zeewoncode.entity.GrouponInstance;
 import com.zeewoncode.entity.Order;
+import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.pdd_server.mapper.po.GrouponInstancesCount;
 import com.zeewoncode.pdd_server.mapper.po.InstanceRef;
 import org.apache.ibatis.annotations.*;
@@ -182,4 +183,11 @@ public interface GrouponMapper {
             "values (#{spuId}, #{skuId}, #{groupPrice}, #{targetCount}, " +
             "#{expireHours}, #{startTime}, #{endTime}, #{status}, #{createdAt})")
     int insertGrouponDefine(GrouponDefine define);
+
+    /**
+     * 根据spu_id列表查询拼团活动价格
+     * @param spuIds
+     * @return
+     */
+    List<SpuCard> selectPriceBySpuIds(List<Long> spuIds);
 }

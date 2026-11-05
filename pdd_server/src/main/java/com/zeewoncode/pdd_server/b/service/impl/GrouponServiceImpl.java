@@ -73,7 +73,7 @@ public class GrouponServiceImpl implements GrouponService {
         }
         // 查询title (spu)
         List<Integer> spuIdList = SafeCollectors.distinctValues(grouponDefines, GrouponDefine::getSpuId);
-        List<Spu> spus = spuMapper.selectSpuByIds(spuIdList);
+        List<Spu> spus = spuMapper.selectSpuByIds(spuIdList.stream().map(Long::valueOf).collect(Collectors.toList()));
         Map<Long, Spu> spuMap = spuIdList.isEmpty()
                 ? Collections.emptyMap()
                 : SafeCollectors.toMap(spus, Spu::getId);

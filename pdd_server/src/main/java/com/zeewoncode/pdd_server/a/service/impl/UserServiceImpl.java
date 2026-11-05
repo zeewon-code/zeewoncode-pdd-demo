@@ -42,10 +42,8 @@ public class UserServiceImpl implements UserService {
         if (!isAdmin(userId)) {
             return PageResult.empty(new PageInfo());
         }
-        log.info("【分页入参】page={}, size={}", page, size);
         PageHelper.startPage(page, size);
         List<UserVO> userVOS = userMapper.selectUsers(userType, status, phoneKeyword, nicknameKeyword);
-        log.info("【返回类型】{}", userVOS.getClass().getName());
         PageInfo<UserVO> userVOPageInfo = new PageInfo<>(userVOS);
         if (userVOS == null || userVOS.isEmpty()) {
             return PageResult.empty(userVOPageInfo);

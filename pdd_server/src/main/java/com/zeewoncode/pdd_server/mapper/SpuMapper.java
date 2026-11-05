@@ -46,7 +46,7 @@ public interface SpuMapper {
      * @param spuIds
      * @return
      */
-    List<Spu> selectSpuByIds(List<Integer> spuIds);
+    List<Spu> selectSpuByIds(List<Long> spuIds);
 
     /**
      * 根据spuId更新商品销售量
@@ -122,4 +122,13 @@ public interface SpuMapper {
      */
     @Select("select count(*) from spu where category_id = #{id} AND deleted_flag = 0")
     int selectSpuCountByCategoryId(Long id);
+
+    /**
+     * 根据merchantId、状态、分类id查询商品id
+     * @param merchantId
+     * @param status
+     * @param categoryId
+     * @return
+     */
+    List<Long> selectIds(Long merchantId, Integer status, Long categoryId);
 }

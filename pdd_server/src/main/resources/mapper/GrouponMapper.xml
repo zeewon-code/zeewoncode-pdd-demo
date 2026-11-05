@@ -127,4 +127,14 @@
         </foreach>
     </select>
 
+    <select id="selectPriceBySpuIds" resultType="com.zeewoncode.entity.SpuCard">
+        SELECT spu_id as id, MIN(group_price) AS group_price, 1 as hasGroupon
+        FROM groupon_define
+        WHERE status = 1 AND spu_id IN
+        <foreach collection="spuIds" item="spuId" separator="," open="(" close=")">
+            #{spuId}
+        </foreach>
+        GROUP BY spu_id
+    </select>
+
 </mapper>

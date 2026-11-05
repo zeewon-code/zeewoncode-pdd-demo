@@ -120,7 +120,7 @@ public class SpuServiceImpl implements SpuService {
         // b. 根据spuid查询拼团活动定义，封装成groupons集合
         List<GrouponDefine> groupons = grouponMapper.selectGrouponDefineListBySpuId(id);
         SpuDetail spuDetail = spuMapper.getSpuDetailById(id);
-        List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id)));
+        List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id.longValue())));
         Spu spu = spus.get(0);
         String images = spu.getImages();
         if (images != null) {

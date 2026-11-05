@@ -345,7 +345,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         List<Integer> spuIds = SafeCollectors.distinctValues(defineMap.values(), GrouponDefine::getSpuId);
         Map<Long, Spu> spuMap = spuIds.isEmpty()
                 ? Collections.emptyMap()
-                : SafeCollectors.toMap(spuMapper.selectSpuByIds(spuIds), Spu::getId);
+                : SafeCollectors.toMap(spuMapper.selectSpuByIds(spuIds.stream().map(Long::valueOf).collect(Collectors.toList())), Spu::getId);
         // user
         List<Long> leaderUserIds = SafeCollectors.distinctValues(instances, GrouponInstance::getLeaderUserId);
         Map<Integer, User> userMap = leaderUserIds.isEmpty()
