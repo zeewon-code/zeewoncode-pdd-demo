@@ -22,7 +22,7 @@ public class Coupon implements Serializable {
     private Double discountRate;
     private LocalDateTime validFrom;
     private LocalDateTime validTo;
-    private Long total;
+    private Integer total;
     private Integer issued;
     private LocalDateTime createdAt;
 }

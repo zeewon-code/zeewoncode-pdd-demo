@@ -124,4 +124,10 @@ public interface CouponMapper {
      */
     List<CouponVO> selectCoupons();
 
+    /**
+     * 插入优惠券
+     * @param coupon
+     * @return
+     */
+    int insert(Coupon coupon);
 }

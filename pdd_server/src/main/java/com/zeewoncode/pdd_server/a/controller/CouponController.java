@@ -1,14 +1,14 @@
 package com.zeewoncode.pdd_server.a.controller;
 
+import com.zeewoncode.dto.CouponCreateDTO;
 import com.zeewoncode.pdd_server.a.service.CouponService;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CouponVO;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * A端-优惠券管理
@@ -34,5 +34,16 @@ public class CouponController {
     ) {
         log.info("优惠券列表（含已领/剩余）: 页码{}, 每页数量{}", page, size);
         return couponService.listCoupons(page, size);
+    }
+
+    /**
+     * 创建优惠券
+     * @param couponCreateDTO
+     * @return
+     */
+    @PostMapping
+    public Result createCoupon(@RequestBody @Valid CouponCreateDTO couponCreateDTO) {
+        log.info("创建优惠券：{}", couponCreateDTO);
+        return couponService.createCoupon(couponCreateDTO);
     }
 }

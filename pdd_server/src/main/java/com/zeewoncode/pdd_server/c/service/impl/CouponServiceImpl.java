@@ -45,7 +45,6 @@ public class CouponServiceImpl implements CouponService {
         }
         PageResult<CouponVO> couponVOPageResult = PageResult.of(couponVOPageInfo, voList);
         return couponVOPageResult;
-
     }
 
     /**
