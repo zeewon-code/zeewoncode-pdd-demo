@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
+import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.entity.Spu;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.User;
@@ -14,6 +15,7 @@ import com.zeewoncode.pdd_server.mapper.SpuMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.pdd_server.mapper.po.GrouponInstancesCount;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import com.zeewoncode.utils.SafeCollectors;
 import io.swagger.models.auth.In;
 import org.springframework.beans.BeanUtils;
@@ -94,6 +96,30 @@ public class SpuServiceImpl implements SpuService {
             return spuCard;
         }).collect(Collectors.toList());
         return PageResult.of(info, spuCardsList);
+    }
+
+    /**
+     * 强制下架 / 恢复
+     * @param spuId
+     * @param dto
+     * @return
+     */
+    @Override
+    public Result PlatformForceControl(Long spuId, SpuStatusDTO dto) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        if (!isAdmin(userId)) {
+            throw new RuntimeException("没有此权限进行查看");
+        }
+        Spu spuById = spuMapper.getSpuById(spuId);
+        if ( spuById == null || spuById.getDeletedFlag() != 0) {
+            return Result.error("商品不存在");
+        }
+        Spu spu = Spu.builder().id(spuId).status(dto.getStatus()).build();
+        int i = spuMapper.update(spu);
+        if (i == 0) {
+            return Result.error("商品状态更新失败，请稍后重试");
+        }
+        return Result.success("商品状态更新成功");
     }
 
     // 校验当前用户是否为管理员

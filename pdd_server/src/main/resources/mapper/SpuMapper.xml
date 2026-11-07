@@ -137,6 +137,7 @@
             <if test="images != null">images = #{images},</if>
             <if test="details != null">details = #{details},</if>
             <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="status != null">status = #{status},</if>
         </set>
         WHERE id = #{id}
     </update>
