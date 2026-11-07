@@ -117,4 +117,11 @@ public interface CouponMapper {
      * @return
      */
     List<CouponOptionVO> selectCouponOptions(Double totalAmount, LocalDateTime now, Long userId);
+
+    /**
+     * 列出优惠券列表（含已领和未领）
+     * @return
+     */
+    List<CouponVO> selectCoupons();
+
 }

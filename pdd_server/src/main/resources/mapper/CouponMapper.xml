@@ -22,7 +22,7 @@
 
     <select id="selectCouponsByValidTime" resultType="com.zeewoncode.vo.CouponVO">
         select id, title, condition_amount, discount_amount,
-               discount_rate, valid_to, (total - issued) as remain
+               discount_rate, valid_to, (total - issued) as remain, issued, type
         from coupon
         where valid_to &gt; #{now}
     </select>
@@ -57,5 +57,10 @@
                 AND c.valid_from &lt;= #{now} AND c.valid_to &gt;= #{now}
             </if>
         </where>
+    </select>
+    <select id="selectCoupons" resultType="com.zeewoncode.vo.CouponVO">
+        select id, title, condition_amount, discount_amount,
+               discount_rate, valid_to, (total - issued) as remain, issued, type
+        from coupon
     </select>
 </mapper>

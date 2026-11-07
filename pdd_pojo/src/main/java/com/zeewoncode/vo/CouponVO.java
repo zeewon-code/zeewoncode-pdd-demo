@@ -22,4 +22,6 @@ public class CouponVO implements Serializable {
     private Double discountRate;
     private LocalDateTime validTo;
     private Integer remain;
+    private Integer issued;
+    private Integer type;
 }
