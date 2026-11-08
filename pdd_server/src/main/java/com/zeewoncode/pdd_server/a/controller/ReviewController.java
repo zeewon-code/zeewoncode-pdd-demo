@@ -2,12 +2,11 @@ package com.zeewoncode.pdd_server.a.controller;
 
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * A端-评价监管
@@ -40,5 +39,16 @@ public class ReviewController {
         log.info("全平台评价列表：{},{},{}", spuId, keyword, rating);
         PageResult<Review> result = reviewService.reviewList(spuId, keyword, rating, page, size);
         return result;
+    }
+
+    /**
+     * 删除违规评价
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/{id}")
+    public Result deleteReview(@PathVariable Long id) {
+        log.info("删除评价：{}", id);
+        return reviewService.deleteReview(id);
     }
 }

@@ -12,6 +12,7 @@ import com.zeewoncode.pdd_server.mapper.ReviewMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,25 @@ public class ReviewServiceImpl implements ReviewService {
             return PageResult.empty(pageInfo);
         }
         return PageResult.of(pageInfo, reviewList);
+    }
+
+
+    /**
+     * 删除违规评价
+     * @param id
+     * @return
+     */
+    @Override
+    public Result deleteReview(Long id) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        if (!isAdmin(userId)) {
+            throw new RuntimeException("没有此权限进行查看");
+        }
+        if (reviewMapper.deleteById(id) > 0) {
+            return Result.success("删除成功");
+        } else {
+            return Result.error("删除失败");
+        }
     }
 
     // 校验当前用户是否为管理员

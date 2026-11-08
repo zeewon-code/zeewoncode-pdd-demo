@@ -3,6 +3,7 @@ package com.zeewoncode.pdd_server.mapper;
 import com.zeewoncode.entity.ProductReview;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.dto.ReviewsListQueryDTO;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -58,4 +59,11 @@ public interface ReviewMapper {
      */
     List<Review> selectReviewListBySpuIdAndKeywordAndRating(Long spuId, String keyword, Integer rating);
 
+    /**
+     * 根据id删除评论
+     * @param id
+     * @return
+     */
+    @Delete("DELETE FROM product_review WHERE id = #{id}")
+    int deleteById(Long id);
 }
