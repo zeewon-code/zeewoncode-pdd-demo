@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.CouponCreateDTO;
 import com.zeewoncode.entity.Coupon;
+import com.zeewoncode.entity.CouponRecord;
 import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.CouponService;
 import com.zeewoncode.pdd_server.mapper.CouponMapper;
@@ -76,6 +77,28 @@ public class CouponServiceImpl implements CouponService {
         } else {
             return Result.error("创建优惠券失败");
         }
+    }
+
+    /**
+     * 获取优惠券领取/使用记录
+     * @param couponId
+     * @param page
+     * @param size
+     * @return
+     */
+    @Override
+    public PageResult<CouponRecord> getCouponRecord(Long couponId, Integer page, Integer size) {
+        Long userId = BaseContext.getCurrentId().longValue();
+        if (!isAdmin(userId)) {
+            throw new RuntimeException("没有此权限进行查看");
+        }
+        PageHelper.startPage(page, size);
+        List<CouponRecord> records = couponMapper.selectCouponRecord(couponId);
+        PageInfo<CouponRecord> info = new PageInfo<>(records);
+        if (records.isEmpty()) {
+            return PageResult.empty(info);
+        }
+        return PageResult.of(info, records);
     }
 
     // 校验当前用户是否为管理员

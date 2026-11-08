@@ -69,4 +69,11 @@
                discount_rate, valid_to, (total - issued) as remain, issued, type
         from coupon
     </select>
+    <select id="selectCouponRecord" resultType="com.zeewoncode.entity.CouponRecord">
+        select uc.id as userCouponId, uc.user_id, uc.status,
+               uc.received_at, uc.used_at, u.nickname
+        from user_coupon uc left join user u
+        on uc.user_id = u.id
+        where uc.coupon_id = #{couponId}
+    </select>
 </mapper>

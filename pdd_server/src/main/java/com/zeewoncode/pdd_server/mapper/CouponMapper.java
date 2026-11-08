@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.Coupon;
+import com.zeewoncode.entity.CouponRecord;
 import com.zeewoncode.entity.UserCoupon;
 import com.zeewoncode.vo.CouponOptionVO;
 import com.zeewoncode.vo.CouponVO;
@@ -130,4 +131,11 @@ public interface CouponMapper {
      * @return
      */
     int insert(Coupon coupon);
+
+    /**
+     * 根据优惠券id查询优惠券领取记录
+     * @param couponId
+     * @return
+     */
+    List<CouponRecord> selectCouponRecord(Long couponId);
 }

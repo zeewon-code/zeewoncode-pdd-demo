@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.a.controller;
 
 import com.zeewoncode.dto.CouponCreateDTO;
+import com.zeewoncode.entity.CouponRecord;
 import com.zeewoncode.pdd_server.a.service.CouponService;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
@@ -45,5 +46,22 @@ public class CouponController {
     public Result createCoupon(@RequestBody @Valid CouponCreateDTO couponCreateDTO) {
         log.info("创建优惠券：{}", couponCreateDTO);
         return couponService.createCoupon(couponCreateDTO);
+    }
+
+    /**
+     * 获取优惠券领取/使用记录
+     * @param id
+     * @param page
+     * @param size
+     * @return
+     */
+    @GetMapping("/{id}/records")
+    public PageResult<CouponRecord> getCouponRecord(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        log.info("获取优惠券记录: {}", id);
+        return couponService.getCouponRecord(id, page, size);
     }
 }
