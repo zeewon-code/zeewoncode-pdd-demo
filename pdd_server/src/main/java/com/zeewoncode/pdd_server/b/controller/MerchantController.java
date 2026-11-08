@@ -2,12 +2,10 @@ package com.zeewoncode.pdd_server.b.controller;
 
 import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.dto.ShopUpdateDTO;
-import com.zeewoncode.pdd_server.b.service.MerchantService;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.BDashboard;
 import com.zeewoncode.vo.MerchantVO;
 import com.zeewoncode.vo.ShopApplyVO;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

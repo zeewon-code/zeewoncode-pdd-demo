@@ -58,6 +58,12 @@ public interface UserMapper {
      */
     List<UserVO> selectUsers(Integer userType, Integer status, String phoneKeyword, String nicknameKeyword);
 
-
-
+    /**
+     * 根据用户类型查询用户数量
+     * @param userType
+     * @return
+     */
+    @Select("select count(*) from user " +
+            "where user_type = #{userType} and deleted_flag = 0")
+    Long selectCountByUserType(Integer userType);
 }

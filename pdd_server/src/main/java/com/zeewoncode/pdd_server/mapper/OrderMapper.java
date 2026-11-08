@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.*;
 import com.zeewoncode.vo.OrderItemVO;
+import com.zeewoncode.vo.OrderStatusDist;
 import org.apache.ibatis.annotations.*;
 
 import java.time.LocalDateTime;
@@ -161,4 +162,34 @@ public interface OrderMapper {
      */
     @Select("SELECT * FROM orders WHERE merchant_id = #{merchantId}")
     List<Order> selectOrderByMerchantId(Long merchantId);
+
+    /**
+     * 统计订单数量
+     * @return
+     */
+    Long selectOrderCount(LocalDateTime now, LocalDateTime nowPlusOneDay);
+
+    /**
+     * 统计今日已支付订单数量
+     * @param now
+     * @param nowPlusOneDay
+     * @return
+     */
+    @Select("SELECT count(*) from orders " +
+            "where created_at >= #{now} AND created_at < #{nowPlusOneDay} AND status IN (1,2,3)")
+    Long selectPaidCount(LocalDateTime now, LocalDateTime nowPlusOneDay);
+
+    /**
+     * 累计已支付GMV
+     * @param now
+     * @param nowPlusOneDay
+     * @return
+     */
+    Double selectGmv(LocalDateTime now, LocalDateTime nowPlusOneDay);
+
+    /**
+     * 各订单状态分布，无订单时count=0
+     * @return
+     */
+    List<OrderStatusDist> selectOrderStatusDist();
 }

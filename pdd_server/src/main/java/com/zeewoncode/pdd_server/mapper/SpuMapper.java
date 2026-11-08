@@ -131,4 +131,11 @@ public interface SpuMapper {
      * @return
      */
     List<Long> selectIds(Long merchantId, Integer status, Long categoryId);
+
+    /**
+     * 商品总数
+     * @return
+     */
+    @Select("select count(*) from spu where deleted_flag = 0")
+    Long selectCount();
 }

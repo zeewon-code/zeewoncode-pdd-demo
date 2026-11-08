@@ -69,4 +69,11 @@ public interface MerchantMapper {
      */
     @Update("UPDATE merchant SET status = #{status} WHERE id = #{merchantId}")
     int updateMerchantStatus(Long merchantId, Integer status);
+
+    /**
+     * 查询商户总数
+     * @return
+     */
+    @Select("SELECT COUNT(*) FROM merchant WHERE deleted_flag = 0")
+    Long selectCount();
 }

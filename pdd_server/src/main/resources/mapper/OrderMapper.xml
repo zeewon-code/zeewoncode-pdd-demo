@@ -195,6 +195,35 @@
             #{grouponInstanceId}
         </foreach>
     </select>
+    <select id="selectGmv" resultType="java.lang.Double">
+        select sum(payable_amount)
+        from orders
+        where status in (1,2,3)
+        <if test="now != null and nowPlusOneDay != null">
+            AND created_at &gt;= #{now} AND created_at &lt; #{nowPlusOneDay}
+        </if>
+    </select>
+    <select id="selectOrderCount" resultType="java.lang.Long">
+        select count(*) from orders
+        <where>
+            <if test="now != null and nowPlusOneDay != null" >
+                created_at &gt;= #{now} AND created_at &lt; #{nowPlusOneDay}
+            </if>
+        </where>
+    </select>
+    <select id="selectOrderStatusDist" resultType="com.zeewoncode.vo.OrderStatusDist">
+        select status, count(*) as count,
+           CASE status
+                WHEN 0 THEN '待付款'
+                WHEN 1 THEN '待发货'
+                WHEN 2 THEN '待收货'
+                WHEN 3 THEN '已完成'
+                WHEN 4 THEN '已取消'
+                ELSE '已关闭'
+           END AS statusName
+        from orders
+        group by status
+    </select>
 
     <update id="updateOrderStatusAndCancelTypeByInstanceIds">
         UPDATE orders
