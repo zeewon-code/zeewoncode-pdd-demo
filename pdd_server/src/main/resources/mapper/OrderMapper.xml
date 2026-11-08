@@ -6,7 +6,7 @@
         <id property="id" column="id"/>
         <result property="title" column="title"/>
         <result property="specs" column="specs"/>
-        <result property="image" column="image"/>    <!-- 表字段是 image，VO属性是 images -->
+        <result property="image" column="image"/>
         <result property="price" column="price"/>
         <result property="quantity" column="quantity"/>
         <result property="amount" column="amount"/>
@@ -23,7 +23,7 @@
 <!--        collection 嵌套 ResultMap: 一条订单 -> 多条明细-->
         <collection property="items"
                     column="id"
-                    select="com.zeewoncode.pdd_server.mapper.OrderMapper.selectItemsByOrderId"/>
+                    select="com.zeewoncode.pdd_server.mapper.OrderMapper.selectItemsVOByOrderId"/>
     </resultMap>
 
     <!-- ==================== 主查询：已完成但未评价的订单 ==================== -->
@@ -87,6 +87,12 @@
             </if>
             <if test="merchantId != null">
                 AND merchant_id = #{merchantId}
+            </if>
+            <if test="startTime != null">
+                AND created_at &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND created_at &lt;= #{endTime}
             </if>
         </where>
         ORDER BY created_at DESC
@@ -201,17 +207,6 @@
             #{grouponInstanceId}
         </foreach>
     </update>
-    <update id="updateOrderStatusAndCancelTypeByOrderIds">
-        UPDATE orders
-        <set>
-            <if test="status != null">status = #{status},</if>
-            <if test="cancelType != null">cancel_type = #{cancelType},</if>
-        </set>
-        WHERE id IN
-        <foreach item="orderId" collection="orderIds" open="(" separator="," close=")">
-            #{orderId}
-        </foreach>
-        AND status = 0;
-    </update>
+
 
 </mapper>

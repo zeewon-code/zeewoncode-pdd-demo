@@ -4,6 +4,7 @@ import com.zeewoncode.entity.*;
 import com.zeewoncode.vo.OrderItemVO;
 import org.apache.ibatis.annotations.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -87,7 +88,7 @@ public interface OrderMapper {
      * @param merchantId
      * @return
      */
-    List<OrderCard> selectOrderList(Long userId, Integer status, Long merchantId);
+    List<OrderCard> selectOrderList(Long userId, Integer status, Long merchantId, LocalDateTime startTime, LocalDateTime endTime);
 
     /**
      * 根据用户id和订单id查询订单详情

@@ -46,15 +46,15 @@ public class OrderServiceImpl implements OrderService {
         }
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
         // 1.启动分页
-        PageHelper.startPage(page, size, true);
+        PageHelper.startPage(page, size);
         // 2.查询订单列表
-        List<OrderCard> orderList = orderMapper.selectOrderList(null, status, merchant.getId());
+        List<OrderCard> orderList = orderMapper.selectOrderList(null, status, merchant.getId(), null, null);
         // 3.包装分页结果
         PageInfo<OrderCard> pageInfo = new PageInfo<>(orderList);
         if (orderList == null) {
             return PageResult.empty(pageInfo);
         }
-        return PageResult.of(pageInfo, pageInfo.getList());
+        return PageResult.of(pageInfo, orderList);
     }
 
     /**

@@ -364,7 +364,7 @@ public class OrderServiceImpl implements OrderService {
         // 1.启动分页
         PageHelper.startPage(page, size, true);
         // 2.查询订单列表
-        List<OrderCard> orderList = orderMapper.selectOrderList(userId, status, null);
+        List<OrderCard> orderList = orderMapper.selectOrderList(userId, status, null, null, null);
         // 3.包装分页结果
         PageInfo<OrderCard> pageInfo = new PageInfo<>(orderList);
         PageResult<OrderCard> result = new PageResult<>();
