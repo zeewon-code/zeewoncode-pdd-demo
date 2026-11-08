@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.b.service.impl;
 
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.GrouponCreateDTO;
@@ -15,13 +16,11 @@ import com.zeewoncode.vo.GrouponAdminItemVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,6 +65,7 @@ public class GrouponServiceImpl implements GrouponService {
         // 3.查询店铺旗下的商品id
         List<Long> spuIds = spuMapper.selectIdByMerchantId(merchantId);
         // 4.查询商品拼团信息
+        PageHelper.startPage(page, size);
         List<GrouponDefine> grouponDefines = grouponMapper.selectGrouponDefinesBySpuIdAndStatus(spuIds, status);
         PageInfo<GrouponDefine> pageInfo = new PageInfo<>(grouponDefines);
         if (grouponDefines == null) {
@@ -81,9 +81,10 @@ public class GrouponServiceImpl implements GrouponService {
         List<Integer> defineIds = SafeCollectors.distinctValues(grouponDefines, GrouponDefine::getId);
         List<Long> defineIdsList = defineIds.stream().map(Integer::longValue).toList();
         List<GrouponInstancesCount> grouponInstancesCounts = grouponMapper.selectDefineCountByDefineIds(defineIdsList);
-        Map<Long, GrouponInstancesCount> countMap = defineIdsList.isEmpty()
-                ? Collections.emptyMap()
-                : SafeCollectors.toMap(grouponInstancesCounts, GrouponInstancesCount::getDefineId);
+        Map<Long, GrouponInstancesCount> countMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(grouponInstancesCounts)) {
+            countMap.putAll(SafeCollectors.toMap(grouponInstancesCounts, GrouponInstancesCount::getDefineId));
+        }
         for (Long defineId : defineIdsList) {
             countMap.putIfAbsent(defineId, new GrouponInstancesCount(defineId, 0, 0, 0));
         }
