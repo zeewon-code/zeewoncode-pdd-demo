@@ -54,4 +54,21 @@
             </if>
         </where>
     </select>
+    <select id="selectReviewListBySpuIdAndKeywordAndRating" resultMap="reviewResultMap">
+        select r.id AS id, u.nickname AS nickname, u.avatar AS avatar, r.rating AS rating, r.content AS content,
+               r.images AS images, r.created_at AS createdAt
+        from product_review r left join user u on r.user_id = u.id
+        <where>
+            <if test="spuId != null">
+                AND r.spu_id = #{spuId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND r.content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="rating != null">
+                AND r.rating = #{rating}
+            </if>
+        </where>
+        ORDER BY r.created_at DESC
+    </select>
 </mapper>

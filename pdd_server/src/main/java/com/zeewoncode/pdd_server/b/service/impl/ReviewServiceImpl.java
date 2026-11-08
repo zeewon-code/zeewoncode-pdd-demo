@@ -55,7 +55,7 @@ public class ReviewServiceImpl implements ReviewService {
             //前端传了spuId，校验该spu是否是属于当前店铺的
             Spu spuById = spuMapper.getSpuById(spuId);
             Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-            if (spuById == null || !spuById.getMerchantId().equals(merchant.getId())) {
+            if (spuById == null || !spuById.getMerchantId().equals(merchant.getId()) || spuById.getDeletedFlag() != 0) {
                 throw new RuntimeException("当前店铺下不存在该商品");
             }
             spuIds = List.of(spuId);
