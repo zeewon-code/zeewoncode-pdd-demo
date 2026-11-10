@@ -2,10 +2,8 @@ package com.zeewoncode.pdd_server.a.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.entity.GrouponDefine;
 import com.zeewoncode.entity.Spu;
-import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.GrouponService;
 import com.zeewoncode.pdd_server.mapper.GrouponMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
@@ -25,8 +23,6 @@ import java.util.stream.Collectors;
 public class GrouponServiceImpl implements GrouponService {
 
     @Autowired
-    private UserMapper userMapper;
-    @Autowired
     private SpuMapper spuMapper;
     @Autowired
     private GrouponMapper grouponMapper;
@@ -39,10 +35,6 @@ public class GrouponServiceImpl implements GrouponService {
      */
     @Override
     public PageResult<GrouponAdminItemVO> listGroupon(Integer page, Integer size) {
-        Long userId = BaseContext.getCurrentId().longValue();
-        if (!isAdmin(userId)) {
-            throw new RuntimeException("没有此权限进行查看");
-        }
         // 3.查询商品id
         List<Long> spuIds = spuMapper.selectIds(null, 1, null);
         // 4.查询商品拼团信息
@@ -93,13 +85,4 @@ public class GrouponServiceImpl implements GrouponService {
         return PageResult.of(pageInfo, vos);
     }
 
-    // 校验当前用户是否为管理员
-    private boolean isAdmin(Long userId) {
-        User user = userMapper.selectById(userId.intValue());
-        if (user == null || user.getUserType() != 9
-                || user.getStatus() != 1 || user.getDeletedFlag() != 0) {
-            return false;
-        }
-        return true;
-    }
 }

@@ -1,6 +1,6 @@
 package com.zeewoncode.pdd_server.c.service.impl;
 
-import com.zeewoncode.context.BaseContext;
+
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.CartService;
 import com.zeewoncode.pdd_server.mapper.*;
@@ -36,8 +36,7 @@ public class CartServiceImpl implements CartService {
      * @return
      */
     @Override
-    public CartVO getCartList() {
-        Integer userId = BaseContext.getCurrentId();
+    public CartVO getCartList(Integer userId) {
         CartVO cartVO = new CartVO();
         List<CartItem> cartItemList = cartMapper.selectCartItemByUserId(userId.longValue());
         Double totalAmountCopy = 0.0;
@@ -91,7 +90,7 @@ public class CartServiceImpl implements CartService {
      * @param req
      */
     @Override
-    public void addCart(CartAddDTO req) {
+    public void addCart(CartAddDTO req, Integer userId) {
         // 1. 对sku表的stock,status和deleted_flag进行校验
         Sku sku = skuMapper.selectSkuById(req.getSkuId());
         if (sku == null || sku.getStock() <= 0 || sku.getStatus() != 1 || sku.getDeletedFlag() != 0) {
@@ -104,20 +103,19 @@ public class CartServiceImpl implements CartService {
         }
         // 3. 对购物车表进行操作，加入购物车（同 sku 数量累加）
         // 3.1 查询购物车表，判断该用户是否已经将该商品规格加入过购物车
-        Long userId = BaseContext.getCurrentId().longValue();
         Long skuId = req.getSkuId();
-        List<CartItem> cartItemList = cartMapper.selectCartItemByUserIdAndSkuId(userId, skuId);
+        List<CartItem> cartItemList = cartMapper.selectCartItemByUserIdAndSkuId(userId.longValue(), skuId);
         // 3.2 已存在则更新数量
         if (cartItemList != null && cartItemList.size() == 1) {
             CartItem cartItem = cartItemList.get(0);
             cartItem.setQuantity(cartItem.getQuantity() + req.getQuantity());
-            cartMapper.updateCartItem(cartItem, userId);
+            cartMapper.updateCartItem(cartItem, userId.longValue());
         } else {
             // 3.3 不存在则插入新记录
             // 填充spuId
             Integer spuId = skuMapper.selectSkuById(skuId).getSpuId();
             CartItem cartItem = CartItem.builder()
-                    .userId(userId)
+                    .userId(userId.longValue())
                     .skuId(req.getSkuId())
                     .spuId(spuId.longValue())
                     .quantity(req.getQuantity())
@@ -162,7 +160,7 @@ public class CartServiceImpl implements CartService {
      * 删除购物车中已勾选的商品
      */
     @Override
-    public void deleteCartBySelected() {
-        cartMapper.deleteCartBySelected(BaseContext.getCurrentId().longValue());
+    public void deleteCartBySelected(Integer userId) {
+        cartMapper.deleteCartBySelected(userId.longValue());
     }
 }

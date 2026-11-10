@@ -1,20 +1,16 @@
 package com.zeewoncode.pdd_server.a.service.impl;
 
-import com.zeewoncode.context.BaseContext;
-import com.zeewoncode.entity.User;
+
 import com.zeewoncode.pdd_server.a.service.DashboardService;
 import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.OrderMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
-import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.ADashboard;
 import com.zeewoncode.vo.OrderStatusDist;
 import lombok.Getter;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,10 +36,6 @@ public class DashboardServiceImpl implements DashboardService {
      */
     @Override
     public ADashboard getDashboardData() {
-        Long userId = BaseContext.getCurrentId().longValue();
-        if (!isAdmin(userId)) {
-            throw new RuntimeException("没有此权限进行查看");
-        }
         // userCount, merchantCount, spuCount, totalOrderCount, todayOrderCount
         // todayPaidOrderCount, todayGmv, totalGmv
         // orderStatusDist
@@ -130,13 +122,4 @@ public class DashboardServiceImpl implements DashboardService {
         }
     }
 
-    // 校验当前用户是否为管理员
-    private boolean isAdmin(Long userId) {
-        User user = userMapper.selectById(userId.intValue());
-        if (user == null || user.getUserType() != 9
-                || user.getStatus() != 1 || user.getDeletedFlag() != 0) {
-            return false;
-        }
-        return true;
-    }
 }

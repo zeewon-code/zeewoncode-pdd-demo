@@ -3,10 +3,12 @@ package com.zeewoncode.pdd_server.b.controller;
 
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.ReviewStat;
+import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,10 +37,11 @@ public class ReviewController {
             @RequestParam(required = false) Long spuId,
             @RequestParam(required = false) Integer rating,
             @RequestParam(required = false, defaultValue = "1") Integer page,
-            @RequestParam(required = false, defaultValue = "10") Integer size
+            @RequestParam(required = false, defaultValue = "10") Integer size,
+            @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("spuId:{}, rating:{}, page:{}, size:{}", spuId, rating, page, size);
-        return reviewService.getReviewList(spuId, rating, page, size);
+        return reviewService.getReviewList(spuId, rating, page, size, loginUser.getUserId());
     }
 
     /**
@@ -46,9 +49,9 @@ public class ReviewController {
      * @return
      */
     @GetMapping("/stat")
-    public Result<ReviewStat> getReviewStat() {
+    public Result<ReviewStat> getReviewStat(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("本店商品评价统计");
-        Result<ReviewStat> result = reviewService.getReviewStat();
+        Result<ReviewStat> result = reviewService.getReviewStat(loginUser.getUserId());
         return result;
     }
 }

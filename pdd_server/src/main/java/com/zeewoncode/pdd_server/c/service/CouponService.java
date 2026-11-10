@@ -22,7 +22,7 @@ public interface CouponService {
      * @param id
      * @return
      */
-    CouponClaimVO claimCoupon(Long id);
+    CouponClaimVO claimCoupon(Long id, Integer userId);
 
     /**
      * 我的优惠券
@@ -31,12 +31,12 @@ public interface CouponService {
      * @param size
      * @return
      */
-    PageResult<UserCouponVO> getMyUserCoupons(Integer status, Integer page, Integer size);
+    PageResult<UserCouponVO> getMyUserCoupons(Integer status, Integer page, Integer size, Integer userId);
 
     /**
      * 结算页可选券
      * @param totalAmount
      * @return
      */
-    List<CouponOptionVO> getCouponOptions(Double totalAmount);
+    List<CouponOptionVO> getCouponOptions(Double totalAmount, Integer userId);
 }

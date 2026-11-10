@@ -14,21 +14,21 @@ public interface GrouponService {
      * @param size
      * @return
      */
-    PageResult<GrouponAdminItemVO> getGrouponsList(Integer status, Integer page, Integer size);
+    PageResult<GrouponAdminItemVO> getGrouponsList(Integer status, Integer page, Integer size, Integer userId);
 
     /**
      * 店家创建拼团活动
      * @param grouponCreateDTO
      * @return
      */
-    Result createGroupon(GrouponCreateDTO grouponCreateDTO);
+    Result createGroupon(GrouponCreateDTO grouponCreateDTO, Integer userId);
 
     /**
      * 店家获取拼团活动详情
      * @param defineId
      * @return
      */
-    Result<GrouponAdminItemVO> getGrouponDetail(Long defineId);
+    Result<GrouponAdminItemVO> getGrouponDetail(Long defineId, Integer userId);
 
     /**
      * 启用 / 停用拼团活动
@@ -36,5 +36,5 @@ public interface GrouponService {
      * @param dto
      * @return
      */
-    Result updateGrouponDefineStatus(Long defineId, SpuStatusDTO dto);
+    Result updateGrouponDefineStatus(Long defineId, SpuStatusDTO dto, Integer userId);
 }

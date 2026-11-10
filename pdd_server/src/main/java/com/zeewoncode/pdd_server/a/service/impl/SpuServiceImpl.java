@@ -1,24 +1,17 @@
 package com.zeewoncode.pdd_server.a.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.entity.Spu;
 import com.zeewoncode.entity.SpuCard;
-import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.SpuService;
 import com.zeewoncode.pdd_server.mapper.GrouponMapper;
 import com.zeewoncode.pdd_server.mapper.SkuMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
-import com.zeewoncode.pdd_server.mapper.UserMapper;
-import com.zeewoncode.pdd_server.mapper.po.GrouponInstancesCount;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.utils.SafeCollectors;
-import io.swagger.models.auth.In;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +22,6 @@ import java.util.stream.Collectors;
 @Service
 public class SpuServiceImpl implements SpuService {
 
-    @Autowired
-    private UserMapper userMapper;
     @Autowired
     private SpuMapper spuMapper;
     @Autowired
@@ -53,10 +44,6 @@ public class SpuServiceImpl implements SpuService {
         // spu:id , title, mainImage, sales
         // sku:minPrice, maxPrice
         // groupon_define: groupPrice, hasGroupon=true(status=1)
-        Long userId = BaseContext.getCurrentId().longValue();
-        if (!isAdmin(userId)) {
-            throw new RuntimeException("没有此权限进行查看");
-        }
         PageHelper.startPage(page, size);
         List<Long> spuIds = spuMapper.selectIds(merchantId, status, categoryId);
         PageInfo<Long> info = new PageInfo<>(spuIds);
@@ -106,10 +93,6 @@ public class SpuServiceImpl implements SpuService {
      */
     @Override
     public Result PlatformForceControl(Long spuId, SpuStatusDTO dto) {
-        Long userId = BaseContext.getCurrentId().longValue();
-        if (!isAdmin(userId)) {
-            throw new RuntimeException("没有此权限进行查看");
-        }
         Spu spuById = spuMapper.getSpuById(spuId);
         if ( spuById == null || spuById.getDeletedFlag() != 0) {
             return Result.error("商品不存在");
@@ -122,13 +105,4 @@ public class SpuServiceImpl implements SpuService {
         return Result.success("商品状态更新成功");
     }
 
-    // 校验当前用户是否为管理员
-    private boolean isAdmin(Long userId) {
-        User user = userMapper.selectById(userId.intValue());
-        if (user == null || user.getUserType() != 9
-                || user.getStatus() != 1 || user.getDeletedFlag() != 0) {
-            return false;
-        }
-        return true;
-    }
 }

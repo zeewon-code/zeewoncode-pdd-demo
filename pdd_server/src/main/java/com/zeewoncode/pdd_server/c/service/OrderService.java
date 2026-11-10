@@ -16,7 +16,7 @@ public interface OrderService {
      * @param req
      * @return
      */
-    OrderCreateVO createOrder(OrderCreateDTO req);
+    OrderCreateVO createOrder(OrderCreateDTO req, Integer userId);
 
     /**
      * 订单结算预览
@@ -29,7 +29,7 @@ public interface OrderService {
      * 取消待付款订单
      * @param id
      */
-    void cancelOrderPendingPayMent(Integer id);
+    void cancelOrderPendingPayMent(Integer id, Integer userId);
 
     /**
      * 获取订单支付倒计时
@@ -43,7 +43,7 @@ public interface OrderService {
      * @param id
      * @return
      */
-    PayVO orderPay(Long id);
+    PayVO orderPay(Long id, Integer userId);
 
     /**
      * 获取订单列表
@@ -52,12 +52,12 @@ public interface OrderService {
      * @param size
      * @return
      */
-    PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size);
+    PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size, Integer userId);
 
     /**
      * 获取订单详情
      * @param id
      * @return
      */
-    OrderDetail getOrderDetail(Integer id);
+    OrderDetail getOrderDetail(Integer id, Integer userId);
 }

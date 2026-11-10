@@ -2,7 +2,6 @@ package com.zeewoncode.pdd_server.b.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.GrouponCreateDTO;
 import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.entity.*;
@@ -27,8 +26,6 @@ import java.util.stream.Collectors;
 public class GrouponServiceImpl implements GrouponService {
 
     @Autowired
-    private UserMapper userMapper;
-    @Autowired
     private MerchantMapper merchantMapper;
     @Autowired
     private SpuMapper spuMapper;
@@ -49,18 +46,15 @@ public class GrouponServiceImpl implements GrouponService {
      * @return
      */
     @Override
-    public PageResult<GrouponAdminItemVO> getGrouponsList(Integer status, Integer page, Integer size) {
+    public PageResult<GrouponAdminItemVO> getGrouponsList(Integer status, Integer page, Integer size, Integer userId) {
         // id,spuId,skuId,groupPrice,targetCount,status,startTime,endTime (groupon_define)
         // title (spu)
         // runningCount successCount failCount (groupon_instance)
-        // 1.判断当前用户是否是商店的管理员
-        Long userId = BaseContext.getCurrentId().longValue();
-        Integer result = isMerchantAdmin(userId.intValue());
-        if (result != 4) {
+        if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
         // 2.查询merchantId
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
         Long merchantId = merchant.getId();
         // 3.查询店铺旗下的商品id
         List<Long> spuIds = spuMapper.selectIdByMerchantId(merchantId);
@@ -115,10 +109,8 @@ public class GrouponServiceImpl implements GrouponService {
      * @return
      */
     @Override
-    public Result createGroupon(GrouponCreateDTO grouponCreateDTO) {
-        Long userId = BaseContext.getCurrentId().longValue();
-        Integer result = isMerchantAdmin(userId.intValue());
-        if (result != 4) {
+    public Result createGroupon(GrouponCreateDTO grouponCreateDTO, Integer userId) {
+        if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
         // 校验参数
@@ -128,7 +120,7 @@ public class GrouponServiceImpl implements GrouponService {
         }
         // 校验sku属于当前店铺
         Spu spuById = spuMapper.getSpuById(sku.getSpuId().longValue());
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
         if (!spuById.getMerchantId().equals(merchant.getId())) {
             return Result.error("当前商品规格不属于当前店铺，无法创建拼团活动");
         }
@@ -169,18 +161,16 @@ public class GrouponServiceImpl implements GrouponService {
      * @return
      */
     @Override
-    public Result<GrouponAdminItemVO> getGrouponDetail(Long defineId) {
+    public Result<GrouponAdminItemVO> getGrouponDetail(Long defineId, Integer userId) {
         // 1.判断当前用户是否是店铺的管理员
-        Long userId = BaseContext.getCurrentId().longValue();
-        Integer result = isMerchantAdmin(userId.intValue());
-        if (result != 4) {
+        if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
         // 2.校验该sku是否属于当前店铺
         GrouponDefine define = grouponMapper.selectGrouponDefineById(defineId);
         Integer spuId = define.getSpuId();
         Spu spuById = spuMapper.getSpuById(define.getSpuId().longValue());
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
         if (!spuById.getMerchantId().equals(merchant.getId())) {
             return Result.error("当前商品规格不属于当前店铺，无法查询该拼团活动详情");
         }
@@ -217,18 +207,16 @@ public class GrouponServiceImpl implements GrouponService {
      */
     @Override
     @Transactional
-    public Result updateGrouponDefineStatus(Long defineId, SpuStatusDTO dto) {
+    public Result updateGrouponDefineStatus(Long defineId, SpuStatusDTO dto, Integer userId) {
         // 1.判断当前用户是否是店铺的管理员
-        Long userId = BaseContext.getCurrentId().longValue();
-        Integer result = isMerchantAdmin(userId.intValue());
-        if (result != 4) {
+        if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
         // 2.校验该sku是否属于当前店铺
         GrouponDefine define = grouponMapper.selectGrouponDefineById(defineId);
         Integer spuId = define.getSpuId();
         Spu spuById = spuMapper.getSpuById(define.getSpuId().longValue());
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
         if (!spuById.getMerchantId().equals(merchant.getId())) {
             return Result.error("当前商品规格不属于当前店铺，无法查询该拼团活动详情");
         }
@@ -268,21 +256,14 @@ public class GrouponServiceImpl implements GrouponService {
 
 
     /**
-     * 校验当前用户是否有资格进行相关操作
+     * 校验当前用户是否有资格进行相关操作()
      * @return
      */
-    public Integer isMerchantAdmin(Integer userId) {
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            return 1; // 1表示当前用户不存在
-        }
+    public Boolean haveMerchantOperation(Integer userId) {
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
-        if (merchant == null) {
-            return 2; // 2表示当前用户没有绑定店铺
+        if (merchant == null || merchant.getDeletedFlag() == 0) {
+            return false;
         }
-        if (user.getUserType() != 2) {
-            return 3; // 3表示当前用户不是店铺的管理员
-        }
-        return 4; // 正常
+        return true;
     }
 }

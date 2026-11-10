@@ -1,6 +1,5 @@
 package com.zeewoncode.pdd_server.c.service.impl;
 
-import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.entity.Order;
 import com.zeewoncode.entity.OrderItem;
 import com.zeewoncode.entity.Shipment;
@@ -14,7 +13,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -60,7 +58,7 @@ public class ShipmentServiceImpl implements ShipmentService {
      */
     @Override
     @Transactional
-    public void receive(Long id) {
+    public void receive(Long id, Integer userId) {
         //shipment置3已签收 → 订单2待收货→3已完成 → 累加 spu.sales。
         //shipment置3已签收
         int i = shipmentMapper.updateShipmentStatus(id, 3);
@@ -73,7 +71,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         Order order = new Order();
         order.setStatus(3);
         order.setId(orderId);
-        order.setUserId(BaseContext.getCurrentId().longValue());
+        order.setUserId(userId.longValue());
         order.setCompletedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         orderMapper.update(order);
         //累加 spu.sales。

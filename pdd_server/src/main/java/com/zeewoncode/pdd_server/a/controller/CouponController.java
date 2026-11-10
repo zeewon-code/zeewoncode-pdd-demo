@@ -2,7 +2,6 @@ package com.zeewoncode.pdd_server.a.controller;
 
 import com.zeewoncode.dto.CouponCreateDTO;
 import com.zeewoncode.entity.CouponRecord;
-import com.zeewoncode.pdd_server.a.service.CouponService;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CouponVO;

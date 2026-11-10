@@ -1,18 +1,17 @@
 package com.zeewoncode.pdd_server.c.controller;
 
-import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.ReviewStat;
-import com.zeewoncode.pdd_server.c.service.ReviewService;
 import com.zeewoncode.dto.ReviewCreateDTO;
 import com.zeewoncode.dto.ReviewsListQueryDTO;
+import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.result.ReviewCreateResult;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -59,10 +58,10 @@ public class ReviewController {
      */
     @GetMapping("/orders/unreviewed")
     public Result<PageResult<OrderCard>> getUnreviewedOrders(@RequestParam(defaultValue = "1") Integer page,
-                                                             @RequestParam(defaultValue = "10") Integer size) {
+                                                             @RequestParam(defaultValue = "10") Integer size,
+                                                             @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取待评价订单列表");
-        Integer userId = BaseContext.getCurrentId();
-        PageResult<OrderCard> unReviewedOrders = reviewService.getUnreviewedOrders(page, size, userId);
+        PageResult<OrderCard> unReviewedOrders = reviewService.getUnreviewedOrders(page, size, loginUser.getUserId());
         return Result.success(unReviewedOrders);
     }
 
@@ -72,9 +71,9 @@ public class ReviewController {
      * @return
      */
     @PostMapping("/reviews")
-    public Result<ReviewCreateResult> addReview(@RequestBody ReviewCreateDTO req) {
+    public Result<ReviewCreateResult> addReview(@RequestBody ReviewCreateDTO req, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("发表评价:{}", req);
-        ReviewCreateResult reviewCreateResult = reviewService.addReview(req);
+        ReviewCreateResult reviewCreateResult = reviewService.addReview(req, loginUser.getUserId());
         return Result.success(reviewCreateResult);
     }
 }

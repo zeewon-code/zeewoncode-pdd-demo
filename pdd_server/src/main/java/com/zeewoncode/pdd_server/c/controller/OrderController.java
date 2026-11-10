@@ -4,6 +4,7 @@ import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.OrderService;
 import com.zeewoncode.dto.OrderCreateDTO;
 import com.zeewoncode.dto.OrderPreviewDTO;
+import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CountdownVO;
@@ -13,6 +14,7 @@ import com.zeewoncode.vo.PayVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,9 +31,9 @@ public class OrderController {
      * @return
      */
     @PostMapping
-    public Result<OrderCreateVO> createOrder(@RequestBody OrderCreateDTO req) {
+    public Result<OrderCreateVO> createOrder(@RequestBody OrderCreateDTO req, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("提交订单:{}", req);
-        OrderCreateVO result = orderService.createOrder(req);
+        OrderCreateVO result = orderService.createOrder(req, loginUser.getUserId());
         return Result.success(result);
     }
 
@@ -54,9 +56,9 @@ public class OrderController {
      * @return
      */
     @PostMapping("/{id}/cancel")
-    public Result cancelOrderPendingPayMent(@PathVariable Integer id) {
+    public Result cancelOrderPendingPayMent(@PathVariable Integer id, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("取消待付款订单:{}", id);
-        orderService.cancelOrderPendingPayMent(id);
+        orderService.cancelOrderPendingPayMent(id, loginUser.getUserId());
         return Result.success();
     }
 
@@ -78,9 +80,9 @@ public class OrderController {
      * @return
      */
     @PostMapping("/{id}/pay")
-    public Result<PayVO> orderPay(@PathVariable Long id) {
+    public Result<PayVO> orderPay(@PathVariable Long id, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("订单支付:{}", id);
-        PayVO result = orderService.orderPay(id);
+        PayVO result = orderService.orderPay(id, loginUser.getUserId());
         return Result.success(result);
     }
 
@@ -94,9 +96,11 @@ public class OrderController {
     @GetMapping()
     public PageResult<OrderCard> getOrderList(@RequestParam(required = false) Integer status,
                                               @RequestParam(defaultValue = "1") Integer page,
-                                              @RequestParam(defaultValue = "10") Integer size) {
+                                              @RequestParam(defaultValue = "10") Integer size,
+                                              @AuthenticationPrincipal LoginUser loginUser
+    ) {
         log.info("获取订单列表:状态{}, 页码{}, 每页数量{}", status, page, size);
-        PageResult<OrderCard> result = orderService.getOrderList(status, page, size);
+        PageResult<OrderCard> result = orderService.getOrderList(status, page, size, loginUser.getUserId());
         return result;
     }
 
@@ -106,9 +110,9 @@ public class OrderController {
      * @return
      */
     @GetMapping("/{id}")
-    public Result<OrderDetail> getOrderDetail(@PathVariable Integer id) {
+    public Result<OrderDetail> getOrderDetail(@PathVariable Integer id, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取订单详情:{}", id);
-        OrderDetail result = orderService.getOrderDetail(id);
+        OrderDetail result = orderService.getOrderDetail(id, loginUser.getUserId());
         return Result.success(result);
     }
 }

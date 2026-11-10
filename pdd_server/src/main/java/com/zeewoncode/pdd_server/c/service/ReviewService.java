@@ -37,5 +37,5 @@ public interface ReviewService {
      * @param req
      * @return
      */
-    ReviewCreateResult addReview(ReviewCreateDTO req);
+    ReviewCreateResult addReview(ReviewCreateDTO req, Integer userId);
 }

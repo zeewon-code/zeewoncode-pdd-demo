@@ -4,12 +4,10 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.zeewoncode.constant.MessageConstant;
 import com.zeewoncode.constant.RatingConstant;
-import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.ReviewService;
 import com.zeewoncode.pdd_server.mapper.OrderMapper;
 import com.zeewoncode.pdd_server.mapper.ReviewMapper;
-import com.zeewoncode.pdd_server.mapper.SpuMapper;
 import com.zeewoncode.dto.ReviewCreateDTO;
 import com.zeewoncode.dto.ReviewsListQueryDTO;
 import com.zeewoncode.result.PageResult;
@@ -17,7 +15,6 @@ import com.zeewoncode.result.ReviewCreateResult;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +28,6 @@ public class ReviewServiceImpl implements ReviewService {
     private ReviewMapper reviewMapper;
     @Autowired
     private OrderMapper orderMapper;
-    @Autowired
-    private SpuMapper spuMapper;
 
     /**
      * 获取评价列表
@@ -104,7 +99,7 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public ReviewCreateResult addReview(ReviewCreateDTO req) {
+    public ReviewCreateResult addReview(ReviewCreateDTO req, Integer userId) {
         Order order = orderMapper.selectOrderById(req.getOrderId());
         if (order == null) {
             throw new RuntimeException(MessageConstant.ORDER_NOT_EXIST);
@@ -114,7 +109,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
         ProductReview productReview = new ProductReview();
         BeanUtils.copyProperties(req, productReview);
-        productReview.setUserId(BaseContext.getCurrentId().longValue());
+        productReview.setUserId(userId.longValue());
         OrderItem orderItem = orderMapper.selectItemById(req.getOrderItemId());
         productReview.setSpuId(orderItem.getSpuId());
         productReview.setCreatedAt(LocalDateTime.now());

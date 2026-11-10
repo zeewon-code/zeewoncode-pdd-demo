@@ -1,19 +1,15 @@
 package com.zeewoncode.pdd_server.a.service.impl;
 
-import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.CategoryCreateDTO;
 import com.zeewoncode.dto.CategoryUpdateDTO;
 import com.zeewoncode.entity.Category;
-import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.CategoryService;
 import com.zeewoncode.pdd_server.mapper.CategoryMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
-import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.pdd_server.mapper.po.CategoryTreeRows;
 import com.zeewoncode.vo.CategoryAdminNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,8 +21,6 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryMapper categoryMapper;
     @Autowired
     private SpuMapper spuMapper;
-    @Autowired
-    private UserMapper userMapper;
 
     /**
      * 获取分类树
@@ -34,10 +28,6 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public List<CategoryAdminNode> getCategoryTree() {
-        Long userId = BaseContext.getCurrentId().longValue();
-        if (!isAdmin(userId)) {
-            throw new RuntimeException("无权限访问");
-        }
         List<CategoryTreeRows> rows = categoryMapper.selectCategoryTreeRows();
         Map<Long, CategoryAdminNode> nodeMap = rows.stream().collect(Collectors.toMap(CategoryTreeRows::getId, r -> {
             CategoryAdminNode node = new CategoryAdminNode();
@@ -68,10 +58,6 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public void addCategory(CategoryCreateDTO dto) {
-        Long userId = BaseContext.getCurrentId().longValue();
-        if (!isAdmin(userId)) {
-            throw new RuntimeException("无权限访问");
-        }
         Category category = new Category();
         category.setName(dto.getName());
         category.setParentId(dto.getParentId());
@@ -95,10 +81,6 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public void updateCategory(Long id, CategoryUpdateDTO dto) {
-        Long userId = BaseContext.getCurrentId().longValue();
-        if (!isAdmin(userId)) {
-            throw new RuntimeException("无权限访问");
-        }
         Category category = new Category();
         category.setId(id);
         category.setName(dto.getName());
@@ -114,10 +96,6 @@ public class CategoryServiceImpl implements CategoryService {
      */
     @Override
     public void delete(Long id) {
-        Long userId = BaseContext.getCurrentId().longValue();
-        if (!isAdmin(userId)) {
-            throw new RuntimeException("无权限访问");
-        }
         // 查询是否有子类
         if (categoryMapper.selectIsParentIdById(id) > 0) {
             throw new RuntimeException("该分类下有子类，无法删除");
@@ -129,15 +107,5 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryMapper.delete(id) == 0) {
             throw new RuntimeException("删除分类失败");
         }
-    }
-
-    // 校验当前用户是否为管理员
-    private boolean isAdmin(Long userId) {
-        User user = userMapper.selectById(userId.intValue());
-        if (user == null || user.getUserType() != 9
-                || user.getStatus() != 1 || user.getDeletedFlag() != 0) {
-            return false;
-        }
-        return true;
     }
 }

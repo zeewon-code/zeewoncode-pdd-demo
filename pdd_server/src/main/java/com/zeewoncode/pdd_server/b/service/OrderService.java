@@ -14,14 +14,14 @@ public interface OrderService {
      * @param size
      * @return
      */
-    PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size);
+    PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size, Integer userId);
 
     /**
      * 获取本店订单详情
      * @param orderId
      * @return
      */
-    OrderDetail getOrderDetail(Long orderId);
+    OrderDetail getOrderDetail(Long orderId, Integer userId);
 
     /**
      * 订单发货
@@ -29,5 +29,5 @@ public interface OrderService {
      * @param dto
      * @return
      */
-    ShipVO ship(Long orderId, ShipDTO dto);
+    ShipVO ship(Long orderId, ShipDTO dto, Integer userId);
 }

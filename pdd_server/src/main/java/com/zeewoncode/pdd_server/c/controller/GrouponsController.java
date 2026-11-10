@@ -4,6 +4,7 @@ import com.zeewoncode.dto.GrouponCancelDTO;
 import com.zeewoncode.dto.GrouponInitiateDTO;
 import com.zeewoncode.dto.GrouponJoinDTO;
 import com.zeewoncode.pdd_server.c.service.GrouponsService;
+import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.GrouponInitiateVO;
@@ -12,6 +13,7 @@ import com.zeewoncode.vo.GrouponJoinVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -35,9 +37,9 @@ public class GrouponsController {
      * @return
      */
     @PostMapping("/initiate")
-    public Result<GrouponInitiateVO> initiateGroupon(@RequestBody GrouponInitiateDTO grouponInitiateDTO) {
+    public Result<GrouponInitiateVO> initiateGroupon(@RequestBody GrouponInitiateDTO grouponInitiateDTO, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("拼团发起:{}", grouponInitiateDTO);
-        GrouponInitiateVO grouponInitiateVO = grouponsService.initiateGroupon(grouponInitiateDTO);
+        GrouponInitiateVO grouponInitiateVO = grouponsService.initiateGroupon(grouponInitiateDTO, loginUser.getUserId());
         return Result.success(grouponInitiateVO);
     }
 
@@ -50,10 +52,11 @@ public class GrouponsController {
     @PostMapping("/{instanceId}/join")
     public Result<GrouponJoinVO> joinGroupon(
             @PathVariable @NotNull(message = "拼团实例ID不能为空") Long instanceId,
-            @RequestBody @Valid GrouponJoinDTO grouponJoinDTO
+            @RequestBody @Valid GrouponJoinDTO grouponJoinDTO,
+            @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("拼团加入:{},{}", instanceId,grouponJoinDTO);
-        GrouponJoinVO grouponJoinVO = grouponsService.joinGroupon(instanceId, grouponJoinDTO);
+        GrouponJoinVO grouponJoinVO = grouponsService.joinGroupon(instanceId, grouponJoinDTO, loginUser.getUserId());
         return Result.success(grouponJoinVO);
     }
 
@@ -64,9 +67,10 @@ public class GrouponsController {
     @GetMapping("/mine")
     public Result<PageResult<GrouponInstanceVO>> getGrouponInstanceList(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size ) {
+            @RequestParam(defaultValue = "10") Integer size,
+            @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取我的拼团列表");
-        PageResult<GrouponInstanceVO> pageResult = grouponsService.getGrouponInstanceList(page, size);
+        PageResult<GrouponInstanceVO> pageResult = grouponsService.getGrouponInstanceList(page, size, loginUser.getUserId());
         return Result.success(pageResult);
     }
 
@@ -87,9 +91,9 @@ public class GrouponsController {
      * @return
      */
     @PostMapping("/cancel")
-    public Result cancelGroupon(@RequestBody GrouponCancelDTO dto) {
+    public Result cancelGroupon(@RequestBody GrouponCancelDTO dto, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("团员取消拼团：{}", dto);
-        grouponsService.cancelGroupon(dto);
+        grouponsService.cancelGroupon(dto, loginUser.getUserId());
         return Result.success();
     }
 

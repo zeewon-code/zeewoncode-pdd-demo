@@ -20,13 +20,13 @@ public interface AddressesService {
     /**
      * 添加收货地址
      */
-    void addAddress(AddressDTO addressDTO);
+    void addAddress(AddressDTO addressDTO, Integer userId);
 
     /**
      * 修改收货地址
      * @param addressDTO
      */
-    void updateAddress(AddressDTO addressDTO);
+    void updateAddress(AddressDTO addressDTO, Integer userId);
 
 
     /**
@@ -39,5 +39,5 @@ public interface AddressesService {
      * 设置默认收货地址
      * @param id
      */
-    void setDefaultAddress(Integer id);
+    void setDefaultAddress(Integer id, Integer userId);
 }

@@ -1,14 +1,14 @@
 package com.zeewoncode.pdd_server.c.controller;
 
-import com.zeewoncode.pdd_server.c.service.CartService;
 import com.zeewoncode.dto.CartAddDTO;
 import com.zeewoncode.dto.CartQuantityDTO;
 import com.zeewoncode.dto.CartSelectDTO;
+import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.vo.CartVO;
 import com.zeewoncode.result.Result;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -27,9 +27,9 @@ public class CartController {
      * @return
      */
     @GetMapping
-    public Result<CartVO> getCartList() {
+    public Result<CartVO> getCartList(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("查看购物车列表");
-        CartVO result = cartService.getCartList();
+        CartVO result = cartService.getCartList(loginUser.getUserId());
         return Result.success(result);
     }
 
@@ -40,9 +40,9 @@ public class CartController {
      * @return
      */
     @PostMapping("/add")
-    public Result addCart(@RequestBody CartAddDTO req) {
+    public Result addCart(@RequestBody CartAddDTO req, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("添加购物车:{}", req);
-        cartService.addCart(req);
+        cartService.addCart(req, loginUser.getUserId());
         return Result.success();
     }
 
@@ -89,9 +89,9 @@ public class CartController {
      * @return
      */
     @DeleteMapping("/selected")
-    public Result deleteCartBySelected() {
+    public Result deleteCartBySelected(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("清空已勾选购物车条目");
-        cartService.deleteCartBySelected();
+        cartService.deleteCartBySelected(loginUser.getUserId());
         return Result.success();
     }
 }

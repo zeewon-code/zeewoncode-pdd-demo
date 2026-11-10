@@ -4,11 +4,13 @@ package com.zeewoncode.pdd_server.b.controller;
 import com.zeewoncode.dto.ShipDTO;
 import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.entity.OrderDetail;
+import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.ShipVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -32,10 +34,11 @@ public class OrderController {
     public PageResult<OrderCard> getOrderList(
             @RequestParam(required = false) Integer status,
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam(defaultValue = "10") Integer size,
+            @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("获取本店订单列表:状态{}, 页码{}, 每页数量{}", status, page, size);
-        PageResult<OrderCard> result = orderService.getOrderList(status, page, size);
+        PageResult<OrderCard> result = orderService.getOrderList(status, page, size, loginUser.getUserId());
         return result;
     }
 
@@ -45,9 +48,9 @@ public class OrderController {
      * @return
      */
     @GetMapping("/{id}")
-    public Result<OrderDetail> getOrderDetail(@PathVariable Long id) {
+    public Result<OrderDetail> getOrderDetail(@PathVariable Long id, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取本店订单详情: 订单id{}", id);
-        OrderDetail result = orderService.getOrderDetail(id);
+        OrderDetail result = orderService.getOrderDetail(id, loginUser.getUserId());
         return Result.success(result);
     }
 
@@ -60,10 +63,11 @@ public class OrderController {
     @PostMapping("/{id}/ship")
     public Result<ShipVO> ship(
             @PathVariable Long id,
-            @RequestBody ShipDTO dto
+            @RequestBody ShipDTO dto,
+            @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("订单发货: 订单id{}, 发货信息{}", id, dto);
-        ShipVO result = orderService.ship(id, dto);
+        ShipVO result = orderService.ship(id, dto, loginUser.getUserId());
         return Result.success(result);
     }
 }

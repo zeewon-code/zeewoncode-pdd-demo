@@ -2,12 +2,14 @@ package com.zeewoncode.pdd_server.b.controller;
 
 import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.dto.ShopUpdateDTO;
+import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.BDashboard;
 import com.zeewoncode.vo.MerchantVO;
 import com.zeewoncode.vo.ShopApplyVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -29,10 +31,10 @@ public class MerchantController {
      * @return
      */
     @PostMapping("/apply")
-    public Result<ShopApplyVO> applyShop(@RequestBody @Valid ShopApplyDTO shopApplyDTO) {
+    public Result<ShopApplyVO> applyShop(@RequestBody @Valid ShopApplyDTO shopApplyDTO, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("申请开店:{}", shopApplyDTO);
-        ShopApplyVO shopApplyVO = merchantService.applyShop(shopApplyDTO);
-        return Result.success();
+        ShopApplyVO shopApplyVO = merchantService.applyShop(shopApplyDTO, loginUser.getUserId());
+        return Result.success(shopApplyVO);
     }
 
     /**
@@ -40,9 +42,9 @@ public class MerchantController {
      * @return
      */
     @GetMapping("/mine")
-    public Result<MerchantVO> getMyShop() {
+    public Result<MerchantVO> getMyShop(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取我的店铺信息");
-        MerchantVO merchantVO = merchantService.getMyShop();
+        MerchantVO merchantVO = merchantService.getMyShop(loginUser.getUserId());
         return Result.success(merchantVO);
     }
 
@@ -52,9 +54,9 @@ public class MerchantController {
      * @return
      */
     @PutMapping("/mine")
-    public Result updateShop(@RequestBody @Valid ShopUpdateDTO shopUpdateDTO) {
+    public Result updateShop(@RequestBody @Valid ShopUpdateDTO shopUpdateDTO, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("修改店铺信息:{}", shopUpdateDTO);
-        merchantService.updateShop(shopUpdateDTO);
+        merchantService.updateShop(shopUpdateDTO, loginUser.getUserId());
         return Result.success();
     }
 
@@ -64,9 +66,9 @@ public class MerchantController {
      * @return
      */
     @PutMapping("/mine/status")
-    public Result updateShopStatus(@RequestParam Integer status) {
+    public Result updateShopStatus(@RequestParam Integer status, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("修改店铺状态:{}", status);
-        merchantService.updateShopStatus(status);
+        merchantService.updateShopStatus(status, loginUser.getUserId());
         return Result.success();
     }
 
@@ -75,9 +77,9 @@ public class MerchantController {
      * @return
      */
     @GetMapping("/dashboard")
-    public Result<BDashboard> getBDashboard() {
+    public Result<BDashboard> getBDashboard(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取商家经营看板数据");
-        BDashboard bDashboard = merchantService.getBDashboard();
+        BDashboard bDashboard = merchantService.getBDashboard(loginUser.getUserId());
         return Result.success(bDashboard);
     }
 }

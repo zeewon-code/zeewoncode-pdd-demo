@@ -8,13 +8,13 @@ import com.zeewoncode.dto.StockDTO;
 
 public interface SkuService {
 
-    void addSku(Long id, SkuDTO dto);
+    void addSku(Long id, SkuDTO dto, Integer userId);
 
-    void editSku(Long id, SkuUpdateDTO dto);
+    void editSku(Long skuId, SkuUpdateDTO dto, Integer userId);
 
-    void deleteSku(Long id);
+    void deleteSku(Long id, Integer userId);
 
-    void updateStock(Long id, StockDTO dto);
+    void updateStock(Long id, StockDTO dto, Integer userId);
 
-    void updateSkuStatus(Long id, SpuStatusDTO dto);
+    void updateSkuStatus(Long id, SpuStatusDTO dto, Integer userId);
 }

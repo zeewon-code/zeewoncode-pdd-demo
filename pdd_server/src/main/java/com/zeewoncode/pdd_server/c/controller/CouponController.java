@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.c.controller;
 
 import com.zeewoncode.pdd_server.c.service.CouponService;
+import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CouponClaimVO;
@@ -10,6 +11,7 @@ import com.zeewoncode.vo.UserCouponVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,9 +48,9 @@ public class CouponController {
      * @return
      */
     @PostMapping("/{id}/claim")
-    public Result<CouponClaimVO> claimCoupon(@PathVariable Long id) {
+    public Result<CouponClaimVO> claimCoupon(@PathVariable Long id, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("领取优惠券:{}",id);
-        CouponClaimVO couponClaimVO = couponService.claimCoupon(id);
+        CouponClaimVO couponClaimVO = couponService.claimCoupon(id, loginUser.getUserId());
         return Result.success(couponClaimVO);
     }
 
@@ -63,10 +65,11 @@ public class CouponController {
     public Result<PageResult<UserCouponVO>> getUserCoupons(
             @RequestParam(required = false) Integer status,
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam(defaultValue = "10") Integer size,
+            @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("获取我的优惠券:状态{}, 页码{}, 每页数量{}", status, page, size);
-        PageResult<UserCouponVO> pageResult = couponService.getMyUserCoupons(status, page, size);
+        PageResult<UserCouponVO> pageResult = couponService.getMyUserCoupons(status, page, size, loginUser.getUserId());
         return Result.success(pageResult);
     }
 
@@ -76,9 +79,9 @@ public class CouponController {
      * @return
      */
     @GetMapping("/user-coupons/options")
-    public Result<List<CouponOptionVO>> getCouponOptions(@RequestParam Double totalAmount) {
+    public Result<List<CouponOptionVO>> getCouponOptions(@RequestParam Double totalAmount, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("结算页可选券,总金额：{}", totalAmount);
-        List<CouponOptionVO> couponOptionVOList = couponService.getCouponOptions(totalAmount);
+        List<CouponOptionVO> couponOptionVOList = couponService.getCouponOptions(totalAmount, loginUser.getUserId());
         return Result.success(couponOptionVOList);
     }
 }

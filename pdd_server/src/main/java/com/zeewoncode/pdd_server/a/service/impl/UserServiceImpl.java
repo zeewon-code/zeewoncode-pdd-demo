@@ -3,15 +3,18 @@ package com.zeewoncode.pdd_server.a.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.zeewoncode.context.BaseContext;
+import com.zeewoncode.entity.Merchant;
 import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.UserService;
+import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,11 +22,10 @@ import java.util.List;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    private final UserMapper userMapper;
-
-    public UserServiceImpl(UserMapper userMapper) {
-        this.userMapper = userMapper;
-    }
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private MerchantMapper merchantMapper;
 
     /**
      * 获取用户列表
@@ -36,12 +38,8 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public PageResult<UserVO> getUsersList(Integer userType, Integer status, String phoneKeyword, String nicknameKeyword, Integer page, Integer size) {
-        Long userId = BaseContext.getCurrentId().longValue();
-        // 判断当前用户是否为管理员
-        if (!isAdmin(userId)) {
-            return PageResult.empty(new PageInfo());
-        }
+    public PageResult<UserVO> getUsersList(Integer userType, Integer status, String phoneKeyword,
+                                           String nicknameKeyword, Integer page, Integer size) {
         PageHelper.startPage(page, size);
         List<UserVO> userVOS = userMapper.selectUsers(userType, status, phoneKeyword, nicknameKeyword);
         PageInfo<UserVO> userVOPageInfo = new PageInfo<>(userVOS);
@@ -58,10 +56,6 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Result<UserVO> getUserInfo(Long userId) {
-        Long id = BaseContext.getCurrentId().longValue();
-        if (!(isAdmin(id))) {
-            return Result.error("无权限访问");
-        }
         User user = userMapper.selectById(userId.intValue());
         if (user == null) {
             return Result.error("该用户信息不存在");
@@ -76,28 +70,21 @@ public class UserServiceImpl implements UserService {
      * @param status
      * @return
      */
+    @Transactional
     @Override
     public Result updateUserStatus(Long userId, Integer status) {
-        Long id = BaseContext.getCurrentId().longValue();
-        if (!(isAdmin(id))) {
-            return Result.error("无权限访问");
-        }
         User user = userMapper.selectById(userId.intValue());
         if (user == null) {
             return Result.error("该用户信息不存在");
         }
         user.setStatus(status);
         int i = userMapper.updateById(user);
+        // 如果用户类型为商户，则更新店铺营业状态
+        if (user.getUserType() == 2) {
+            Merchant merchant = Merchant.builder().userId(userId).status(0).build();
+            merchantMapper.update(merchant);
+        }
         return i > 0 ? Result.success() : Result.error("更新用户状态失败");
     }
 
-    // 校验当前用户是否为管理员
-    private boolean isAdmin(Long userId) {
-        User user = userMapper.selectById(userId.intValue());
-        if (user == null || user.getUserType() != 9
-                || user.getStatus() != 1 || user.getDeletedFlag() != 0) {
-            return false;
-        }
-        return true;
-    }
 }

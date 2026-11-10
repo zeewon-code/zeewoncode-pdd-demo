@@ -15,5 +15,5 @@ public interface ShipmentService {
      * 确认收货
      * @param id
      */
-    void receive(Long id);
+    void receive(Long id, Integer userId);
 }

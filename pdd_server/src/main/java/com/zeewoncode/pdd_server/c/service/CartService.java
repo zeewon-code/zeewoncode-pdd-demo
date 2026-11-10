@@ -10,13 +10,13 @@ public interface CartService {
      * 查看购物车列表
      * @return
      */
-    CartVO getCartList();
+    CartVO getCartList(Integer userId);
 
     /**
      * 添加购物车
      * @param req
      */
-    void addCart(CartAddDTO req);
+    void addCart(CartAddDTO req,Integer userId);
 
     /**
      * 更新购物车数量
@@ -40,5 +40,5 @@ public interface CartService {
     /**
      * 清空已勾选购物车条目
      */
-    void deleteCartBySelected();
+    void deleteCartBySelected(Integer userId);
 }

@@ -3,12 +3,14 @@ package com.zeewoncode.pdd_server.b.controller;
 import com.zeewoncode.dto.*;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
+import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.SpuCreateVO;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -38,10 +40,11 @@ public class SpuController {
             @RequestParam(defaultValue = "10", required = false) Integer size,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Integer status
-    ) {
+            @RequestParam(required = false) Integer status,
+            @AuthenticationPrincipal LoginUser loginUser
+            ) {
         log.info("分页查询商品列表: 页码{}, 每页数量{}, 关键字{}, 类目ID{}, 状态{}", page, size, keyword, categoryId, status);
-        PageResult<SpuCard> result = spuService.listSpuCards(page, size, keyword, categoryId, status);
+        PageResult<SpuCard> result = spuService.listSpuCards(page, size, keyword, categoryId, status, loginUser.getUserId());
         return Result.success(result);
     }
 
@@ -51,9 +54,10 @@ public class SpuController {
      * @return
      */
     @PostMapping
-    public Result<SpuCreateVO> addSpu(@Valid @RequestBody SpuCreateDTO dto) {
+    public Result<SpuCreateVO> addSpu(@Valid @RequestBody SpuCreateDTO dto,
+                                      @AuthenticationPrincipal LoginUser loginUser) {
         log.info("新建商品: {}", dto);
-        SpuCreateVO vo = spuService.addSpu(dto);
+        SpuCreateVO vo = spuService.addSpu(dto, loginUser.getUserId());
         return Result.success(vo);
     }
 
@@ -63,9 +67,9 @@ public class SpuController {
      * @return
      */
     @GetMapping("/{id}")
-    public Result<SpuDetail> getSpuDetail(@PathVariable Long id) {
+    public Result<SpuDetail> getSpuDetail(@PathVariable Long id, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("商品详情: {}", id);
-        SpuDetail detail = spuService.getSpuDetail(id);
+        SpuDetail detail = spuService.getSpuDetail(id, loginUser.getUserId());
         return Result.success(detail);
     }
 
@@ -77,9 +81,11 @@ public class SpuController {
      */
     @PutMapping("/{id}")
     public Result editSpu(@PathVariable Long id,
-                          @Valid @RequestBody(required = false) SpuEditDTO dto) {
+                          @Valid @RequestBody(required = false) SpuEditDTO dto,
+                          @AuthenticationPrincipal LoginUser loginUser
+    ) {
         log.info("编辑商品: {}, {}", id, dto);
-        spuService.editSpu(id, dto);
+        spuService.editSpu(id, dto, loginUser.getUserId());
         return Result.success();
     }
 
@@ -89,9 +95,10 @@ public class SpuController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result softDeleteSpu(@PathVariable Long id) {
+    public Result softDeleteSpu(@PathVariable Long id,
+                                @AuthenticationPrincipal LoginUser loginUser) {
         log.info("软删除商品: {}", id);
-        spuService.softDeleteSpu(id);
+        spuService.softDeleteSpu(id, loginUser.getUserId());
         return Result.success();
     }
 
@@ -104,10 +111,11 @@ public class SpuController {
     @PutMapping("/{id}/status")
     public Result listAndDelist(
             @PathVariable Long id,
-            @RequestBody SpuStatusDTO dto
+            @RequestBody SpuStatusDTO dto,
+            @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("更新商品状态: {}, {}", id, dto);
-        spuService.listAndDelist(id, dto);
+        spuService.listAndDelist(id, dto, loginUser.getUserId());
         return Result.success();
     }
 

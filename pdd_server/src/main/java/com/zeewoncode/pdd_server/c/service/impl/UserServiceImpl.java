@@ -123,9 +123,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getById(Integer userId) {
         User user = userMapper.selectById(userId);
-        if (user == null) {
-            return null;
-        }
         return user;
     }
 

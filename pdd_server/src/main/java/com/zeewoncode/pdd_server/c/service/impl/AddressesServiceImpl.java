@@ -1,7 +1,8 @@
 package com.zeewoncode.pdd_server.c.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.zeewoncode.context.BaseContext;
+
+
 import com.zeewoncode.entity.UserAddress;
 import com.zeewoncode.pdd_server.c.service.AddressesService;
 import com.zeewoncode.pdd_server.mapper.AddressesMapper;
@@ -44,8 +45,8 @@ public class AddressesServiceImpl implements AddressesService {
      */
     @Override
     @Transactional
-    public void addAddress(AddressDTO addressDTO) {
-        Integer userId = BaseContext.getCurrentId();
+    public void addAddress(AddressDTO addressDTO, Integer userId) {
+
         UserAddress userAddress = new UserAddress();
         BeanUtils.copyProperties(addressDTO, userAddress);
         userAddress.setDeletedFlag(0);
@@ -69,8 +70,7 @@ public class AddressesServiceImpl implements AddressesService {
      */
     @Override
     @Transactional
-    public void updateAddress(AddressDTO addressDTO) {
-        Integer userId = BaseContext.getCurrentId();
+    public void updateAddress(AddressDTO addressDTO, Integer userId) {
         UserAddress userAddress = new UserAddress();
         BeanUtils.copyProperties(addressDTO, userAddress);
         userAddress.setDeletedFlag(0);
@@ -103,11 +103,11 @@ public class AddressesServiceImpl implements AddressesService {
      */
     @Override
     @Transactional
-    public void setDefaultAddress(Integer id) {
+    public void setDefaultAddress(Integer id, Integer userId) {
         UserAddress userAddress = new UserAddress();
         userAddress.setId(id);
         userAddress.setIsDefault(1);
-        userAddress.setUserId(BaseContext.getCurrentId());
+        userAddress.setUserId(userId);
         UserAddress userAddressDB = addressesMapper.selectById(Long.valueOf(id));
         if (userAddressDB != null && userAddressDB.getIsDefault() != null && userAddressDB.getIsDefault() == 1) {
             throw new RuntimeException("当前地址已经是默认地址");

@@ -2,7 +2,6 @@ package com.zeewoncode.pdd_server.c.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.GrouponCancelDTO;
 import com.zeewoncode.dto.GrouponInitiateDTO;
 import com.zeewoncode.dto.GrouponJoinDTO;
@@ -21,14 +20,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.function.support.RouterFunctionMapping;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,11 +43,7 @@ public class GrouponsServiceImpl implements GrouponsService {
     @Autowired
     private OrderMapper orderMapper;
     @Autowired
-    private RouterFunctionMapping routerFunctionMapping;
-    @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private ShipmentMapper shipmentMapper;
 
     /**
      * 拼团发起（团长下单）
@@ -60,9 +52,8 @@ public class GrouponsServiceImpl implements GrouponsService {
      */
     @Override
     @Transactional
-    public GrouponInitiateVO initiateGroupon(GrouponInitiateDTO grouponInitiateDTO) {
+    public GrouponInitiateVO initiateGroupon(GrouponInitiateDTO grouponInitiateDTO, Integer userId) {
         Long defineId = grouponInitiateDTO.getDefineId();
-        Long userId = BaseContext.getCurrentId().longValue();
         LocalDateTime now = LocalDateTime.now();
         // 校验该拼团活动是否存在
         GrouponDefine define = grouponMapper.selectGrouponDefineById(defineId);
@@ -80,7 +71,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         }
         // 判断是否已经用户目前是否已经开起了拼团活动，
         // 如果已经发起该款商品活动且同商品拼团未结束；则不允许再发起新的同款商品的拼团活动
-        GrouponInstance instanceDb = grouponMapper.selectGrouponInstanceByDefineIdAndLeaderUserId(defineId, userId);
+        GrouponInstance instanceDb = grouponMapper.selectGrouponInstanceByDefineIdAndLeaderUserId(defineId, userId.longValue());
         if (instanceDb != null && instanceDb.getStatus() == 0) {
             throw new RuntimeException("您已在进行该商品的拼团活动");
         }
@@ -98,7 +89,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         Integer targetCount = define.getTargetCount();
         GrouponInstance grouponInstance = GrouponInstance.builder()
                 .defineId(defineId.longValue())
-                .leaderUserId(userId)
+                .leaderUserId(userId.longValue())
                 .currentCount(1)
                 .targetCount(targetCount)
                 .status(0)
@@ -109,7 +100,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         // 插入订单表orders和order_item表
         Integer quantity = grouponInitiateDTO.getQuantity();
         Long addressId = grouponInitiateDTO.getAddressId();
-        Order order = insertOrder(userId, define, addressId, quantity, grouponInstance);
+        Order order = insertOrder(userId.longValue(), define, addressId, quantity, grouponInstance);
         insertOrderItem(order, define, quantity);
         GrouponInitiateVO grouponInitiateVO = new GrouponInitiateVO();
         BeanUtils.copyProperties(grouponInstance, grouponInitiateVO);
@@ -185,8 +176,7 @@ public class GrouponsServiceImpl implements GrouponsService {
      */
     @Override
     @Transactional
-    public GrouponJoinVO joinGroupon(Long instanceId, GrouponJoinDTO grouponJoinDTO) {
-        Long userId = BaseContext.getCurrentId().longValue();
+    public GrouponJoinVO joinGroupon(Long instanceId, GrouponJoinDTO grouponJoinDTO, Integer userId) {
         LocalDateTime now = LocalDateTime.now();
         // 校验该拼团活动是否存在
         GrouponInstance grouponInstance = grouponMapper.selectGrouponInstanceById(instanceId);
@@ -202,7 +192,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         }
         // 用户只能占用一个拼团事务中的一个名额
         // 通过拼团实例跟用户id查询订单，判断用户是否已经占用该拼团事务的名额
-        if (grouponMapper.selectOrderByUserIdAndInstanceId(userId, instanceId) != null) {
+        if (grouponMapper.selectOrderByUserIdAndInstanceId(userId.longValue(), instanceId) != null) {
             throw new RuntimeException("您已经参加了该同款商品规格的拼团活动了");
         }
         List<OrderItemDTO> list = new ArrayList<>();
@@ -222,7 +212,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         // 团员插入订单表
         Long addressId = grouponJoinDTO.getAddressId();
         Integer quantity = grouponJoinDTO.getQuantity();
-        Order order = insertOrder(userId, define, addressId, quantity, grouponInstance);
+        Order order = insertOrder(userId.longValue(), define, addressId, quantity, grouponInstance);
         insertOrderItem(order, define, quantity);
         GrouponInstance updatedGrouponInstance = grouponMapper.selectGrouponInstanceById(instanceId);
         GrouponJoinVO grouponJoinVO = new GrouponJoinVO();
@@ -256,7 +246,6 @@ public class GrouponsServiceImpl implements GrouponsService {
     public void cancelGrouponByLeader(GrouponCancelDTO dto) {
         // 团长取消拼团
         // 验证当前用户的id是否为团长id，且拼团状态是否为进行中， 且拼团名额小于成团人数
-        Long userId = BaseContext.getCurrentId().longValue();
         Long instanceId = dto.getInstanceId();
         GrouponInstance instance = grouponMapper.selectGrouponInstanceById(instanceId);
         if (instance == null) {
@@ -288,8 +277,7 @@ public class GrouponsServiceImpl implements GrouponsService {
      * @param dto
      */
     @Override
-    public void cancelGroupon(GrouponCancelDTO dto) {
-        Long userId = BaseContext.getCurrentId().longValue();
+    public void cancelGroupon(GrouponCancelDTO dto, Integer userId) {
         Long instanceId = dto.getInstanceId();
         GrouponInstance instance = grouponMapper.selectGrouponInstanceById(instanceId);
         if (instance == null) {
@@ -307,8 +295,8 @@ public class GrouponsServiceImpl implements GrouponsService {
         // 修改groupon_instance中的current_count-1
         grouponMapper.reduceGrouponInstanceCurrentCount(instanceId);
         // 通过拼团实例id找到该拼团实例下的当前用户id的订单并修改订单状态，并取出订单id
-        orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId,userId, 4, 3);
-        List<Long> orderIds = orderMapper.selectOrderIdsByInstanceIdAndUserId(instanceId, userId);
+        orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId, userId.longValue(), 4, 3);
+        List<Long> orderIds = orderMapper.selectOrderIdsByInstanceIdAndUserId(instanceId, userId.longValue());
         // 释放预占库存，通过订单id去找到订单明细表中对应的下单的商品数量
         Integer quantity = orderMapper.selectQuantityByOrderIds(orderIds);
         // 通过拼团实例id找到拼团活动define，找到skuId,然后到sku表进行预占库存的释放
@@ -322,11 +310,10 @@ public class GrouponsServiceImpl implements GrouponsService {
      * @return
      */
     @Override
-    public PageResult<GrouponInstanceVO> getGrouponInstanceList(Integer pageNum, Integer pageSize) {
-        Long userId = BaseContext.getCurrentId().longValue();
+    public PageResult<GrouponInstanceVO> getGrouponInstanceList(Integer pageNum, Integer pageSize, Integer userId) {
         PageHelper.startPage(pageNum, pageSize);
         // ===== 1. 只对「我的实例集合」分页 =====
-        List<InstanceRef> refs = grouponMapper.selectMyGrouponRefs(userId);
+        List<InstanceRef> refs = grouponMapper.selectMyGrouponRefs(userId.longValue());
         PageInfo<InstanceRef> pageInfo = new PageInfo<>(refs);
         if (refs.isEmpty()) {
             return PageResult.empty(pageInfo);
@@ -353,7 +340,7 @@ public class GrouponsServiceImpl implements GrouponsService {
                 : SafeCollectors.toMap(userMapper.selectUserByIds(leaderUserIds), User::getId);
         // orders
 //        一次把「团长订单」和「我自己的订单」都捞出来
-        List<Order> orders = orderMapper.selectOrderByInstanceIdsAndUserIds(instanceIds, userId, leaderUserIds);
+        List<Order> orders = orderMapper.selectOrderByInstanceIdsAndUserIds(instanceIds, userId.longValue(), leaderUserIds);
         Map<Long, Map<Long, Order>> orderMap = orders.stream()
                 .collect(Collectors.groupingBy(Order::getGrouponInstanceId,
                         Collectors.toMap(Order::getUserId, order -> order, (o1, o2) -> o1)));

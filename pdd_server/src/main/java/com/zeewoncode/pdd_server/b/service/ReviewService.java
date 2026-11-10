@@ -14,12 +14,12 @@ public interface ReviewService {
      * @param size
      * @return
      */
-    PageResult<Review> getReviewList(Long spuId, Integer rating, Integer page, Integer size);
+    PageResult<Review> getReviewList(Long spuId, Integer rating, Integer page, Integer size, Integer userId);
 
     /**
      * 本店商品评价统计
      * @return
      */
-    Result<ReviewStat> getReviewStat();
+    Result<ReviewStat> getReviewStat(Integer userId);
 
 }

@@ -13,30 +13,30 @@ public interface MerchantService {
      * @param shopApplyDTO
      * @return
      */
-    ShopApplyVO applyShop(ShopApplyDTO shopApplyDTO);
+    ShopApplyVO applyShop(ShopApplyDTO shopApplyDTO, Integer userId);
 
     /**
      * 获取我的店铺信息
      * @return
      */
-    MerchantVO getMyShop();
+    MerchantVO getMyShop(Integer userId);
 
     /**
      * 修改店铺信息
      * @param shopUpdateDTO
      */
-    void updateShop(ShopUpdateDTO shopUpdateDTO);
+    void updateShop(ShopUpdateDTO shopUpdateDTO, Integer userId);
 
     /**
      * 修改店铺状态
      * @param status
      */
-    void updateShopStatus(Integer status);
+    void updateShopStatus(Integer status, Integer userId);
 
     /**
      * 商家经营看板
      * @return
      */
-    BDashboard getBDashboard();
+    BDashboard getBDashboard(Integer userId);
 
 }

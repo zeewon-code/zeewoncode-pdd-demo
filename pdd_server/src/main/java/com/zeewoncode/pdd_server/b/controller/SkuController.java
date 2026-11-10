@@ -4,11 +4,13 @@ import com.zeewoncode.dto.SkuDTO;
 import com.zeewoncode.dto.SkuUpdateDTO;
 import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.dto.StockDTO;
+import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.Result;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,10 +34,11 @@ public class SkuController {
     @PostMapping("/{id}")
     public Result addSku(
             @PathVariable Long id,
-            @Valid @RequestBody SkuDTO dto
-    ) {
+            @Valid @RequestBody SkuDTO dto,
+            @AuthenticationPrincipal LoginUser loginUser
+            ) {
         log.info("新建SKU: {}, {}", id, dto);
-        skuService.addSku(id, dto);
+        skuService.addSku(id, dto, loginUser.getUserId());
         return Result.success();
     }
 
@@ -49,10 +52,11 @@ public class SkuController {
     @PutMapping("/{id}")
     public Result editSku(
             @PathVariable Long id,
-            @Valid @RequestBody SkuUpdateDTO dto
+            @Valid @RequestBody SkuUpdateDTO dto,
+            @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("编辑 SKU: {}, {}", id, dto);
-        skuService.editSku(id, dto);
+        skuService.editSku(id, dto, loginUser.getUserId());
         return Result.success();
     }
 
@@ -63,9 +67,10 @@ public class SkuController {
      */
     @Validated
     @DeleteMapping("/{id}")
-    public Result deleteSku(@PathVariable @NotNull(message = "ID不能为空") Long id) {
+    public Result deleteSku(@PathVariable @NotNull(message = "ID不能为空") Long id,
+                            @AuthenticationPrincipal LoginUser loginUser) {
         log.info("删除 SKU: {}", id);
-        skuService.deleteSku(id);
+        skuService.deleteSku(id, loginUser.getUserId());
         return Result.success();
     }
 
@@ -78,10 +83,11 @@ public class SkuController {
     @PutMapping("/{id}/stock")
     public Result updateStock(
             @PathVariable Long id,
-            @Valid @RequestBody StockDTO dto
+            @Valid @RequestBody StockDTO dto,
+            @AuthenticationPrincipal LoginUser loginUser
     ){
         log.info("调整库存: {}, {}", id, dto);
-        skuService.updateStock(id, dto);
+        skuService.updateStock(id, dto, loginUser.getUserId());
         return Result.success();
     }
 
@@ -94,10 +100,11 @@ public class SkuController {
     @PutMapping("/{id}/status")
     public Result updateSkuStatus(
             @PathVariable Long id,
-            @Valid @RequestBody SpuStatusDTO dto
+            @Valid @RequestBody SpuStatusDTO dto,
+            @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("更新商品状态: {}, {}", id, dto);
-        skuService.updateSkuStatus(id, dto);
+        skuService.updateSkuStatus(id, dto, loginUser.getUserId());
         return Result.success();
     }
 }

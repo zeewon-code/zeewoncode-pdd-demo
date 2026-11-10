@@ -1,6 +1,5 @@
 package com.zeewoncode.pdd_server.b.service.impl;
 
-import com.zeewoncode.context.BaseContext;
 import com.zeewoncode.dto.SkuDTO;
 import com.zeewoncode.dto.SkuUpdateDTO;
 import com.zeewoncode.dto.SpuStatusDTO;
@@ -12,7 +11,6 @@ import com.zeewoncode.utils.InfoValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
@@ -37,8 +35,8 @@ public class SkuServiceImpl implements SkuService {
      * @param dto
      */
     @Override
-    public void addSku(Long id, SkuDTO dto) {
-        if (!isMerchantPermisson(id)) throw new RuntimeException("没有此权限进行新增商品规格");
+    public void addSku(Long id, SkuDTO dto, Integer userId) {
+        if (!haveSkuOperation(id, userId)) throw new RuntimeException("没有此权限进行新增商品规格");
         Spu spuById = spuMapper.getSpuById(id);
         if (spuById == null) throw new RuntimeException("该商品不存在");
         List<Sku> skuList = skuMapper.selectSkuListBySpuId(id.intValue());
@@ -64,18 +62,17 @@ public class SkuServiceImpl implements SkuService {
 
     /**
      * 编辑商品规格
-     * @param id
      * @param dto
      */
     @Override
-    public void editSku(Long id, SkuUpdateDTO dto) {
-        Long spuId = skuMapper.selectById(id).getSpuId().longValue();
-        if (!isMerchantPermisson(spuId)) throw new RuntimeException("没有此权限进行编辑商品规格");
+    public void editSku(Long skuId, SkuUpdateDTO dto, Integer userId) {
+        Long spuId = skuMapper.selectById(skuId).getSpuId().longValue();
+        if (!haveSkuOperation(spuId, userId)) throw new RuntimeException("没有此权限进行编辑商品规格");
         if (spuMapper.getSpuById(spuId) == null) throw new RuntimeException("该商品不存在");
         if (dto.getImage() != null) InfoValidator.validateAvatarUrl(dto.getImage());
         List<Sku> skuList = skuMapper.selectSkuListBySpuId(spuId.intValue());
         for (Sku skuDb : skuList) {
-            if (skuDb.getSpecs().equals(dto.getSpecs()) && skuDb.getId().longValue() != id) {
+            if (skuDb.getSpecs().equals(dto.getSpecs()) && skuDb.getId().longValue() != skuId) {
                 throw new RuntimeException("该商品已存在同规格");
             }
         }
@@ -83,7 +80,7 @@ public class SkuServiceImpl implements SkuService {
             throw new RuntimeException("价格不能为负数或0");
         }
         Sku sku = Sku.builder()
-                .id(id.intValue())
+                .id(skuId.intValue())
                 .price(dto.getPrice().doubleValue())
                 .image(dto.getImage())
                 .specs(dto.getSpecs())
@@ -99,13 +96,13 @@ public class SkuServiceImpl implements SkuService {
      */
     @Override
     @Transactional
-    public void deleteSku(Long id) {
+    public void deleteSku(Long id, Integer userId) {
         Sku skuDb = skuMapper.selectById(id);
         if (skuDb == null || skuDb.getDeletedFlag() == 1) {
             throw new RuntimeException("该商品规格不存在");
         }
         Long spuId = skuDb.getSpuId().longValue();
-        if (!isMerchantPermisson(spuId)) throw new RuntimeException("没有此权限进行编辑商品规格");
+        if (!haveSkuOperation(spuId, userId)) throw new RuntimeException("没有此权限进行编辑商品规格");
         // 判断当前该sku是否禁售了
         if (skuDb.getStatus() == 1) {
             throw new RuntimeException("该商品规格未禁售，无法进行删除操作");
@@ -121,13 +118,13 @@ public class SkuServiceImpl implements SkuService {
      * @param dto
      */
     @Override
-    public void updateStock(Long id, StockDTO dto) {
+    public void updateStock(Long id, StockDTO dto, Integer userId) {
         Sku skuDb = skuMapper.selectById(id);
         if (skuDb == null) {
             throw new RuntimeException("该商品规格不存在");
         }
         Long spuId = skuDb.getSpuId().longValue();
-        if (!isMerchantPermisson(spuId)) throw new RuntimeException("没有此权限进行更新商品库存");
+        if (!haveSkuOperation(spuId, userId)) throw new RuntimeException("没有此权限进行更新商品库存");
         Sku sku = Sku.builder().id(id.intValue()).stock(dto.getStock()).build();
         if (skuMapper.update(sku) == 0) {
             throw new RuntimeException("更新商品库存失败, 请稍后重试");
@@ -141,9 +138,10 @@ public class SkuServiceImpl implements SkuService {
      */
     @Override
     @Transactional
-    public void updateSkuStatus(Long id, SpuStatusDTO dto) {
+    public void updateSkuStatus(Long id, SpuStatusDTO dto, Integer userId) {
         Sku skuById = skuMapper.selectSkuById(id);
-        if (!isMerchantPermisson(skuById.getSpuId().longValue())) throw new RuntimeException("没有此权限进行商品规格状态的更新");
+        Long spuId = skuById.getSpuId().longValue();
+        if (!haveSkuOperation(spuId, userId)) throw new RuntimeException("没有此权限进行商品规格状态的更新");
         Sku skuDb = skuMapper.selectById(id);
         if (skuDb == null) {
             throw new RuntimeException("该商品规格不存在");
@@ -179,19 +177,19 @@ public class SkuServiceImpl implements SkuService {
 
     /**
      * 判断当前用户是否有权限进行商品操作
-     * @param id
+     * @param spuId
      * @return
      */
-    public Boolean isMerchantPermisson(Long id) {
-        Long userId = BaseContext.getCurrentId().longValue();
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        if (merchant == null) {
-            throw new RuntimeException("信息有误，请稍后重试");
+    public Boolean haveSkuOperation(Long spuId, Integer userId) {
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+        if (merchant == null || merchant.getDeletedFlag() == 0) {
+            return false;
         }
-        Spu spuById = spuMapper.getSpuById(id);
+        Spu spuById = spuMapper.getSpuById(spuId);
         if (merchant.getId() != spuById.getMerchantId()) {
             return false;
         }
         return true;
     }
+
 }
