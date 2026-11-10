@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.zeewoncode.constant.DeletedConstant;
 import com.zeewoncode.constant.StatusConstant;
 import com.zeewoncode.constant.UserTypeConstant;
+import com.zeewoncode.pdd_server.c.service.VerificationCodeService;
 import com.zeewoncode.vo.LoginVO;
 import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
@@ -36,6 +37,8 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private VerificationCodeService verificationCodeService;
 
 
     /**
@@ -49,9 +52,6 @@ public class UserServiceImpl implements UserService {
         if (registerDTO == null) {
             return Result.error(PARAM_ERROR);
         }
-        if (registerDTO.getCode() == null || !registerDTO.getCode().equals("8888")) {
-            return Result.error(CODE_ERROR);
-        }
         if (registerDTO.getPassword() == null || registerDTO.getPassword().isBlank()) {
             return Result.error(PASSWORD_ERROR);
         }
@@ -61,13 +61,16 @@ public class UserServiceImpl implements UserService {
         if (registerDTO.getPhone().length() != 11) {
             return Result.error(PHONE_ERROR);
         }
-        User user = new User();
-        BeanUtils.copyProperties(registerDTO, user);
         // 2. 判断该用户是否已存在
         User userInDB = userMapper.selectByPhoneAndUser(registerDTO.getPhone());
         if (userInDB != null ) {
             return Result.error(USER_ALREADY_EXIST);
         }
+        if (!verificationCodeService.verify(registerDTO.getPhone(), registerDTO.getCode())) {
+            return Result.error(CODE_ERROR);
+        }
+        User user = new User();
+        BeanUtils.copyProperties(registerDTO, user);
 
         // 3. 注册用户
         user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));

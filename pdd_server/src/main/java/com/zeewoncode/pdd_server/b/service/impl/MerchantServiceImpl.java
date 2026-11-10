@@ -189,7 +189,7 @@ public class MerchantServiceImpl implements MerchantService {
      */
     public Boolean haveMerchantOperation(Integer userId) {
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
-        if (merchant == null || merchant.getDeletedFlag() == 0) {
+        if (merchant == null || merchant.getDeletedFlag() != 0) {
             return false;
         }
         return true;

@@ -18,7 +18,7 @@ public interface UserService {
      * @param registerDTO
      * @return
      */
-    Result<T> register(RegisterDTO registerDTO);
+    Result register(RegisterDTO registerDTO);
 
     /**
      * 用户登录

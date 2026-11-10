@@ -1,5 +1,8 @@
 package com.zeewoncode.pdd_server.security;
 
+import com.zeewoncode.constant.StatusConstant;
+import com.zeewoncode.entity.User;
+import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -22,9 +25,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String PREFIX = "Bearer ";
 
     private final JwtUtil jwtUtil;
+    private final UserMapper userMapper;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserMapper userMapper) {
         this.jwtUtil = jwtUtil;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -39,9 +44,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (claims != null) {
                     Integer userId = JwtUtil.getUserId(claims);
                     if (userId != null) {
-                        Integer userType = JwtUtil.getUserType(claims);
-                        LoginUser loginUser = new LoginUser(userId, userType);
+//                        // 从jwt令牌中拿到用户类型
+//                        Integer userType = JwtUtil.getUserType(claims);
+                        // 从数据库中获取用户类型
+                        User user = userMapper.selectById(userId);
 
+                        // 用户被删除或已冻结
+                        if (user == null || StatusConstant.DISABLE == user.getStatus()) {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(
+                                    "{\"code\":401,\"msg\":\"账号已被冻结或不存在\",\"data\":null}");
+                            return;
+                        }
+
+                        LoginUser loginUser = new LoginUser(userId, user.getUserType());
                         UsernamePasswordAuthenticationToken authentication =
                                 new UsernamePasswordAuthenticationToken(
                                         loginUser, null, loginUser.getAuthorities());

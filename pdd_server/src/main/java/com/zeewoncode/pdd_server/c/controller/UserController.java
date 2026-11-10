@@ -1,6 +1,8 @@
 package com.zeewoncode.pdd_server.c.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.zeewoncode.constant.MessageConstant;
+import com.zeewoncode.pdd_server.c.service.VerificationCodeService;
 import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.vo.LoginVO;
 import com.zeewoncode.entity.User;
@@ -11,7 +13,6 @@ import com.zeewoncode.dto.UpdateProfileDTO;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,8 @@ public class UserController {
 
     @Autowired
     private com.zeewoncode.pdd_server.c.service.UserService userService;
+    @Autowired
+    private VerificationCodeService verificationCodeService;
 
     /**
      * 用户注册
@@ -33,8 +36,23 @@ public class UserController {
     @PostMapping("auth/register")
     public Result register(@RequestBody RegisterDTO registerDTO) {
         log.info("用户注册: {}", registerDTO);
-        Result<T> result = userService.register(registerDTO);
+        Result result = userService.register(registerDTO);
         return result;
+    }
+
+    /**
+     * 获取注册验证码
+     * @param phone
+     * @return
+     */
+    @PostMapping("auth/code")
+    public Result<String> getRegisterCode(@RequestParam String phone) {
+        log.info("获取注册验证码: {}", phone);
+        if (phone == null || phone.isEmpty() || phone.length() != 11) {
+            return Result.error(MessageConstant.PHONE_ERROR);
+        }
+        return Result.success(verificationCodeService.generate(phone));
+
     }
 
     /**

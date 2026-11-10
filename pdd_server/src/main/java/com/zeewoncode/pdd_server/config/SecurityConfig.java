@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.config;
 
+import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.pdd_server.security.JsonAccessDeniedHandler;
 import com.zeewoncode.pdd_server.security.JsonAuthenticationEntryPoint;
 import com.zeewoncode.pdd_server.security.JwtAuthenticationFilter;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final UserMapper userMapper;
     private final JsonAuthenticationEntryPoint authenticationEntryPoint;
     private final JsonAccessDeniedHandler accessDeniedHandler;
 
@@ -64,7 +66,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)           // 403
                 )
                 // JWT 过滤器放在用户名密码过滤器之前
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userMapper),
                         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
