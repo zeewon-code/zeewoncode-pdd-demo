@@ -7,7 +7,6 @@ import com.zeewoncode.entity.Spu;
 import com.zeewoncode.pdd_server.a.service.GrouponService;
 import com.zeewoncode.pdd_server.mapper.GrouponMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
-import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.pdd_server.mapper.po.GrouponInstancesCount;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.utils.SafeCollectors;
@@ -45,40 +44,39 @@ public class GrouponServiceImpl implements GrouponService {
             return PageResult.empty(pageInfo);
         }
         // 查询title (spu)
-        List<Integer> spuIdList = SafeCollectors.distinctValues(grouponDefines, GrouponDefine::getSpuId);
-        List<Spu> spus = spuMapper.selectSpuByIds(spuIdList.stream().map(Long::valueOf).collect(Collectors.toList()));
+        List<Long> spuIdList = SafeCollectors.distinctValues(grouponDefines, GrouponDefine::getSpuId);
+        List<Spu> spus = spuMapper.selectSpuByIds(spuIdList);
         Map<Long, Spu> spuMap = spuIdList.isEmpty()
                 ? Collections.emptyMap()
                 : SafeCollectors.toMap(spus, Spu::getId);
         // runningCount successCount failCount (groupon_instance)
-        List<Integer> defineIds = SafeCollectors.distinctValues(grouponDefines, GrouponDefine::getId);
-        List<Long> defineIdsList = defineIds.stream().map(Integer::longValue).toList();
-        List<GrouponInstancesCount> grouponInstancesCounts = grouponMapper.selectDefineCountByDefineIds(defineIdsList);
+        List<Long> defineIds = SafeCollectors.distinctValues(grouponDefines, GrouponDefine::getId);
+        List<GrouponInstancesCount> grouponInstancesCounts = grouponMapper.selectDefineCountByDefineIds(defineIds);
         Map<Long, GrouponInstancesCount> countMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(grouponInstancesCounts)) {
             countMap.putAll(SafeCollectors.toMap(grouponInstancesCounts, GrouponInstancesCount::getDefineId));
         }
-        for (Long defineId : defineIdsList) {
+        for (Long defineId : defineIds) {
             countMap.putIfAbsent(defineId, new GrouponInstancesCount(defineId, 0, 0, 0));
         }
         // 拼接GrouponAdminItemVO
         List<GrouponAdminItemVO> vos = grouponDefines.stream().map(grouponDefine -> {
             GrouponAdminItemVO grouponAdminItemVO = GrouponAdminItemVO.builder()
-                    .id(grouponDefine.getId().longValue())
-                    .spuId(grouponDefine.getSpuId().longValue())
-                    .skuId(grouponDefine.getSkuId().longValue())
-                    .groupPrice(grouponDefine.getGroupPrice().doubleValue())
+                    .id(grouponDefine.getId())
+                    .spuId(grouponDefine.getSpuId())
+                    .skuId(grouponDefine.getSkuId())
+                    .groupPrice(grouponDefine.getGroupPrice())
                     .targetCount(grouponDefine.getTargetCount())
                     .status(grouponDefine.getStatus())
                     .startTime(grouponDefine.getStartTime())
                     .endTime(grouponDefine.getEndTime())
-                    .title(spuMap.get(grouponDefine.getSpuId().longValue()).getTitle())
-                    .runningCount(countMap.get(grouponDefine.getId().longValue()).getRunningCount() != null
-                            ? countMap.get(grouponDefine.getId().longValue()).getRunningCount() : 0)
-                    .successCount(countMap.get(grouponDefine.getId().longValue()).getSuccessCount() != null
-                            ? countMap.get(grouponDefine.getId().longValue()).getSuccessCount() : 0)
-                    .failCount(countMap.get(grouponDefine.getId().longValue()).getFailCount() != null
-                            ? countMap.get(grouponDefine.getId().longValue()).getFailCount() : 0)
+                    .title(spuMap.get(grouponDefine.getSpuId()).getTitle())
+                    .runningCount(countMap.get(grouponDefine.getId()).getRunningCount() != null
+                            ? countMap.get(grouponDefine.getId()).getRunningCount() : 0)
+                    .successCount(countMap.get(grouponDefine.getId()).getSuccessCount() != null
+                            ? countMap.get(grouponDefine.getId()).getSuccessCount() : 0)
+                    .failCount(countMap.get(grouponDefine.getId()).getFailCount() != null
+                            ? countMap.get(grouponDefine.getId()).getFailCount() : 0)
                     .build();
             return grouponAdminItemVO;
         }).filter(Objects::nonNull).collect(Collectors.toList());

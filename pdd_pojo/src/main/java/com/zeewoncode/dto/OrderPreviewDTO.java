@@ -15,5 +15,5 @@ import java.util.List;
 public class OrderPreviewDTO implements Serializable {
 
     private List<OrderItemDTO> items;
-    private Integer userCouponId;
+    private Long userCouponId;
 }

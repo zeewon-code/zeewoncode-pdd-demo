@@ -58,7 +58,7 @@ public class ShipmentServiceImpl implements ShipmentService {
      */
     @Override
     @Transactional
-    public void receive(Long id, Integer userId) {
+    public void receive(Long id, Long userId) {
         //shipment置3已签收 → 订单2待收货→3已完成 → 累加 spu.sales。
         //shipment置3已签收
         int i = shipmentMapper.updateShipmentStatus(id, 3);
@@ -71,7 +71,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         Order order = new Order();
         order.setStatus(3);
         order.setId(orderId);
-        order.setUserId(userId.longValue());
+        order.setUserId(userId);
         order.setCompletedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         orderMapper.update(order);
         //累加 spu.sales。

@@ -19,24 +19,27 @@ public interface CouponService {
 
     /**
      * 领取优惠券
-     * @param id
+     * @param CouponId
+     * @param userId
      * @return
      */
-    CouponClaimVO claimCoupon(Long id, Integer userId);
+    CouponClaimVO claimCoupon(Long CouponId, Long userId);
 
     /**
      * 我的优惠券
      * @param status
      * @param page
      * @param size
+     * @param userId
      * @return
      */
-    PageResult<UserCouponVO> getMyUserCoupons(Integer status, Integer page, Integer size, Integer userId);
+    PageResult<UserCouponVO> getMyUserCoupons(Integer status, Integer page, Integer size, Long userId);
 
     /**
      * 结算页可选券
      * @param totalAmount
+     * @param userId
      * @return
      */
-    List<CouponOptionVO> getCouponOptions(Double totalAmount, Integer userId);
+    List<CouponOptionVO> getCouponOptions(Double totalAmount, Long userId);
 }

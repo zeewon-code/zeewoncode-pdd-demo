@@ -14,7 +14,7 @@ public interface OrderMapper {
      * 查询待评价订单
      * @return
      */
-    List<OrderCard> selectUnreviewedOrdersPage(@Param("userId") Integer userId);
+    List<OrderCard> selectUnreviewedOrdersPage(@Param("userId") Long userId);
 
     /**
      * 根据订单id查询订单明细返回
@@ -89,25 +89,26 @@ public interface OrderMapper {
      * @param merchantId
      * @return
      */
-    List<OrderCard> selectOrderList(Long userId, Integer status, Long merchantId, LocalDateTime startTime, LocalDateTime endTime);
+    List<OrderCard> selectOrderList(Long userId, Integer status, Long merchantId,
+                                    LocalDateTime startTime, LocalDateTime endTime);
 
     /**
      * 根据用户id和订单id查询订单详情
      * @param userId
-     * @param id
+     * @param orderId
      * @return
      */
-    OrderDetail selectOrderDetail(Long userId, Integer id);
+    OrderDetail selectOrderDetail(Long userId, Long orderId);
 
     /**
      * 根据订单id查询收货人信息
-     * @param id
+     * @param orderId
      * @return
      */
     @Select("SELECT receiver_name as name, receiver_phone as phone, receiver_address as address " +
             "FROM orders " +
-            "WHERE id = #{id}")
-    Receiver selectReceiverByOrderId(Integer id);
+            "WHERE id = #{orderId}")
+    Receiver selectReceiverByOrderId(Long orderId);
 
     /**
      * 根据团购实例id和用户id查询订单
@@ -153,7 +154,7 @@ public interface OrderMapper {
      * @param cancelType
      * @return
      */
-    int updateOrderStatusAndCancelTypeByInstanceIds(List<Long> instanceIds, int status, int cancelType);
+    int updateOrderStatusAndCancelTypeByInstanceIds(List<Long> instanceIds, Integer status, Integer cancelType);
 
     /**
      * 根据商户id查询订单列表

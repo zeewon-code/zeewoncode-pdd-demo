@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @Builder
 public class CartVO implements Serializable {
 
-    private BigDecimal totalAmount;
+    private Double totalAmount;
     private List<CartGroup> groups;
 
 }

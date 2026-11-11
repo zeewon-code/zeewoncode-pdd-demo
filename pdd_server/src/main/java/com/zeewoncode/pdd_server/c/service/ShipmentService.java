@@ -6,14 +6,15 @@ public interface ShipmentService {
 
     /**
      * 根据id获取物流信息
-     * @param id
+     * @param shipmentId
      * @return
      */
-    ShipmentVO getShipment(Long id);
+    ShipmentVO getShipment(Long shipmentId);
 
     /**
      * 确认收货
-     * @param id
+     * @param shipmentId
+     * @param userId
      */
-    void receive(Long id, Integer userId);
+    void receive(Long shipmentId, Long userId);
 }

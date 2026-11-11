@@ -12,7 +12,6 @@ import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,8 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public PageResult<Review> getReviewList(Long spuId, Integer rating, Integer page, Integer size, Integer userId) {
+    public PageResult<Review> getReviewList(Long spuId, Integer rating, Integer page,
+                                            Integer size, Long userId) {
         // 涉及的表：user， product_review
         if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
@@ -48,13 +48,13 @@ public class ReviewServiceImpl implements ReviewService {
         if (spuId != null) {
             //前端传了spuId，校验该spu是否是属于当前店铺的
             Spu spuById = spuMapper.getSpuById(spuId);
-            Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+            Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
             if (spuById == null || !spuById.getMerchantId().equals(merchant.getId()) || spuById.getDeletedFlag() != 0) {
                 throw new RuntimeException("当前店铺下不存在该商品");
             }
             spuIds = List.of(spuId);
         } else {
-            Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+            Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
             List<Spu> spus = spuMapper.selectSpuByMerchantId(merchant.getId(), null, null, null);
             spuIds = spus.stream().map(Spu::getId).toList();
         }
@@ -72,11 +72,11 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public Result<ReviewStat> getReviewStat(Integer userId) {
+    public Result<ReviewStat> getReviewStat(Long userId) {
         if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         List<Spu> spus = spuMapper.selectSpuByMerchantId(merchant.getId(), null, null, null);
         List<Long> spuIds = spus.stream().map(Spu::getId).toList();
         List<Integer> ratings = reviewMapper.selectRatingBySpuIds(spuIds);
@@ -88,12 +88,12 @@ public class ReviewServiceImpl implements ReviewService {
         reviewStat.setAvgRating(ratingSum / ratings.size());
         Map<Integer, Long> countMap = ratings.stream()
                 .collect(Collectors.groupingBy(r -> r, Collectors.counting()));
-        Map<String, Integer> ratingDist = new HashMap<>();
-        ratingDist.put(RatingConstant.RATING_1, countMap.getOrDefault(1, 0L).intValue());
-        ratingDist.put(RatingConstant.RATING_2, countMap.getOrDefault(2, 0L).intValue());
-        ratingDist.put(RatingConstant.RATING_3, countMap.getOrDefault(3, 0L).intValue());
-        ratingDist.put(RatingConstant.RATING_4, countMap.getOrDefault(4, 0L).intValue());
-        ratingDist.put(RatingConstant.RATING_5, countMap.getOrDefault(5, 0L).intValue());
+        Map<String, Long> ratingDist = new HashMap<>();
+        ratingDist.put(RatingConstant.RATING_1, countMap.getOrDefault(1, 0L));
+        ratingDist.put(RatingConstant.RATING_2, countMap.getOrDefault(2, 0L));
+        ratingDist.put(RatingConstant.RATING_3, countMap.getOrDefault(3, 0L));
+        ratingDist.put(RatingConstant.RATING_4, countMap.getOrDefault(4, 0L));
+        ratingDist.put(RatingConstant.RATING_5, countMap.getOrDefault(5, 0L));
         reviewStat.setRatingDist(ratingDist);
         return Result.success(reviewStat);
     }
@@ -102,8 +102,8 @@ public class ReviewServiceImpl implements ReviewService {
      * 校验当前用户是否有资格进行相关操作
      * @return
      */
-    public Boolean haveMerchantOperation(Integer userId) {
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+    public Boolean haveMerchantOperation(Long userId) {
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         if (merchant == null || merchant.getDeletedFlag() == 0) {
             return false;
         }

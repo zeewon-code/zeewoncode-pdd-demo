@@ -15,8 +15,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class Sku implements Serializable {
-    private Integer id;
-    private Integer spuId;
+    private Long id;
+    private Long spuId;
     private String specs; //规格描述
     private Double price;
     private Integer stock;

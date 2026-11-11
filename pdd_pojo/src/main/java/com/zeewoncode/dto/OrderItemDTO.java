@@ -13,6 +13,6 @@ import java.io.Serializable;
 @Builder
 public class OrderItemDTO implements Serializable {
 
-    private Integer skuId;
+    private Long skuId;
     private Integer quantity;
 }

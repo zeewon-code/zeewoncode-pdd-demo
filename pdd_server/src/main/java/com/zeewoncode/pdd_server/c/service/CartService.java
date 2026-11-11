@@ -10,20 +10,20 @@ public interface CartService {
      * 查看购物车列表
      * @return
      */
-    CartVO getCartList(Integer userId);
+    CartVO getCartList(Long userId);
 
     /**
      * 添加购物车
      * @param req
      */
-    void addCart(CartAddDTO req,Integer userId);
+    void addCart(CartAddDTO req, Long userId);
 
     /**
      * 更新购物车数量
-     * @param id
+     * @param cartItemId
      * @param req
      */
-    void updateCartQuantity(Long id, CartQuantityDTO req);
+    void updateCartQuantity(Long cartItemId, CartQuantityDTO req);
 
     /**
      * 选中或取消选中购物车
@@ -33,12 +33,12 @@ public interface CartService {
 
     /**
      * 删除购物车
-     * @param id
+     * @param cartItemId
      */
-    void deleteCart(Long id);
+    void deleteCart(Long cartItemId);
 
     /**
      * 清空已勾选购物车条目
      */
-    void deleteCartBySelected(Integer userId);
+    void deleteCartBySelected(Long userId);
 }

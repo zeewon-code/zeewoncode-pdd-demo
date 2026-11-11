@@ -34,11 +34,11 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size, Integer userId) {
+    public PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size, Long userId) {
         if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         // 1.启动分页
         PageHelper.startPage(page, size);
         // 2.查询订单列表
@@ -57,15 +57,15 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public OrderDetail getOrderDetail(Long orderId, Integer userId) {
+    public OrderDetail getOrderDetail(Long orderId, Long userId) {
         if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
-        OrderDetail orderDetail = orderMapper.selectOrderDetail(userId.longValue(), orderId.intValue());
+        OrderDetail orderDetail = orderMapper.selectOrderDetail(userId, orderId);
         // 1.补充receiver类字段
-        Receiver receiver = orderMapper.selectReceiverByOrderId(orderId.intValue());
+        Receiver receiver = orderMapper.selectReceiverByOrderId(orderId);
         // 2.补充ShipVO类字段
-        Shipment shipment = shipmentMapper.selectShipmentByOrderId(orderId.intValue());
+        Shipment shipment = shipmentMapper.selectShipmentByOrderId(orderId);
         ShipVO shipVO = new ShipVO();
         if (shipment != null) {
             shipVO = ShipVO.builder()
@@ -85,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public ShipVO ship(Long orderId, ShipDTO dto, Integer userId) {
+    public ShipVO ship(Long orderId, ShipDTO dto, Long userId) {
         if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
@@ -120,8 +120,8 @@ public class OrderServiceImpl implements OrderService {
      * 校验当前用户是否有资格进行相关操作
      * @return
      */
-    public Boolean haveMerchantOperation(Integer userId) {
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+    public Boolean haveMerchantOperation(Long userId) {
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         if (merchant == null || merchant.getDeletedFlag() == 0) {
             return false;
         }

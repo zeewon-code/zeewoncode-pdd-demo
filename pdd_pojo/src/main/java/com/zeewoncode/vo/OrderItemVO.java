@@ -12,7 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class OrderItemVO implements Serializable {
-    private Integer id; // 订单明细id
+    private Long id; // 订单明细id
     private String title;
     private String specs;
     private String image;

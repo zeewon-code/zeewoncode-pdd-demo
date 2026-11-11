@@ -1,10 +1,9 @@
 package com.zeewoncode.pdd_server.c.controller;
 
-import com.zeewoncode.pdd_server.c.service.ShipmentService;
+
 import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.ShipmentVO;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,7 +39,8 @@ public class ShipmentController {
      * @return
      */
     @PostMapping("/{id}/receive")
-    public Result receive(@PathVariable Long id, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result receive(@PathVariable Long id,
+                          @AuthenticationPrincipal LoginUser loginUser) {
         log.info("确认收货:{}",id);
         shipmentService.receive(id, loginUser.getUserId());
         return Result.success();

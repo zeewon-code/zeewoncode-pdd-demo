@@ -1,6 +1,6 @@
 package com.zeewoncode.utils;
 
-import org.springframework.stereotype.Component;
+
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 /**
  * 信息校验器：名称或标题 +  URL，纯业务校验，不涉及注解
  */
-//@Component
+
 public class InfoValidator {
 
     private InfoValidator() { throw new UnsupportedOperationException(); }

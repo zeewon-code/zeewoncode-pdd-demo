@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Result<UserVO> getUserInfo(Long userId) {
-        User user = userMapper.selectById(userId.intValue());
+        User user = userMapper.selectById(userId);
         if (user == null) {
             return Result.error("该用户信息不存在");
         }
@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public Result updateUserStatus(Long userId, Integer status) {
-        User user = userMapper.selectById(userId.intValue());
+        User user = userMapper.selectById(userId);
         if (user == null) {
             return Result.error("该用户信息不存在");
         }

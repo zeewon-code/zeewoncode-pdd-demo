@@ -17,16 +17,16 @@ public interface ReviewMapper {
      * @param dto
      * @return
      */
-    List<Review> selectReviewList(Integer spuId, ReviewsListQueryDTO dto);
+    List<Review> selectReviewList(Long spuId, ReviewsListQueryDTO dto);
 
 
     /**
      * 根据spuId获取该商品的评分列表
-     * @param id
+     * @param spuId
      * @return
      */
-    @Select("SELECT rating FROM product_review WHERE spu_id = #{id}")
-    List<Review> selectReviewListBySpuId(Integer id);
+    @Select("SELECT rating FROM product_review WHERE spu_id = #{spuId}")
+    List<Review> selectReviewListBySpuId(Long spuId);
 
     /**
      * 添加评论
@@ -61,9 +61,9 @@ public interface ReviewMapper {
 
     /**
      * 根据id删除评论
-     * @param id
+     * @param reviewId
      * @return
      */
-    @Delete("DELETE FROM product_review WHERE id = #{id}")
-    int deleteById(Long id);
+    @Delete("DELETE FROM product_review WHERE id = #{reviewId}")
+    int deleteById(Long reviewId);
 }

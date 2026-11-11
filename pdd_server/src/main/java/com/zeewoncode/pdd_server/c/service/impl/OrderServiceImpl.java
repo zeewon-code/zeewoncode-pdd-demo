@@ -15,7 +15,6 @@ import com.zeewoncode.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Transactional
     @Override
-    public OrderCreateVO createOrder(OrderCreateDTO req, Integer userId) {
+    public OrderCreateVO createOrder(OrderCreateDTO req, Long userId) {
         // 1.预占库存
         int isLockStock = skuMapper.lockStock(req.getItems());
         int size = req.getItems().size();
@@ -62,9 +61,9 @@ public class OrderServiceImpl implements OrderService {
         }
         // 判断下单的sku属于的spu是否存在
         for (OrderItemDTO item : req.getItems()) {
-            Long skuId = item.getSkuId().longValue();
+            Long skuId = item.getSkuId();
             Sku sku = skuMapper.selectSkuById(skuId);
-            Spu spuById = spuMapper.getSpuById(sku.getSpuId().longValue());
+            Spu spuById = spuMapper.getSpuById(sku.getSpuId());
             if (spuById.getDeletedFlag() == 1) {
                 throw new RuntimeException("该商品已下架");
             }
@@ -72,15 +71,15 @@ public class OrderServiceImpl implements OrderService {
         // 2.插入订单表orders
         Order order = new Order();
         order.setOrderNo(String.valueOf(snowflakeIdGenerator.nextId()));
-        order.setUserId(userId.longValue());
+        order.setUserId(userId);
         // 填充merchantId
-        Sku sku = skuMapper.selectSkuById(req.getItems().get(0).getSkuId().longValue());
-        Spu spu = spuMapper.getSpuById(sku.getSpuId().longValue());
+        Sku sku = skuMapper.selectSkuById(req.getItems().get(0).getSkuId());
+        Spu spu = spuMapper.getSpuById(sku.getSpuId());
         order.setMerchantId(spu.getMerchantId());
         // 填充addressId
-        order.setAddressId(req.getAddressId().longValue());
+        order.setAddressId(req.getAddressId());
         // 填充receiverName, receiverPhone, receiverAddress
-        UserAddress userAddress = addressesMapper.selectById(req.getAddressId().longValue());
+        UserAddress userAddress = addressesMapper.selectById(req.getAddressId());
         order.setReceiverName(userAddress.getReceiverName());
         order.setReceiverPhone(userAddress.getReceiverPhone());
         String address = userAddress.getProvince() + userAddress.getCity() + userAddress.getDistrict() + userAddress.getDetail();
@@ -88,33 +87,33 @@ public class OrderServiceImpl implements OrderService {
         Double totalAmount = 0.0;
         // 填充totalAmount
         for (OrderItemDTO item : req.getItems()) {
-            Long skuId = item.getSkuId().longValue();
+            Long skuId = item.getSkuId();
             Integer quantity = item.getQuantity();
             Sku skuDB = skuMapper.selectSkuById(skuId);
             Double price = skuDB.getPrice();
             totalAmount += (price * quantity);
         }
-        order.setTotalAmount(new BigDecimal(totalAmount.toString()));
+        order.setTotalAmount(totalAmount);
         // 填充discountAmount, payableAmount
         // 判断用户是否有使用优惠券的资格
         if (req.getUserCouponId() != null) {
-            Long couponId = req.getUserCouponId().longValue();
+            Long couponId = req.getUserCouponId();
             UserCoupon userCoupon = couponMapper.selectUserCouponById(couponId);
             Coupon coupon = couponMapper.selectById(userCoupon.getCouponId(), LocalDateTime.now());
             if (coupon.getType() == 1) {
                 // 优惠券类型为满减券
                 if (totalAmount >= coupon.getConditionAmount()) {
-                    order.setDiscountAmount(new BigDecimal(coupon.getDiscountAmount().toString()));
+                    order.setDiscountAmount(coupon.getDiscountAmount());
                 } else throw new RuntimeException("优惠券不满足使用条件");
             } else {
                 // 优惠券为折扣券
                 Double discountAmount = (1-coupon.getDiscountRate()) * totalAmount;
-                order.setDiscountAmount(new BigDecimal(discountAmount.toString()));
+                order.setDiscountAmount(discountAmount);
             }
         } else {
-            order.setDiscountAmount(BigDecimal.ZERO);
+            order.setDiscountAmount(0.0);
         }
-        order.setPayableAmount((order.getTotalAmount().subtract(order.getDiscountAmount())));
+        order.setPayableAmount((order.getTotalAmount() - order.getDiscountAmount()));
         order.setPaymentId(null);
         order.setGrouponInstanceId(null);
         order.setStatus(0);
@@ -122,13 +121,13 @@ public class OrderServiceImpl implements OrderService {
         order.setPaidAt(null);
         order.setCompletedAt(null);
         orderMapper.insert(order);
-        if (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
+        if (order.getDiscountAmount() != null && order.getDiscountAmount() > 0) {
             // 修改优惠券的状态
             UserCoupon userCouponDb = UserCoupon.builder()
                     .orderId(order.getId())
                     .status(1)
                     .usedAt(LocalDateTime.now())
-                    .id(req.getUserCouponId().longValue())
+                    .id(req.getUserCouponId())
                     .build();
             couponMapper.updateUserCoupon(userCouponDb);
         }
@@ -139,23 +138,23 @@ public class OrderServiceImpl implements OrderService {
             OrderItem item = new OrderItem();
             Long orderId = order.getId();
             item.setOrderId(orderId);
-            item.setSkuId(orderItem.getSkuId().longValue());
-            Sku skuDB = skuMapper.selectSkuById(orderItem.getSkuId().longValue());
-            Long spuId = skuDB.getSpuId().longValue();
+            item.setSkuId(orderItem.getSkuId());
+            Sku skuDB = skuMapper.selectSkuById(orderItem.getSkuId());
+            Long spuId = skuDB.getSpuId();
             item.setSpuId(spuId);
             Spu spuById = spuMapper.getSpuById(spuId);
             item.setTitle(spuById.getTitle());
             item.setSpecs(skuDB.getSpecs());
             item.setImage(skuDB.getImage());
-            item.setPrice(new BigDecimal(skuDB.getPrice().toString()));
+            item.setPrice(skuDB.getPrice());
             item.setQuantity(orderItem.getQuantity());
-            item.setAmount(item.getPrice().multiply(new BigDecimal(item.getQuantity())));
+            item.setAmount(item.getPrice() * item.getQuantity());
             orderItems.add(item);
         }
         orderMapper.insertOrderItems(orderItems);
         // 4. 删除cart_items表购物车数据
         for (OrderItemDTO orderItem : req.getItems()) {
-            cartMapper.deleteCartItemsByUserIdAndSkuId(userId, orderItem.getSkuId().longValue());
+            cartMapper.deleteCartItemsByUserIdAndSkuId(userId, orderItem.getSkuId());
         }
         // 5. 返回创建订单结果
         // 返回支付截止时间
@@ -163,7 +162,7 @@ public class OrderServiceImpl implements OrderService {
         OrderCreateVO result = OrderCreateVO.builder()
                 .orderId(order.getId().intValue())
                 .orderNo(order.getOrderNo())
-                .payableAmount(order.getPayableAmount().doubleValue())
+                .payableAmount(order.getPayableAmount())
                 .payExpireTime(expireDateTime)
                 .build();
         return result;
@@ -182,7 +181,7 @@ public class OrderServiceImpl implements OrderService {
         Double totalAmount = 0.0;
         Double payableAmount = 0.0;
         for (OrderItemDTO item : orderPreviewDTO.getItems()) {
-            Long skuId = item.getSkuId().longValue();
+            Long skuId = item.getSkuId();
             Integer quantity = item.getQuantity();
             Sku sku = skuMapper.selectSkuById(skuId);
             totalAmount += (sku.getPrice() * quantity);
@@ -193,7 +192,7 @@ public class OrderServiceImpl implements OrderService {
         // 2.计算优惠总额 discountAmount
         if (orderPreviewDTO.getUserCouponId() != null) {
             // 判断用户的优惠券是否过期，如果过期则不能使用
-            Long userCouponId = orderPreviewDTO.getUserCouponId().longValue();
+            Long userCouponId = orderPreviewDTO.getUserCouponId();
             UserCoupon userCoupon = couponMapper.selectUserCouponById(userCouponId);
             if (userCoupon.getStatus() == 1) {
                 throw new RuntimeException("优惠券已使用");
@@ -226,12 +225,11 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 取消待付款订单
-     * @param id
+     * @param orderId
      */
     @Override
     @Transactional
-    public void cancelOrderPendingPayMent(Integer id, Integer userId) {
-        Long orderId = Long.valueOf(id);
+    public void cancelOrderPendingPayMent(Long orderId, Long userId) {
         Order order = orderMapper.selectOrderById(orderId);
         if (order == null) {
             throw new RuntimeException("该订单不存在");
@@ -250,10 +248,10 @@ public class OrderServiceImpl implements OrderService {
         }
         // 4.退还优惠券(将优惠券状态改为未使用，status=0, used_at=null, order_id = null)
         // 判断是否使用了优惠券
-        if (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
-            UserCoupon userCoupon = UserCoupon.builder().userId(userId.longValue()).orderId(orderId).status(0).usedAt(null).build();
+        if (order.getDiscountAmount() != null && order.getDiscountAmount() > 0) {
+            UserCoupon userCoupon = UserCoupon.builder().userId(userId).orderId(orderId).status(0).usedAt(null).build();
             couponMapper.updateUserCouponStatusAndUsedAt(userCoupon);
-            UserCoupon userCoupon1 = couponMapper.selectUserCouponByUserIdAndOrderId(userId.longValue(), orderId);
+            UserCoupon userCoupon1 = couponMapper.selectUserCouponByUserIdAndOrderId(userId, orderId);
             userCoupon1.setOrderId(null);
             couponMapper.updateUserCouponSetOrderIdToNull(userCoupon1);
         }
@@ -267,11 +265,11 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public CountdownVO getCountdown(Integer id) {
+    public CountdownVO getCountdown(Long id) {
         if (id == null) {
             throw new RuntimeException("订单id不能为空");
         }
-        Order order = orderMapper.selectOrderById(id.longValue());
+        Order order = orderMapper.selectOrderById(id);
         if (order == null) {
             throw new RuntimeException("订单不存在");
         }
@@ -294,7 +292,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional
-    public PayVO orderPay(Long id, Integer userId) {
+    public PayVO orderPay(Long id, Long userId) {
         // 1.检查待付款时间是否超时
         // 超时
         Order order = orderMapper.selectOrderById(id);
@@ -304,15 +302,15 @@ public class OrderServiceImpl implements OrderService {
         if (LocalDateTime.now().isAfter(order.getCreatedAt().plusMinutes(PAY_TIMEOUT_MINUTES))) {
             Order build = Order.builder().id(id).status(5).build();
             orderMapper.update(build);
-            if (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
+            if (order.getDiscountAmount() != null && order.getDiscountAmount() > 0) {
                 UserCoupon userCoupon = UserCoupon.builder()
-                        .userId(userId.longValue())
+                        .userId(userId)
                         .orderId(id)
                         .status(0)
                         .usedAt(null)
                         .build();
                 couponMapper.updateUserCouponStatusAndUsedAt(userCoupon);
-                UserCoupon userCoupon1 = couponMapper.selectUserCouponByUserIdAndOrderId(userId.longValue(), id);
+                UserCoupon userCoupon1 = couponMapper.selectUserCouponByUserIdAndOrderId(userId, id);
                 userCoupon1.setOrderId(null);
                 couponMapper.updateUserCouponSetOrderIdToNull(userCoupon1);
             }
@@ -320,7 +318,7 @@ public class OrderServiceImpl implements OrderService {
         }
         // 2.不超时
         // 3.往payment表插入数据，支付记录
-        BigDecimal payableAmount = order.getPayableAmount();
+        Double payableAmount = order.getPayableAmount();
         Payment payment = Payment.builder()
                 .paymentNo("P" + String.valueOf(snowflakeIdGenerator.nextId()))
                 .orderId(id)
@@ -333,7 +331,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         paymentMapper.insert(payment);
         // 4.订单状态修改为1 （待发货）
-        Order build = Order.builder().id(id).status(1).userId(userId.longValue()).build();
+        Order build = Order.builder().id(id).status(1).userId(userId).build();
         orderMapper.update(build);
         // 5.扣减库存跟释放预占库存
         List<OrderItem> orderItems = orderMapper.selectItemsByOrderId(id);
@@ -355,11 +353,11 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size, Integer userId) {
+    public PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size, Long userId) {
         // 1.启动分页
         PageHelper.startPage(page, size, true);
         // 2.查询订单列表
-        List<OrderCard> orderList = orderMapper.selectOrderList(userId.longValue(), status, null, null, null);
+        List<OrderCard> orderList = orderMapper.selectOrderList(userId, status, null, null, null);
         // 3.包装分页结果
         PageInfo<OrderCard> pageInfo = new PageInfo<>(orderList);
         PageResult<OrderCard> result = new PageResult<>();
@@ -376,8 +374,8 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public OrderDetail getOrderDetail(Integer id, Integer userId) {
-        OrderDetail orderDetail = orderMapper.selectOrderDetail(userId.longValue(), id);
+    public OrderDetail getOrderDetail(Long id, Long userId) {
+        OrderDetail orderDetail = orderMapper.selectOrderDetail(userId, id);
         // 1.补充receiver类字段
         Receiver receiver = orderMapper.selectReceiverByOrderId(id);
         // 2.补充ShipVO类字段

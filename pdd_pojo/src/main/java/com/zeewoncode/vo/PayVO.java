@@ -16,5 +16,5 @@ public class PayVO implements Serializable {
 
     private Long paymentId;
     private String paymentNo;
-    private BigDecimal paidAmount;
+    private Double paidAmount;
 }

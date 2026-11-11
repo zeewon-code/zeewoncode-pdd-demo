@@ -36,9 +36,9 @@ public class CartServiceImpl implements CartService {
      * @return
      */
     @Override
-    public CartVO getCartList(Integer userId) {
+    public CartVO getCartList(Long userId) {
         CartVO cartVO = new CartVO();
-        List<CartItem> cartItemList = cartMapper.selectCartItemByUserId(userId.longValue());
+        List<CartItem> cartItemList = cartMapper.selectCartItemByUserId(userId);
         Double totalAmountCopy = 0.0;
         for (CartItem cartItem : cartItemList) {
             Long skuId = cartItem.getSkuId();
@@ -47,12 +47,12 @@ public class CartServiceImpl implements CartService {
             Double price = sku.getPrice();
             totalAmountCopy += (quantity * price);
         }
-        cartVO.setTotalAmount(new BigDecimal(totalAmountCopy.toString()));
+        cartVO.setTotalAmount(totalAmountCopy);
         Map<Long, List<CartItem>> cartList = cartItemList.stream()
                 .collect(Collectors.groupingBy(CartItem::getSpuId));
         List<CartGroup> groups = cartList.entrySet().stream().map(entry -> {
             Long spuId = entry.getKey();
-            SpuDetail spuDetail = spuMapper.getSpuDetailById(spuId.intValue());
+            SpuDetail spuDetail = spuMapper.getSpuDetailById(spuId);
             Long merchantId = spuDetail.getMerchantId();
             Merchant merchant = merchantMapper.selectMerchantById(merchantId);
             String shopName = merchant.getShopName();
@@ -66,13 +66,13 @@ public class CartServiceImpl implements CartService {
                 // 填充 selected 将Integer 转换成 Boolean
                 cartItemVO.setSelected(cartItem.getSelected() != null && cartItem.getSelected() != 0);
                 // 填充 title
-                SpuDetail spuDetailById = spuMapper.getSpuDetailById(cartItem.getSpuId().intValue());
+                SpuDetail spuDetailById = spuMapper.getSpuDetailById(cartItem.getSpuId());
                 cartItemVO.setTitle(spuDetailById.getTitle());
                 // 填充specs, image, price
                 Sku sku = skuMapper.selectSkuById(cartItem.getSkuId());
                 cartItemVO.setSpecs(sku.getSpecs());
                 cartItemVO.setImage(sku.getImage());
-                cartItemVO.setPrice(new BigDecimal(sku.getPrice()));
+                cartItemVO.setPrice(sku.getPrice());
                 cartItemVOS.add(cartItemVO);
             }
             return CartGroup.builder()
@@ -90,34 +90,34 @@ public class CartServiceImpl implements CartService {
      * @param req
      */
     @Override
-    public void addCart(CartAddDTO req, Integer userId) {
+    public void addCart(CartAddDTO req, Long userId) {
         // 1. 对sku表的stock,status和deleted_flag进行校验
         Sku sku = skuMapper.selectSkuById(req.getSkuId());
         if (sku == null || sku.getStock() <= 0 || sku.getStatus() != 1 || sku.getDeletedFlag() != 0) {
             throw new RuntimeException("该商品规格已售罄或已下架");
         }
         // 2. 对spu表的status和deleted_flag进行校验
-        Spu spuDetail = spuMapper.getSpuById(sku.getSpuId().longValue());
+        Spu spuDetail = spuMapper.getSpuById(sku.getSpuId());
         if (spuDetail.getStatus() != 1 || spuDetail.getDeletedFlag() != 0) {
             throw new RuntimeException("该商品已下架");
         }
         // 3. 对购物车表进行操作，加入购物车（同 sku 数量累加）
         // 3.1 查询购物车表，判断该用户是否已经将该商品规格加入过购物车
         Long skuId = req.getSkuId();
-        List<CartItem> cartItemList = cartMapper.selectCartItemByUserIdAndSkuId(userId.longValue(), skuId);
+        List<CartItem> cartItemList = cartMapper.selectCartItemByUserIdAndSkuId(userId, skuId);
         // 3.2 已存在则更新数量
         if (cartItemList != null && cartItemList.size() == 1) {
             CartItem cartItem = cartItemList.get(0);
             cartItem.setQuantity(cartItem.getQuantity() + req.getQuantity());
-            cartMapper.updateCartItem(cartItem, userId.longValue());
+            cartMapper.updateCartItem(cartItem, userId);
         } else {
             // 3.3 不存在则插入新记录
             // 填充spuId
-            Integer spuId = skuMapper.selectSkuById(skuId).getSpuId();
+            Long spuId = skuMapper.selectSkuById(skuId).getSpuId();
             CartItem cartItem = CartItem.builder()
-                    .userId(userId.longValue())
+                    .userId(userId)
                     .skuId(req.getSkuId())
-                    .spuId(spuId.longValue())
+                    .spuId(spuId)
                     .quantity(req.getQuantity())
                     .selected(1)
                     .build();
@@ -141,7 +141,7 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     public void selectCart(CartSelectDTO req) {
-        List<Integer> ids = req.getIds();
+        List<Long> ids = req.getIds();
         Boolean isSelected = req.getSelected();
         Integer selected = isSelected != null && isSelected ? 1 : 0;
         cartMapper.updateCartSelectByIds(ids, selected);
@@ -160,7 +160,7 @@ public class CartServiceImpl implements CartService {
      * 删除购物车中已勾选的商品
      */
     @Override
-    public void deleteCartBySelected(Integer userId) {
-        cartMapper.deleteCartBySelected(userId.longValue());
+    public void deleteCartBySelected(Long userId) {
+        cartMapper.deleteCartBySelected(userId);
     }
 }

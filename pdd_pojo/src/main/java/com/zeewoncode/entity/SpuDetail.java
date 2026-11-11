@@ -17,7 +17,7 @@ import java.util.List;
 @Builder
 public class SpuDetail implements Serializable {
 
-    private Integer id;
+    private Long id;
     private String title;
     private String subtitle;
     private Long merchantId; // 店铺id

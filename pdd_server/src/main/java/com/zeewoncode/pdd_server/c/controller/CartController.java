@@ -33,7 +33,6 @@ public class CartController {
         return Result.success(result);
     }
 
-
     /**
      * 添加购物车
      * @param req
@@ -53,9 +52,10 @@ public class CartController {
      * @return
      */
     @PutMapping("/{id}/quantity")
-    public Result updateCartQuantity(@PathVariable Integer id, @RequestBody CartQuantityDTO req) {
+    public Result updateCartQuantity(@PathVariable Long id,
+                                     @RequestBody CartQuantityDTO req) {
         log.info("更新购物车数量:id:{},quantity:{}", id,req);
-        cartService.updateCartQuantity(id.longValue(), req);
+        cartService.updateCartQuantity(id, req);
         return Result.success();
     }
 
@@ -78,9 +78,9 @@ public class CartController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result deleteCart(@PathVariable Integer id) {
+    public Result deleteCart(@PathVariable Long id) {
         log.info("删除购物车:id:{}", id);
-        cartService.deleteCart(id.longValue());
+        cartService.deleteCart(id);
         return Result.success();
     }
 

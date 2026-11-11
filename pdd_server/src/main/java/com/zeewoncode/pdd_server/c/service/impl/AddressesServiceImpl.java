@@ -1,8 +1,6 @@
 package com.zeewoncode.pdd_server.c.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-
-
 import com.zeewoncode.entity.UserAddress;
 import com.zeewoncode.pdd_server.c.service.AddressesService;
 import com.zeewoncode.pdd_server.mapper.AddressesMapper;
@@ -12,7 +10,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +26,7 @@ public class AddressesServiceImpl implements AddressesService {
      * @return
      */
     @Override
-    public List<AddressVO> getAddresses(Integer userId) {
+    public List<AddressVO> getAddresses(Long userId) {
         List<UserAddress> userAddresses = addressesMapper.selectAddressesByUserId(userId);
         List<AddressVO> addressVOList = userAddresses.stream().map(addr -> {
             AddressVO addressVO = BeanUtil.copyProperties(addr, AddressVO.class);
@@ -45,8 +42,7 @@ public class AddressesServiceImpl implements AddressesService {
      */
     @Override
     @Transactional
-    public void addAddress(AddressDTO addressDTO, Integer userId) {
-
+    public void addAddress(AddressDTO addressDTO, Long userId) {
         UserAddress userAddress = new UserAddress();
         BeanUtils.copyProperties(addressDTO, userAddress);
         userAddress.setDeletedFlag(0);
@@ -70,7 +66,7 @@ public class AddressesServiceImpl implements AddressesService {
      */
     @Override
     @Transactional
-    public void updateAddress(AddressDTO addressDTO, Integer userId) {
+    public void updateAddress(AddressDTO addressDTO, Long userId) {
         UserAddress userAddress = new UserAddress();
         BeanUtils.copyProperties(addressDTO, userAddress);
         userAddress.setDeletedFlag(0);
@@ -93,7 +89,7 @@ public class AddressesServiceImpl implements AddressesService {
      * @param id
      */
     @Override
-    public void deleteAddress(Integer id) {
+    public void deleteAddress(Long id) {
         addressesMapper.deleteAddress(id);
     }
 
@@ -103,12 +99,12 @@ public class AddressesServiceImpl implements AddressesService {
      */
     @Override
     @Transactional
-    public void setDefaultAddress(Integer id, Integer userId) {
+    public void setDefaultAddress(Long id, Long userId) {
         UserAddress userAddress = new UserAddress();
         userAddress.setId(id);
         userAddress.setIsDefault(1);
         userAddress.setUserId(userId);
-        UserAddress userAddressDB = addressesMapper.selectById(Long.valueOf(id));
+        UserAddress userAddressDB = addressesMapper.selectById(id);
         if (userAddressDB != null && userAddressDB.getIsDefault() != null && userAddressDB.getIsDefault() == 1) {
             throw new RuntimeException("当前地址已经是默认地址");
         }

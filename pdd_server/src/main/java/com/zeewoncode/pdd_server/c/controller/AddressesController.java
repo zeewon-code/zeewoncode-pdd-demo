@@ -29,8 +29,7 @@ public class AddressesController {
     @GetMapping
     public Result<List<AddressVO>> getAddresses(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取收货地址列表");
-        Integer userId = loginUser.getUserId();
-        List<AddressVO> addressVOList = addressesService.getAddresses(userId);
+        List<AddressVO> addressVOList = addressesService.getAddresses(loginUser.getUserId());
         return Result.success(addressVOList);
     }
 
@@ -40,7 +39,8 @@ public class AddressesController {
      * @return
      */
     @PostMapping
-    public Result addAddress(@RequestBody AddressDTO addressDTO, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result addAddress(@RequestBody AddressDTO addressDTO,
+                             @AuthenticationPrincipal LoginUser loginUser) {
         log.info("添加收货地址:{}", addressDTO);
         addressesService.addAddress(addressDTO, loginUser.getUserId());
         return Result.success();
@@ -52,7 +52,7 @@ public class AddressesController {
      * @return
      */
     @PutMapping("/{id}")
-    public Result updateAddress(@PathVariable Integer id,
+    public Result updateAddress(@PathVariable Long id,
                                 @RequestBody AddressDTO addressDTO,
                                 @AuthenticationPrincipal LoginUser loginUser) {
         addressDTO.setId(id);
@@ -67,7 +67,7 @@ public class AddressesController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result deleteAddress(@PathVariable Integer id) {
+    public Result deleteAddress(@PathVariable Long id) {
         log.info("删除收货地址:{}", id);
         addressesService.deleteAddress(id);
         return Result.success();
@@ -79,7 +79,8 @@ public class AddressesController {
      * @return
      */
     @PutMapping("/{id}/default")
-    public Result setDefaultAddress(@PathVariable Integer id, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result setDefaultAddress(@PathVariable Long id,
+                                    @AuthenticationPrincipal LoginUser loginUser) {
         log.info("设置默认收货地址:{}", id);
         addressesService.setDefaultAddress(id, loginUser.getUserId());
         return Result.success();

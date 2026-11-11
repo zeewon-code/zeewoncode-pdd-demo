@@ -33,7 +33,7 @@ public interface UserMapper {
      * @return
      */
     @Select("select * from user where id = #{userId} and deleted_flag = 0")
-    User selectById(Integer userId);
+    User selectById(Long userId);
 
     /**
      * 根据id更新用户信息

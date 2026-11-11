@@ -26,8 +26,8 @@ public interface SpuService {
 
     /**
      * 获取商品详情
-     * @param id
+     * @param spuId
      * @return
      */
-    SpuDetail getSpuDetail(Integer id);
+    SpuDetail getSpuDetail(Long spuId);
 }

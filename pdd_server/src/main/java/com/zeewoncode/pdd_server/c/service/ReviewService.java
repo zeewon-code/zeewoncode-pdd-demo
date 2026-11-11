@@ -15,27 +15,29 @@ public interface ReviewService {
      * @param req
      * @return
      */
-    PageResult<Review> getReviewList(Integer spuId, ReviewsListQueryDTO req);
+    PageResult<Review> getReviewList(Long spuId, ReviewsListQueryDTO req);
 
     /**
      * 获取商品评价统计
-     * @param id
+     * @param spuId
      * @return
      */
-    ReviewStat getReviewStat(Integer id);
+    ReviewStat getReviewStat(Long spuId);
 
     /**
      * 获取待评价订单列表
      * @param page
      * @param size
+     * @param userId
      * @return
      */
-    PageResult<OrderCard> getUnreviewedOrders(Integer page, Integer size, Integer userId);
+    PageResult<OrderCard> getUnreviewedOrders(Integer page, Integer size, Long userId);
 
     /**
      * 发表评价
      * @param req
+     * @param userId
      * @return
      */
-    ReviewCreateResult addReview(ReviewCreateDTO req, Integer userId);
+    ReviewCreateResult addReview(ReviewCreateDTO req, Long userId);
 }

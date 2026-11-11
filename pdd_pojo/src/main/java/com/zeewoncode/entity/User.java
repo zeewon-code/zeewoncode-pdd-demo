@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class User implements Serializable {
 
-    private Integer id; // 用户ID
+    private Long id; // 用户ID
     private String nickname; // 用户昵称
     private String phone; // 手机号
     private String password; // 密码

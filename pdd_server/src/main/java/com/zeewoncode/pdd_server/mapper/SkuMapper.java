@@ -13,14 +13,14 @@ import java.util.List;
 public interface SkuMapper {
     /**
      * 根据spu_id查询sku列表
-     * @param id
+     * @param spuId
      * @return
      */
     @Select("select id, spu_id, specs, price, stock, locked_stock, image, status " +
             "from sku " +
-            "where spu_id = #{id} AND deleted_flag = 0 " +
+            "where spu_id = #{spuId} AND deleted_flag = 0 " +
             "ORDER BY price ASC")
-    List<Sku> selectSkuListBySpuId(Integer id);
+    List<Sku> selectSkuListBySpuId(Long spuId);
 
     /**
      * 根据id查询sku(启售的)
@@ -85,27 +85,27 @@ public interface SkuMapper {
 
     /**
      * 根据id查询sku
-     * @param id
+     * @param skuId
      * @return
      */
-    @Select("select * from sku where id = #{id} and deleted_flag = 0")
-    Sku selectById(Long id);
+    @Select("select * from sku where id = #{skuId} and deleted_flag = 0")
+    Sku selectById(Long skuId);
 
     /**
      * 软删除sku
-     * @param id
+     * @param skuId
      * @return
      */
-    @Update("update sku set deleted_flag = 1 where spu_id = #{id}")
-    int softDeleteSku(Long id);
+    @Update("update sku set deleted_flag = 1 where spu_id = #{skuId}")
+    int softDeleteSku(Long skuId);
 
     /**
      * 删除sku
-     * @param id
+     * @param skuId
      * @return
      */
-    @Delete("delete from sku where id = #{id}")
-    int deleteSku(Long id);
+    @Delete("delete from sku where id = #{skuId}")
+    int deleteSku(Long skuId);
 
     /**
      * 根据spu_id列表查询库存较低的sku

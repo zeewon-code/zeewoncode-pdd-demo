@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 public class OrderCreateDTO implements Serializable {
 
-    private Integer addressId;
+    private Long addressId;
     private List<OrderItemDTO> items;
-    private Integer userCouponId;
+    private Long userCouponId;
 }

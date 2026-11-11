@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public User getById(Integer userId) {
+    public User getById(Long userId) {
         User user = userMapper.selectById(userId);
         return user;
     }
@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public void updateProfile(UpdateProfileDTO updateProfileDTO, Integer userId) {
+    public void updateProfile(UpdateProfileDTO updateProfileDTO, Long userId) {
         User userDB = userMapper.selectById(userId);
         if (userDB == null) {
             throw new RuntimeException(USER_NOT_EXIST);
@@ -164,7 +164,7 @@ public class UserServiceImpl implements UserService {
      * @param userId
      */
     @Override
-    public void changePassword(ChangePasswordDTO changePasswordDTO, Integer userId) {
+    public void changePassword(ChangePasswordDTO changePasswordDTO, Long userId) {
         User userDB = userMapper.selectById(userId);
         if (userDB == null) {
             throw new RuntimeException(USER_NOT_EXIST);

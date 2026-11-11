@@ -24,8 +24,8 @@
             selected = #{selected}
         </set>
         where id in
-        <foreach item="id" collection="ids" open="(" separator="," close=")">
-            #{id}
+        <foreach item="cartItemId" collection="cartItemIds" open="(" separator="," close=")">
+            #{cartItemId}
         </foreach>
     </update>
 </mapper>

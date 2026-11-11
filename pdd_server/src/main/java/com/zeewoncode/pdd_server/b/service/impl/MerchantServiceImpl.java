@@ -43,7 +43,7 @@ public class MerchantServiceImpl implements MerchantService {
      */
     @Transactional
     @Override
-    public ShopApplyVO applyShop(ShopApplyDTO shopApplyDTO, Integer userId) {
+    public ShopApplyVO applyShop(ShopApplyDTO shopApplyDTO, Long userId) {
         //建 merchant(status=1) → user.user_type 升级为 2。
         // 先判断当前用户有没有开店资格
         User userDb = userMapper.selectById(userId);
@@ -60,7 +60,7 @@ public class MerchantServiceImpl implements MerchantService {
         Merchant merchant = new Merchant();
         BeanUtils.copyProperties(shopApplyDTO, merchant);
         merchant.setStatus(1);
-        merchant.setUserId(userId.longValue());
+        merchant.setUserId(userId);
         merchant.setCreatedAt(LocalDateTime.now());
         merchant.setDeletedFlag(0);
         int i = merchantMapper.insert(merchant);
@@ -84,11 +84,11 @@ public class MerchantServiceImpl implements MerchantService {
      * @return
      */
     @Override
-    public MerchantVO getMyShop(Integer userId) {
+    public MerchantVO getMyShop(Long userId) {
         if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         if (merchant == null) {
             throw new RuntimeException("店铺信息异常，请稍后重试");
         }
@@ -106,7 +106,7 @@ public class MerchantServiceImpl implements MerchantService {
      * @param shopUpdateDTO
      */
     @Override
-    public void updateShop(ShopUpdateDTO shopUpdateDTO, Integer userId) {
+    public void updateShop(ShopUpdateDTO shopUpdateDTO, Long userId) {
         if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
@@ -118,7 +118,7 @@ public class MerchantServiceImpl implements MerchantService {
         }
         Merchant merchant = new Merchant();
         BeanUtils.copyProperties(shopUpdateDTO, merchant);
-        merchant.setUserId(userId.longValue());
+        merchant.setUserId(userId);
         if (merchantMapper.update(merchant) == 0) {
             throw new RuntimeException("修改店铺信息异常，请稍后重试");
         }
@@ -129,16 +129,16 @@ public class MerchantServiceImpl implements MerchantService {
      * @param status
      */
     @Override
-    public void updateShopStatus(Integer status, Integer userId) {
+    public void updateShopStatus(Integer status, Long userId) {
         if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
         // 根据当前用户id查询店铺信息
-        Merchant merchantDb = merchantMapper.selectMerchantByUserId(userId.longValue());
+        Merchant merchantDb = merchantMapper.selectMerchantByUserId(userId);
         if (merchantDb.getStatus().equals(status)) {
             throw new RuntimeException("店铺状态已为指定状态");
         }
-        Merchant merchant = Merchant.builder().userId(userId.longValue()).status(status).build();
+        Merchant merchant = Merchant.builder().userId(userId).status(status).build();
         int i = merchantMapper.update(merchant);
         if (i <= 0) {
             throw new RuntimeException("修改店铺状态异常，请稍后重试");
@@ -150,11 +150,11 @@ public class MerchantServiceImpl implements MerchantService {
      * @return
      */
     @Override
-    public BDashboard getBDashboard(Integer userId) {
+    public BDashboard getBDashboard(Long userId) {
         if (!haveMerchantOperation(userId)) {
             throw new RuntimeException("当前用户没有权限进行相关操作");
         }
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         Long merchantId = merchant.getId();
         List<Order> orders = orderMapper.selectOrderByMerchantId(merchantId);
         if (orders == null || orders.isEmpty()) {
@@ -169,10 +169,10 @@ public class MerchantServiceImpl implements MerchantService {
                 || Integer.valueOf(3).equals(order.getStatus()))
                 .toList();
         Double totalSales = list.stream()
-                .mapToDouble(order -> order.getPayableAmount().doubleValue()).sum();
+                .mapToDouble(Order::getPayableAmount).sum();
         Double todaySales = list.stream()
                 .filter(order -> order.getCreatedAt().toLocalDate().equals(today))
-                .mapToDouble(order -> order.getPayableAmount().doubleValue()).sum();
+                .mapToDouble(Order::getPayableAmount).sum();
         List<Long> spuIds = spuMapper.selectIdsByMerchantId(merchantId);
         // lowStockSkus （低库存stock<=10）(通过orderIds去sku表左连接spu表)
         List<LowStockSkus> lowStockSkus = skuMapper.selectLowStockSkus(spuIds);
@@ -187,8 +187,8 @@ public class MerchantServiceImpl implements MerchantService {
      * 校验当前用户是否有资格进行相关操作
      * @return
      */
-    public Boolean haveMerchantOperation(Integer userId) {
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId.longValue());
+    public Boolean haveMerchantOperation(Long userId) {
+        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         if (merchant == null || merchant.getDeletedFlag() != 0) {
             return false;
         }

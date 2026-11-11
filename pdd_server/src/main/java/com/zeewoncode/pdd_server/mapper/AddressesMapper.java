@@ -13,8 +13,7 @@ public interface AddressesMapper {
      * @return
      */
     @Select("select * from user_address where user_id = #{userId}")
-    List<UserAddress> selectAddressesByUserId(Integer userId);
-
+    List<UserAddress> selectAddressesByUserId(Long userId);
     /**
      * 将用户其他收货地址修改为非默认
      */
@@ -38,17 +37,17 @@ public interface AddressesMapper {
 
     /**
      * 删除收货地址
-     * @param id
+      * @param addressId
      */
-    @Delete("delete from user_address where id = #{id}")
-    void deleteAddress(Integer id);
+    @Delete("delete from user_address where id = #{addressId}")
+    void deleteAddress(Long addressId);
 
 
     /**
      * 根据ID获取收货地址信息
-     * @param id
+      * @param addressId
      * @return
      */
-    @Select("select * from user_address where id = #{id} AND deleted_flag = 0")
-    UserAddress selectById(Long id);
+    @Select("select * from user_address where id = #{addressId} AND deleted_flag = 0")
+    UserAddress selectById(Long addressId);
 }

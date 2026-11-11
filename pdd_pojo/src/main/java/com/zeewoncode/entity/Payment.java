@@ -19,7 +19,7 @@ public class Payment implements Serializable {
     private String paymentNo;
     private Long orderId;
     private Long userId;
-    private BigDecimal amount;
+    private Double amount;
     private String channel;
     private Integer status;
     private LocalDateTime paidAt;

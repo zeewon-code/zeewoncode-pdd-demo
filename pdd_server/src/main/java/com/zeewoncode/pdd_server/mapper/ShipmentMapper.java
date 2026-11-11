@@ -10,11 +10,11 @@ public interface ShipmentMapper {
 
     /**
      * 根据订单id查询物流信息
-     * @param id
+     * @param orderId
      * @return
      */
-    @Select("SELECT * FROM shipment WHERE order_id = #{id}")
-    Shipment selectShipmentByOrderId(Integer id);
+    @Select("SELECT * FROM shipment WHERE order_id = #{orderId}")
+    Shipment selectShipmentByOrderId(Long orderId);
 
     /**
      * 根据id查询物流信息
@@ -26,12 +26,12 @@ public interface ShipmentMapper {
 
     /**
      * 根据id和物流状态更新物流状态
-     * @param id
+     * @param shipmentId
      * @param status
      * @return
      */
-    @Update("UPDATE shipment SET status = #{status} WHERE id = #{id}")
-    int updateShipmentStatus(Long id, Integer status);
+    @Update("UPDATE shipment SET status = #{status} WHERE id = #{shipmentId}")
+    int updateShipmentStatus(Long shipmentId, Integer status);
 
     /**
      * 插入物流信息
@@ -46,7 +46,7 @@ public interface ShipmentMapper {
      * @param status
      * @return
      */
-    int updateShipmentStatusByOrderIds(List<Long> orderIds, int status);
+    int updateShipmentStatusByOrderIds(List<Long> orderIds, Integer status);
 
     /**
      * 根据订单id列表查询物流信息

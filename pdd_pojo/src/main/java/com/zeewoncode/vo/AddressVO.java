@@ -15,7 +15,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Builder
 public class AddressVO implements Serializable {
-    private Integer id; // 地址id
+    private Long id; // 地址id
     private String receiverName; // 收件人
     private String receiverPhone; // 收件人电话
     private String province; // 省份

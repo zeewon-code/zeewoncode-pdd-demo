@@ -1,11 +1,9 @@
 package com.zeewoncode.pdd_server.mapper;
 
 
-import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.entity.Merchant;
 import com.zeewoncode.vo.MerchantVO;
 import org.apache.ibatis.annotations.*;
-
 import java.util.List;
 
 @Mapper

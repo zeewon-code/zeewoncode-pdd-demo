@@ -1,9 +1,6 @@
 package com.zeewoncode.dto;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,8 +18,8 @@ public class SkuDTO implements Serializable {
     @NotBlank(message = "规格不能为空")
     private String specs;
     @NotNull(message = "价格不能为空")
-    @DecimalMin(value = "0.01", message = "价格不能小于0.01")
-    private BigDecimal price;
+    @Positive(message = "价格必须大于0")
+    private Double price;
     @NotNull(message = "库存不能为空")
     @Min(value = 1, message = "库存不能小于1")
     private Integer stock;

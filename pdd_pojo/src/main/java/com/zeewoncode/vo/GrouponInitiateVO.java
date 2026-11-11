@@ -4,9 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -21,6 +19,6 @@ public class GrouponInitiateVO implements Serializable {
     private Integer currentCount;
     private Integer targetCount;
     private LocalDateTime expireAt;
-    private BigDecimal groupPrice;
-    private BigDecimal payableAmount;
+    private Double groupPrice;
+    private Double payableAmount;
 }

@@ -2,12 +2,10 @@ package com.zeewoncode.pdd_server.c.controller;
 
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.entity.SpuDetail;
-import com.zeewoncode.pdd_server.c.service.SpuService;
 import com.zeewoncode.dto.SpuListQueryDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CategoryNodeVO;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -52,7 +50,7 @@ public class SpuController {
      * @return
      */
     @GetMapping("/spu/{id}")
-    public Result<SpuDetail> getSpuDetail(@PathVariable Integer id) {
+    public Result<SpuDetail> getSpuDetail(@PathVariable Long id) {
         log.info("获取商品详情");
         SpuDetail result = spuService.getSpuDetail(id);
         return Result.success(result);

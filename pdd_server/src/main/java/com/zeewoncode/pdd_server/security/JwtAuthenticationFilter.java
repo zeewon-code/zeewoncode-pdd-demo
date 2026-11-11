@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String token = header.substring(PREFIX.length()).trim();
                 Claims claims = jwtUtil.parseToken(token);
                 if (claims != null) {
-                    Integer userId = JwtUtil.getUserId(claims);
+                    Long userId = JwtUtil.getUserId(claims);
                     if (userId != null) {
 //                        // 从jwt令牌中拿到用户类型
 //                        Integer userType = JwtUtil.getUserType(claims);

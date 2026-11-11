@@ -38,7 +38,7 @@ public class JwtUtil {
      * @param userType 用户类型 1:C买家 2:B商家 9:A管理员
      * @return
      */
-    public String generateToken(Integer userId, Integer userType) {
+    public String generateToken(Long userId, Integer userType) {
         // 创建载荷
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
@@ -73,8 +73,8 @@ public class JwtUtil {
     }
 
     // 从claims中获取userId
-    public static Integer getUserId(Claims claims) {
-        return claims.get("userId", Integer.class);
+    public static Long getUserId(Claims claims) {
+        return claims.get("userId", Long.class);
     }
 
     // 从claims中获取userType

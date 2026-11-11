@@ -16,14 +16,17 @@ import java.io.Serializable;
 @Builder
 public class SpuListQueryDTO implements Serializable {
 
-        private Integer categoryId; //二级分类筛选
+        private Long categoryId; //二级分类筛选
         private String keyword; //标题模糊搜索
         /**
          * 排序方式: sales, priceAsc, priceDesc, newest
          * 默认值: sales
          */
 
+        @Builder.Default
         private String sort = "sales";
+        @Builder.Default
         private Integer page = 1;
+        @Builder.Default
         private Integer pageSize = 10;
 }

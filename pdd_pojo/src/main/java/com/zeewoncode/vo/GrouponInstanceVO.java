@@ -20,7 +20,7 @@ public class GrouponInstanceVO implements Serializable {
     private Long leaderUserId;
     private String leaderNickname;
     private String spuTitle;
-    private BigDecimal groupPrice;
+    private Double groupPrice;
     private Integer currentCount;
     private Integer targetCount;
     private Integer remainCount;

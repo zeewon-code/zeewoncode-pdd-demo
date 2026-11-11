@@ -24,9 +24,9 @@ public class Order implements Serializable {
     private String receiverName;
     private String receiverPhone;
     private String receiverAddress;
-    private BigDecimal totalAmount;
-    private BigDecimal discountAmount;
-    private BigDecimal payableAmount;
+    private Double totalAmount;
+    private Double discountAmount;
+    private Double payableAmount;
     private Long paymentId;
     private Long grouponInstanceId;
     private Integer status;

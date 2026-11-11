@@ -16,7 +16,7 @@ import java.io.Serializable;
 @Builder
 public class SpuCard implements Serializable {
 
-    private Integer id; // 商品id
+    private Long id; // 商品id
     private String title; // 商品标题
     private String mainImage; // 主图URL
     private Double minPrice; // 同商品最低价（规格不同）

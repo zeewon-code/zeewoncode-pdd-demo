@@ -16,8 +16,8 @@ import java.io.Serializable;
 @Builder
 public class UserAddress implements Serializable {
 
-    private Integer id; // 地址id
-    private Integer userId; // 用户id
+    private Long id; // 地址id
+    private Long userId; // 用户id
     private String receiverName; // 收件人
     private String receiverPhone; // 收件人电话
     private String province; // 省份

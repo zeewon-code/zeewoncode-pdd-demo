@@ -27,11 +27,11 @@ public interface SpuMapper {
 
     /**
      * 根据id查询商品详情
-     * @param id
+     * @param spuId
      * @return
      */
-    @Select("SELECT * FROM spu WHERE id = #{id}")
-    SpuDetail getSpuDetailById(Integer id);
+    @Select("SELECT * FROM spu WHERE id = #{spuId}")
+    SpuDetail getSpuDetailById(Long spuId);
 
     /**
      *  根据id查询商品
@@ -82,20 +82,20 @@ public interface SpuMapper {
 
     /**
      * 软删除商品
-     * @param id
+     * @param spuId
      * @return
      */
-    @Delete("UPDATE spu SET deleted_flag = 1 WHERE id = #{id}")
-    int softDeleteSpu(Long id);
+    @Delete("UPDATE spu SET deleted_flag = 1 WHERE id = #{spuId}")
+    int softDeleteSpu(Long spuId);
 
     /**
      * 上下架商品
-     * @param id
+     * @param spuId
      * @param status
      * @return
      */
-    @Update("UPDATE spu SET status = #{status} WHERE id = #{id} AND deleted_flag = 0")
-    int listAndDelist(Long id, Integer status);
+    @Update("UPDATE spu SET status = #{status} WHERE id = #{spuId} AND deleted_flag = 0")
+    int listAndDelist(Long spuId, Integer status);
 
     /**
      * 根据merchantId查询商品id
@@ -117,11 +117,11 @@ public interface SpuMapper {
 
     /**
      * 根据分类id查询商品行数
-     * @param id
+     * @param categoryId
      * @return
      */
-    @Select("select count(*) from spu where category_id = #{id} AND deleted_flag = 0")
-    int selectSpuCountByCategoryId(Long id);
+    @Select("select count(*) from spu where category_id = #{categoryId} AND deleted_flag = 0")
+    int selectSpuCountByCategoryId(Long categoryId);
 
     /**
      * 根据merchantId、状态、分类id查询商品id

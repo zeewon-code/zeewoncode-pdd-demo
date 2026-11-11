@@ -103,7 +103,7 @@ public class SpuServiceImpl implements SpuService {
      * @return
      */
     @Override
-    public SpuDetail getSpuDetail(Integer id) {
+    public SpuDetail getSpuDetail(Long id) {
         // 1.id 是商品表spu的id
         // 2.title 是商品表spu的title
         // 3.subtitle 是商品表spu的subtitle
@@ -120,7 +120,7 @@ public class SpuServiceImpl implements SpuService {
         // b. 根据spuid查询拼团活动定义，封装成groupons集合
         List<GrouponDefine> groupons = grouponMapper.selectGrouponDefineListBySpuId(id);
         SpuDetail spuDetail = spuMapper.getSpuDetailById(id);
-        List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id.longValue())));
+        List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id)));
         Spu spu = spus.get(0);
         String images = spu.getImages();
         if (images != null) {

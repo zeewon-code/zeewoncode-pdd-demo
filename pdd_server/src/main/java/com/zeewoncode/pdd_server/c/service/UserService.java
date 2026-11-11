@@ -7,7 +7,6 @@ import com.zeewoncode.dto.LoginDTO;
 import com.zeewoncode.dto.RegisterDTO;
 import com.zeewoncode.dto.UpdateProfileDTO;
 import com.zeewoncode.result.Result;
-import org.apache.poi.ss.formula.functions.T;
 
 /**
  * C端-认证与用户模块
@@ -29,21 +28,24 @@ public interface UserService {
 
     /**
      * 获取当前用户信息
+     * @param userId
      * @return
      */
-    User getById(Integer userId);
+    User getById(Long userId);
 
     /**
      * 修改个人信息
      * @param updateProfileDTO
+     * @param userId
      * @return
      */
-    void updateProfile(UpdateProfileDTO updateProfileDTO, Integer userId);
+    void updateProfile(UpdateProfileDTO updateProfileDTO, Long userId);
 
     /**
      * 修改密码
      * @param changePasswordDTO
      * @param userId
+     * @return
      */
-    void changePassword(ChangePasswordDTO changePasswordDTO, Integer userId);
+    void changePassword(ChangePasswordDTO changePasswordDTO, Long userId);
 }

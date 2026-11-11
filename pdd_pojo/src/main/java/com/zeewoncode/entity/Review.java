@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class Review implements Serializable {
-    private Integer id;
+    private Long id;
     private String nickname;
     private String avatar;
     private Integer rating;

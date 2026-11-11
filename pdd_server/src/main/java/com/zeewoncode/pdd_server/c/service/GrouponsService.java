@@ -12,23 +12,32 @@ public interface GrouponsService {
     /**
      * 拼团发起（团长下单）
      * @param grouponInitiateDTO
+     * @param userId
      * @return
      */
-    GrouponInitiateVO initiateGroupon(GrouponInitiateDTO grouponInitiateDTO, Integer userId);
+    GrouponInitiateVO initiateGroupon(GrouponInitiateDTO grouponInitiateDTO,
+                                      Long userId);
 
     /**
      * 拼团加入（团员下单）,进入他人团
      * @param instanceId
      * @param grouponJoinDTO
+     * @param userId
      * @return
      */
-    GrouponJoinVO joinGroupon(Long instanceId, GrouponJoinDTO grouponJoinDTO, Integer userId);
+    GrouponJoinVO joinGroupon(Long instanceId,
+                              GrouponJoinDTO grouponJoinDTO,
+                              Long userId);
 
     /**
      * 获取我的拼团列表
+     * @param pageNum
+     * @param pageSize
+     * @param userId
      * @return
      */
-    PageResult<GrouponInstanceVO> getGrouponInstanceList(Integer pageNum, Integer pageSize, Integer userId);
+    PageResult<GrouponInstanceVO> getGrouponInstanceList(Integer pageNum, Integer pageSize,
+                                                         Long userId);
 
     /**
      * 取消拼团(团长取消拼团)
@@ -39,8 +48,9 @@ public interface GrouponsService {
     /**
      * 团员取消拼团
      * @param dto
+     * @param userId
      */
-    void cancelGroupon(GrouponCancelDTO dto, Integer userId);
+    void cancelGroupon(GrouponCancelDTO dto, Long userId);
 
     /**
      * 商品进行中的拼团（凑人页）

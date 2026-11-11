@@ -65,11 +65,11 @@ public class SpuServiceImpl implements SpuService {
                 return null;
             }
             SpuCard spuCard = new SpuCard();
-            spuCard.setId(spu.getId().intValue());
+            spuCard.setId(spu.getId());
             spuCard.setTitle(spu.getTitle());
             spuCard.setMainImage(spu.getMainImage());
             spuCard.setSales(spu.getSales());
-            SpuCard defaultCard = new SpuCard(spuId.intValue(), "", "", 0.0, 0.0, 0, 0.0, false);
+            SpuCard defaultCard = new SpuCard(spuId, "", "", 0.0, 0.0, 0, 0.0, false);
             SpuCard skuCard = skuMap.getOrDefault(spuId, defaultCard);
             SpuCard grouponCard = grouponMap.getOrDefault(spuId, defaultCard);
             if (skuCard != null) {

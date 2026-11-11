@@ -22,8 +22,8 @@ public class OrderItem implements Serializable {
     private String title;
     private String specs;
     private String image;
-    private BigDecimal price;
+    private Double price;
     private Integer quantity;
-    private BigDecimal amount;
+    private Double amount;
     private LocalDateTime createAt;
 }

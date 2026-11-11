@@ -31,7 +31,8 @@ public class MerchantController {
      * @return
      */
     @PostMapping("/apply")
-    public Result<ShopApplyVO> applyShop(@RequestBody @Valid ShopApplyDTO shopApplyDTO, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result<ShopApplyVO> applyShop(@RequestBody @Valid ShopApplyDTO shopApplyDTO,
+                                         @AuthenticationPrincipal LoginUser loginUser) {
         log.info("申请开店:{}", shopApplyDTO);
         ShopApplyVO shopApplyVO = merchantService.applyShop(shopApplyDTO, loginUser.getUserId());
         return Result.success(shopApplyVO);
@@ -54,7 +55,8 @@ public class MerchantController {
      * @return
      */
     @PutMapping("/mine")
-    public Result updateShop(@RequestBody @Valid ShopUpdateDTO shopUpdateDTO, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result updateShop(@RequestBody @Valid ShopUpdateDTO shopUpdateDTO,
+                             @AuthenticationPrincipal LoginUser loginUser) {
         log.info("修改店铺信息:{}", shopUpdateDTO);
         merchantService.updateShop(shopUpdateDTO, loginUser.getUserId());
         return Result.success();
@@ -66,7 +68,8 @@ public class MerchantController {
      * @return
      */
     @PutMapping("/mine/status")
-    public Result updateShopStatus(@RequestParam Integer status, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result updateShopStatus(@RequestParam Integer status,
+                                   @AuthenticationPrincipal LoginUser loginUser) {
         log.info("修改店铺状态:{}", status);
         merchantService.updateShopStatus(status, loginUser.getUserId());
         return Result.success();

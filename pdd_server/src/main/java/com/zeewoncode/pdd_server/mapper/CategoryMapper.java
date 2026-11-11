@@ -51,17 +51,17 @@ public interface CategoryMapper {
 
     /**
      * 查询该分类下是否存在子类
-     * @param id
+     * @param parentId
      * @return
      */
-    @Select("select count(*) from category where parent_id = #{id} ")
-    int selectIsParentIdById(Long id);
+    @Select("select count(*) from category where parent_id = #{parentId} ")
+    int selectIsParentIdById(Long parentId);
 
     /**
      * 删除分类
-     * @param id
+     * @param categoryId
      * @return
      */
-    @Delete("delete from category where id = #{id}")
-    int delete(Long id);
+    @Delete("delete from category where id = #{categoryId}")
+    int delete(Long categoryId);
 }

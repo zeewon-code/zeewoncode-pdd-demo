@@ -72,7 +72,7 @@ public class UserController {
      */
     @GetMapping("users/me")
     public Result<UserVO> getUserInfo(@AuthenticationPrincipal LoginUser loginUser) {
-        Integer userId = loginUser.getUserId();
+        Long userId = loginUser.getUserId();
         log.info("获取当前用户信息: {}", userId);
         User user = userService.getById(userId);
         UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
@@ -85,8 +85,9 @@ public class UserController {
      * @return
      */
     @PutMapping("users/me")
-    public Result updateProfile(@RequestBody UpdateProfileDTO updateProfileDTO, @AuthenticationPrincipal LoginUser loginUser) {
-        Integer userId = loginUser.getUserId();
+    public Result updateProfile(@RequestBody UpdateProfileDTO updateProfileDTO,
+                                @AuthenticationPrincipal LoginUser loginUser) {
+        Long userId = loginUser.getUserId();
         log.info("修改个人信息: {},{}", updateProfileDTO, userId);
         userService.updateProfile(updateProfileDTO, userId);
         return Result.success();
@@ -98,8 +99,9 @@ public class UserController {
      * @return
      */
     @PutMapping("users/me/password")
-    public Result changePassword(@RequestBody ChangePasswordDTO changePasswordDTO, @AuthenticationPrincipal LoginUser loginUser) {
-        Integer userId = loginUser.getUserId();
+    public Result changePassword(@RequestBody ChangePasswordDTO changePasswordDTO,
+                                 @AuthenticationPrincipal LoginUser loginUser) {
+        Long userId = loginUser.getUserId();
         log.info("修改密码: {},{}", changePasswordDTO, userId);
         userService.changePassword(changePasswordDTO, userId);
         return Result.success();

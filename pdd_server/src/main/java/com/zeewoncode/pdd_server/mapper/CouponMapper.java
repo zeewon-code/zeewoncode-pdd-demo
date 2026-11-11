@@ -7,8 +7,6 @@ import com.zeewoncode.vo.CouponOptionVO;
 import com.zeewoncode.vo.CouponVO;
 import com.zeewoncode.vo.UserCouponVO;
 import org.apache.ibatis.annotations.*;
-
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -65,10 +63,10 @@ public interface CouponMapper {
 
     /**
      * 更新用户优惠券订单id为空
-     * @param userCoupon1
+     * @param userCoupon
      */
     @Update("UPDATE user_coupon SET order_id = NULL WHERE id = #{id}")
-    void updateUserCouponSetOrderIdToNull(UserCoupon userCoupon1);
+    void updateUserCouponSetOrderIdToNull(UserCoupon userCoupon);
 
     /**
      * 根据优惠券有效期查询优惠券列表
@@ -78,11 +76,11 @@ public interface CouponMapper {
 
     /**
      * 根据优惠券id对优惠券已领取数量进行加一操作
-     * @param id
+     * @param couponId
      * @return
      */
-    @Update("UPDATE coupon SET issued = issued + 1 WHERE id = #{id} AND issued < total")
-    int updateCouponCountById(Long id);
+    @Update("UPDATE coupon SET issued = issued + 1 WHERE id = #{couponId} AND issued < total")
+    int updateCouponCountById(Long couponId);
 
     /**
      * 插入用户优惠券

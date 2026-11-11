@@ -32,7 +32,7 @@ public class ReviewController {
      * @return
      */
     @GetMapping("/spu/{id}/reviews")
-    public Result<PageResult<Review>> getReviewList(@PathVariable Integer id,
+    public Result<PageResult<Review>> getReviewList(@PathVariable Long id,
                                                     ReviewsListQueryDTO req) {
         log.info("获取评价列表:{},{}", id, req);
         return Result.success(reviewService.getReviewList(id, req));
@@ -44,7 +44,7 @@ public class ReviewController {
      * @return
      */
     @GetMapping("/spu/{id}/reviews/stat")
-    public Result<ReviewStat> getReviewStat(@PathVariable Integer id) {
+    public Result<ReviewStat> getReviewStat(@PathVariable Long id) {
         log.info("统计商品id：{}的商品评分分布", id);
         ReviewStat reviewStat = reviewService.getReviewStat(id);
         return Result.success(reviewStat);
@@ -71,7 +71,8 @@ public class ReviewController {
      * @return
      */
     @PostMapping("/reviews")
-    public Result<ReviewCreateResult> addReview(@RequestBody ReviewCreateDTO req, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result<ReviewCreateResult> addReview(@RequestBody ReviewCreateDTO req,
+                                                @AuthenticationPrincipal LoginUser loginUser) {
         log.info("发表评价:{}", req);
         ReviewCreateResult reviewCreateResult = reviewService.addReview(req, loginUser.getUserId());
         return Result.success(reviewCreateResult);

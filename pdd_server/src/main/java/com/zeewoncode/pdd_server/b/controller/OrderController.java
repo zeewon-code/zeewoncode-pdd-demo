@@ -48,7 +48,8 @@ public class OrderController {
      * @return
      */
     @GetMapping("/{id}")
-    public Result<OrderDetail> getOrderDetail(@PathVariable Long id, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result<OrderDetail> getOrderDetail(@PathVariable Long id,
+                                              @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取本店订单详情: 订单id{}", id);
         OrderDetail result = orderService.getOrderDetail(id, loginUser.getUserId());
         return Result.success(result);

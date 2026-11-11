@@ -14,7 +14,6 @@ import com.zeewoncode.vo.UserCouponVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -51,9 +50,9 @@ public class CouponServiceImpl implements CouponService {
      */
     @Override
     @Transactional
-    public CouponClaimVO claimCoupon(Long id, Integer userId) {
+    public CouponClaimVO claimCoupon(Long id, Long userId) {
         // 判断用户是否已经领取过该优惠券
-        if (couponMapper.selectUserCouponByCouponId(id, userId.longValue()) != null) {
+        if (couponMapper.selectUserCouponByCouponId(id, userId) != null) {
             throw new RuntimeException("您已经领取过该优惠券，请勿重复领取");
         }
         // 根据优惠券id查询优惠券是否存在
@@ -66,7 +65,7 @@ public class CouponServiceImpl implements CouponService {
         if (i <= 0) throw new RuntimeException("优惠券领取失败");
         // 插入用户优惠券记录
         UserCoupon userCoupon = UserCoupon.builder()
-                .userId(userId.longValue())
+                .userId(userId)
                 .couponId(id)
                 .status(0)
                 .build();
@@ -87,9 +86,10 @@ public class CouponServiceImpl implements CouponService {
      * @return
      */
     @Override
-    public PageResult<UserCouponVO> getMyUserCoupons(Integer status, Integer page, Integer size, Integer userId) {
+    public PageResult<UserCouponVO> getMyUserCoupons(Integer status, Integer page,
+                                                     Integer size, Long userId) {
         PageHelper.startPage(page, size);
-        List<UserCouponVO> voList = couponMapper.selectMyUserCoupons(userId.longValue(), status);
+        List<UserCouponVO> voList = couponMapper.selectMyUserCoupons(userId, status);
         PageInfo<UserCouponVO> userCouponVOPageInfo = new PageInfo<>(voList);
         if (voList.isEmpty()) {
             return PageResult.empty(userCouponVOPageInfo);
@@ -108,9 +108,9 @@ public class CouponServiceImpl implements CouponService {
      * @return
      */
     @Override
-    public List<CouponOptionVO> getCouponOptions(Double totalAmount, Integer userId) {
+    public List<CouponOptionVO> getCouponOptions(Double totalAmount, Long userId) {
         // 过滤满减门槛不满足、已过期或已使用的券。
-        List<CouponOptionVO> couponOptionVOList = couponMapper.selectCouponOptions(totalAmount, LocalDateTime.now(), userId.longValue());
+        List<CouponOptionVO> couponOptionVOList = couponMapper.selectCouponOptions(totalAmount, LocalDateTime.now(), userId);
         return couponOptionVOList;
     }
 }

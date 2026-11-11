@@ -8,13 +8,42 @@ import com.zeewoncode.dto.StockDTO;
 
 public interface SkuService {
 
-    void addSku(Long id, SkuDTO dto, Integer userId);
+    /**
+     * 新增商品规格
+     * @param id
+     * @param dto
+     * @param userId
+     */
+    void addSku(Long id, SkuDTO dto, Long userId);
 
-    void editSku(Long skuId, SkuUpdateDTO dto, Integer userId);
+    /**
+     * 修改商品规格
+     * @param skuId
+     * @param dto
+     * @param userId
+     */
+    void editSku(Long skuId, SkuUpdateDTO dto, Long userId);
 
-    void deleteSku(Long id, Integer userId);
+    /**
+     * 删除商品规格
+     * @param id
+     * @param userId
+     */
+    void deleteSku(Long id, Long userId);
 
-    void updateStock(Long id, StockDTO dto, Integer userId);
+    /**
+     * 修改商品规格库存
+     * @param id
+     * @param dto
+     * @param userId
+     */
+    void updateStock(Long id, StockDTO dto, Long userId);
 
-    void updateSkuStatus(Long id, SpuStatusDTO dto, Integer userId);
+    /**
+     * 修改商品规格状态
+     * @param id
+     * @param dto
+     * @param userId
+     */
+    void updateSkuStatus(Long id, SpuStatusDTO dto, Long userId);
 }

@@ -12,22 +12,25 @@ public interface OrderService {
      * @param status
      * @param page
      * @param size
+     * @param userId
      * @return
      */
-    PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size, Integer userId);
+    PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size, Long userId);
 
     /**
      * 获取本店订单详情
      * @param orderId
+     * @param userId
      * @return
      */
-    OrderDetail getOrderDetail(Long orderId, Integer userId);
+    OrderDetail getOrderDetail(Long orderId, Long userId);
 
     /**
      * 订单发货
-      * @param orderId
+     * @param orderId
      * @param dto
+     * @param userId
      * @return
      */
-    ShipVO ship(Long orderId, ShipDTO dto, Integer userId);
+    ShipVO ship(Long orderId, ShipDTO dto, Long userId);
 }

@@ -15,29 +15,32 @@ public interface AddressesService {
      * @param userId
      * @return
      */
-    List<AddressVO> getAddresses(Integer userId);
+    List<AddressVO> getAddresses(Long userId);
 
     /**
      * 添加收货地址
+     * @param addressDTO
+     * @param userId
      */
-    void addAddress(AddressDTO addressDTO, Integer userId);
+    void addAddress(AddressDTO addressDTO, Long userId);
 
     /**
      * 修改收货地址
      * @param addressDTO
+     * @param userId
      */
-    void updateAddress(AddressDTO addressDTO, Integer userId);
+    void updateAddress(AddressDTO addressDTO, Long userId);
 
 
     /**
      * 删除收货地址
-     * @param id
+     * @param addressId
      */
-    void deleteAddress(Integer id);
+    void deleteAddress(Long addressId);
 
     /**
      * 设置默认收货地址
-     * @param id
+     * @param addressId
      */
-    void setDefaultAddress(Integer id, Integer userId);
+    void setDefaultAddress(Long addressId, Long userId);
 }

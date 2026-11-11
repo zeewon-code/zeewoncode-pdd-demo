@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,7 +15,7 @@ import java.util.List;
 @Builder
 public class OrderDetail implements Serializable {
 
-    private Integer id;
+    private Long id;
     private String orderNo;
     private Integer status;
     private String statusText;

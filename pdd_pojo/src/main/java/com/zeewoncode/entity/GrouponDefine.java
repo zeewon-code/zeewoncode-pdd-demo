@@ -18,10 +18,10 @@ import java.time.LocalDateTime;
 @Builder
 public class GrouponDefine implements Serializable {
 
-    private Integer id;
-    private Integer skuId;
-    private Integer spuId;
-    private BigDecimal groupPrice;
+    private Long id;
+    private Long skuId;
+    private Long spuId;
+    private Double groupPrice;
     private Integer targetCount; // 成团所需人数
     private Integer expireHours; // 成团时限
     private LocalDateTime startTime;

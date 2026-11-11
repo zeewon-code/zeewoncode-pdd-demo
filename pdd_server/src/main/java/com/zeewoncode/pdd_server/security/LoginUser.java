@@ -10,15 +10,15 @@ import java.util.List;
 
 public class LoginUser implements UserDetails {
 
-    private final Integer userId;
+    private final Long userId;
     private final Integer userType;
 
-    public LoginUser(Integer userId, Integer userType) {
+    public LoginUser(Long userId, Integer userType) {
         this.userId = userId;
         this.userType = userType;
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         return userId;
     }
 

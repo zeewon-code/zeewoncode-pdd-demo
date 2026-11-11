@@ -14,6 +14,6 @@ import java.util.List;
 @Builder
 public class CartSelectDTO implements Serializable {
 
-    private List<Integer> ids;
+    private List<Long> ids;
     private Boolean selected;
 }

@@ -14,11 +14,11 @@ import java.util.List;
 public interface GrouponMapper {
     /**
      * 根据spu_id查询该商品的拼团活动
-     * @param id
+     * @param spuId
      * @return
      */
-    @Select("select * from groupon_define where spu_id = #{id} order by start_time ASC")
-    List<GrouponDefine> selectGrouponDefineListBySpuId(Integer id);
+    @Select("select * from groupon_define where spu_id = #{spuId} order by start_time ASC")
+    List<GrouponDefine> selectGrouponDefineListBySpuId(Long spuId);
 
     /**
      * 根据拼团活动id查询拼团活动
@@ -123,11 +123,11 @@ public interface GrouponMapper {
 
     /**
      * 根据sku_id查询拼团活动
-     * @param id
+     * @param skuId
      * @return
      */
-    @Select("select * from groupon_define where sku_id = #{id}")
-    GrouponDefine selectGrouponDefineBySkuId(Long id);
+    @Select("select * from groupon_define where sku_id = #{skuId}")
+    GrouponDefine selectGrouponDefineBySkuId(Long skuId);
 
     /**
      * 根据拼团活动id更新拼团活动状态
@@ -135,14 +135,14 @@ public interface GrouponMapper {
      * @param status
      */
     @Update("update groupon_define set status = #{status} where id = #{id}")
-    int updateGrouponDefineStatus(Long id, int status);
+    int updateGrouponDefineStatus(Long id, Integer status);
 
     /**
      * 根据拼团活动id和状态删除拼团实例
      * @param defineId
      * @param status
      */
-    int deleteGrouponInstanceByDefineIdAndStatus(Long defineId, int status);
+    int deleteGrouponInstanceByDefineIdAndStatus(Long defineId, Integer status);
 
     /**
      * 根据拼团活动id和状态查询拼团实例
@@ -150,14 +150,14 @@ public interface GrouponMapper {
      * @param status
      * @return
      */
-    List<GrouponInstance> selectGrouponInstanceByDefineIdAndStatus(Long defineId, int status);
+    List<GrouponInstance> selectGrouponInstanceByDefineIdAndStatus(Long defineId, Integer status);
 
     /**
      * 根据拼团实例id列表更新拼团实例状态
      * @param instanceIds
      * @param status
      */
-    void updateGrouponInstanceStatusByInstanceIds(List<Long> instanceIds, int status);
+    void updateGrouponInstanceStatusByInstanceIds(List<Long> instanceIds, Integer status);
 
     /**
      * 根据spu_id列表查询拼团活动

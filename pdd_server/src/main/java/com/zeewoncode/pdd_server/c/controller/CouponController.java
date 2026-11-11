@@ -1,6 +1,5 @@
 package com.zeewoncode.pdd_server.c.controller;
 
-import com.zeewoncode.pdd_server.c.service.CouponService;
 import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
@@ -8,7 +7,6 @@ import com.zeewoncode.vo.CouponClaimVO;
 import com.zeewoncode.vo.CouponOptionVO;
 import com.zeewoncode.vo.CouponVO;
 import com.zeewoncode.vo.UserCouponVO;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -48,7 +46,8 @@ public class CouponController {
      * @return
      */
     @PostMapping("/{id}/claim")
-    public Result<CouponClaimVO> claimCoupon(@PathVariable Long id, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result<CouponClaimVO> claimCoupon(@PathVariable Long id,
+                                             @AuthenticationPrincipal LoginUser loginUser) {
         log.info("领取优惠券:{}",id);
         CouponClaimVO couponClaimVO = couponService.claimCoupon(id, loginUser.getUserId());
         return Result.success(couponClaimVO);
@@ -79,7 +78,8 @@ public class CouponController {
      * @return
      */
     @GetMapping("/user-coupons/options")
-    public Result<List<CouponOptionVO>> getCouponOptions(@RequestParam Double totalAmount, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result<List<CouponOptionVO>> getCouponOptions(@RequestParam Double totalAmount,
+                                                         @AuthenticationPrincipal LoginUser loginUser) {
         log.info("结算页可选券,总金额：{}", totalAmount);
         List<CouponOptionVO> couponOptionVOList = couponService.getCouponOptions(totalAmount, loginUser.getUserId());
         return Result.success(couponOptionVOList);

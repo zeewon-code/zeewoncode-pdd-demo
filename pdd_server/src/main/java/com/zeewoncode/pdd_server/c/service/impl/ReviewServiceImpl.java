@@ -36,7 +36,7 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public PageResult<Review> getReviewList(Integer spuId, ReviewsListQueryDTO req) {
+    public PageResult<Review> getReviewList(Long spuId, ReviewsListQueryDTO req) {
         PageHelper.startPage(req.getPage(), req.getSize());
         List<Review> reviewList = reviewMapper.selectReviewList(spuId, req);
         PageInfo<Review> pageInfo = new PageInfo<>(reviewList);
@@ -54,7 +54,7 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public ReviewStat getReviewStat(Integer id) {
+    public ReviewStat getReviewStat(Long id) {
         List<Review> ratingList =  reviewMapper.selectReviewListBySpuId(id);
         ReviewStat reviewStat = new ReviewStat();
         reviewStat.setTotal(ratingList.size());
@@ -64,12 +64,12 @@ public class ReviewServiceImpl implements ReviewService {
         reviewStat.setAvgRating(ratingSum / ratingList.size());
         Map<Integer, Long> countMap = ratingList.stream()
                 .collect(Collectors.groupingBy(r -> r.getRating(), Collectors.counting()));
-        Map<String, Integer> ratingDist = new HashMap<>();
-        ratingDist.put(RatingConstant.RATING_1, countMap.getOrDefault(1, 0L).intValue());
-        ratingDist.put(RatingConstant.RATING_2, countMap.getOrDefault(2, 0L).intValue());
-        ratingDist.put(RatingConstant.RATING_3, countMap.getOrDefault(3, 0L).intValue());
-        ratingDist.put(RatingConstant.RATING_4, countMap.getOrDefault(4, 0L).intValue());
-        ratingDist.put(RatingConstant.RATING_5, countMap.getOrDefault(5, 0L).intValue());
+        Map<String, Long> ratingDist = new HashMap<>();
+        ratingDist.put(RatingConstant.RATING_1, countMap.getOrDefault(1, 0L));
+        ratingDist.put(RatingConstant.RATING_2, countMap.getOrDefault(2, 0L));
+        ratingDist.put(RatingConstant.RATING_3, countMap.getOrDefault(3, 0L));
+        ratingDist.put(RatingConstant.RATING_4, countMap.getOrDefault(4, 0L));
+        ratingDist.put(RatingConstant.RATING_5, countMap.getOrDefault(5, 0L));
         reviewStat.setRatingDist(ratingDist);
         return reviewStat;
     }
@@ -81,16 +81,14 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public PageResult<OrderCard> getUnreviewedOrders(Integer page, Integer size, Integer userId) {
+    public PageResult<OrderCard> getUnreviewedOrders(Integer page, Integer size, Long userId) {
         PageHelper.startPage(page, size);
         List<OrderCard> orderList = orderMapper.selectUnreviewedOrdersPage(userId);
         PageInfo<OrderCard> pageInfo = new PageInfo<>(orderList);
-        PageResult<OrderCard> result = new PageResult<>();
-        result.setTotal((int) pageInfo.getTotal());
-        result.setRecords(pageInfo.getList());
-        result.setSize(pageInfo.getSize());
-        result.setPage(pageInfo.getPageNum());
-        return result;
+        if (orderList.isEmpty()) {
+            return PageResult.empty(pageInfo);
+        }
+        return PageResult.of(pageInfo, orderList);
     }
 
     /**
@@ -99,7 +97,7 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public ReviewCreateResult addReview(ReviewCreateDTO req, Integer userId) {
+    public ReviewCreateResult addReview(ReviewCreateDTO req, Long userId) {
         Order order = orderMapper.selectOrderById(req.getOrderId());
         if (order == null) {
             throw new RuntimeException(MessageConstant.ORDER_NOT_EXIST);
@@ -109,7 +107,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
         ProductReview productReview = new ProductReview();
         BeanUtils.copyProperties(req, productReview);
-        productReview.setUserId(userId.longValue());
+        productReview.setUserId(userId);
         OrderItem orderItem = orderMapper.selectItemById(req.getOrderItemId());
         productReview.setSpuId(orderItem.getSpuId());
         productReview.setCreatedAt(LocalDateTime.now());

@@ -118,14 +118,7 @@
         </foreach>
         GROUP BY define_id
     </select>
-    <select id="selectGrouponInstanceIdsByDefineIds" resultType="java.lang.Long">
-        SELECT id
-        FROM groupon_instance
-        WHERE define_id IN
-        <foreach item="defineId" collection="defineIdsList" separator="," open="(" close=")">
-            #{defineId}
-        </foreach>
-    </select>
+
 
     <select id="selectPriceBySpuIds" resultType="com.zeewoncode.entity.SpuCard">
         SELECT spu_id as id, MIN(group_price) AS group_price, 1 as hasGroupon

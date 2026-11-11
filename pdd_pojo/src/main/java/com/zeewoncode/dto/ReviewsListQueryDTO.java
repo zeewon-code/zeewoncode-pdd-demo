@@ -17,6 +17,8 @@ import java.io.Serializable;
 public class ReviewsListQueryDTO implements Serializable {
 
     private Integer rating; //评分筛选
+    @Builder.Default
     private Integer page = 1; // 默认第一页
+    @Builder.Default
     private Integer size = 10; // 默认每页10条
 }
