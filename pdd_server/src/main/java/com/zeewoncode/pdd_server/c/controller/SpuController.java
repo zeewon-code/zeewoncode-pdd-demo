@@ -9,7 +9,6 @@ import com.zeewoncode.vo.CategoryNodeVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 /**
@@ -38,8 +37,8 @@ public class SpuController {
      * @param req
      * @return
      */
-    @GetMapping("/spu/list")
-    public Result<PageResult<SpuCard>> getSpuList(SpuListQueryDTO req) {
+    @PostMapping("/spu/list")
+    public Result<PageResult<SpuCard>> getSpuList(@RequestBody SpuListQueryDTO req) {
         log.info("获取商品列表");
         PageResult<SpuCard> result = spuService.getSpuList(req);
         return Result.success(result);

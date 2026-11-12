@@ -11,6 +11,9 @@ import com.zeewoncode.vo.OrderStatusDist;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -54,9 +57,9 @@ public class DashboardServiceImpl implements DashboardService {
         // todayPaidOrderCount
         Long todayPaidOrderCount = orderMapper.selectPaidCount(now, nowPlusOneDay);
         // todayGmv
-        Double todayGmv = orderMapper.selectGmv(now, nowPlusOneDay);
+        BigDecimal todayGmv = orderMapper.selectGmv(now, nowPlusOneDay).setScale(2, RoundingMode.HALF_UP);
         // totalGmv
-        Double totalGmv = orderMapper.selectGmv(null, null);
+        BigDecimal totalGmv = orderMapper.selectGmv(null, null).setScale(2, RoundingMode.HALF_UP);
         // orderStatusDist
         List<OrderStatusDist> dist = orderMapper.selectOrderStatusDist();
         ADashboard aDashboard = ADashboard.builder()

@@ -20,7 +20,7 @@ public class CartItemVO implements Serializable {
     private String title;
     private String specs;
     private String image;
-    private Double price;
+    private BigDecimal price;
     private Integer quantity;
     private Boolean selected;
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +17,7 @@ public class OrderItemVO implements Serializable {
     private String title;
     private String specs;
     private String image;
-    private Double price;
+    private BigDecimal price;
     private Integer quantity;
-    private Double amount;
+    private BigDecimal amount;
 }

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,11 +70,11 @@ public class SpuServiceImpl implements SpuService {
             spuCard.setId(spuId);
             spuCard.setTitle(spu.getTitle());
             spuCard.setMainImage(spu.getMainImage());
-            spuCard.setMinPrice(skuMap.get(spuId).getMinPrice());
-            spuCard.setMaxPrice(skuMap.get(spuId).getMaxPrice());
+            spuCard.setMinPrice(skuMap.get(spuId).getMinPrice().setScale(2, RoundingMode.HALF_UP));
+            spuCard.setMaxPrice(skuMap.get(spuId).getMaxPrice().setScale(2, RoundingMode.HALF_UP));
             spuCard.setSales(spu.getSales());
             GrouponDefine define = grouponDefineMap.get(spuId);
-            spuCard.setGroupPrice(define != null ? define.getGroupPrice() : null);
+            spuCard.setGroupPrice(define != null ? define.getGroupPrice().setScale(2, RoundingMode.HALF_UP) : null);
             spuCard.setHasGroupon(define != null ? true : false);
             return spuCard;
         }).filter(Objects::nonNull).collect(Collectors.toList());

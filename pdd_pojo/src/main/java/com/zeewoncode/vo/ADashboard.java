@@ -3,6 +3,7 @@ package com.zeewoncode.vo;
 import lombok.Builder;
 import lombok.Data;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -15,7 +16,7 @@ public class ADashboard implements Serializable {
     private Long totalOrderCount; // 全部状态
     private Long todayOrderCount; // 按created_at,全部状态
     private Long todayPaidOrderCount;// 按paid_at, status=1/2/3
-    private Double todayGmv; // 今日支付成功订单的实付金额合计，单位元，两位小数
-    private Double totalGmv; // 全部支付成功订单的实付金额合计，单位元，两位小数
+    private BigDecimal todayGmv; // 今日支付成功订单的实付金额合计，单位元，两位小数
+    private BigDecimal totalGmv; // 全部支付成功订单的实付金额合计，单位元，两位小数
     private List<OrderStatusDist> orderStatusDist; //按当前状态，固定6项，无订单时 count=0
 }

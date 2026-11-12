@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -17,9 +18,9 @@ public class Coupon implements Serializable {
     private Long id;
     private String title;
     private Integer type;
-    private Double conditionAmount;
-    private Double discountAmount;
-    private Double discountRate;
+    private BigDecimal conditionAmount;
+    private BigDecimal discountAmount;
+    private BigDecimal discountRate;
     private LocalDateTime validFrom;
     private LocalDateTime validTo;
     private Integer total;

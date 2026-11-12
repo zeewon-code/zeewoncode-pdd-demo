@@ -95,14 +95,14 @@ public class OrderController {
      * @return
      */
     @GetMapping()
-    public PageResult<OrderCard> getOrderList(@RequestParam(required = false) Integer status,
+    public Result<PageResult<OrderCard>> getOrderList(@RequestParam(required = false) Integer status,
                                               @RequestParam(defaultValue = "1") Integer page,
                                               @RequestParam(defaultValue = "10") Integer size,
                                               @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("获取订单列表:状态{}, 页码{}, 每页数量{}", status, page, size);
         PageResult<OrderCard> result = orderService.getOrderList(status, page, size, loginUser.getUserId());
-        return result;
+        return Result.success(result);
     }
 
     /**

@@ -13,6 +13,9 @@ import com.zeewoncode.vo.CouponVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -47,9 +50,26 @@ public class CouponServiceImpl implements CouponService {
      */
     @Override
     public Result createCoupon(CouponCreateDTO couponCreateDTO) {
-        if (couponCreateDTO.getConditionAmount() != null && couponCreateDTO.getDiscountAmount() != null) {
-            if (couponCreateDTO.getConditionAmount() <= couponCreateDTO.getDiscountAmount()) {
-                return Result.error("优惠券满减门槛必须大于满减金额");
+        // 校验优惠券金额（两种情况）
+        Integer type = couponCreateDTO.getType();
+        BigDecimal conditionAmountDto = couponCreateDTO.getConditionAmount();
+        BigDecimal discountAmountDto = couponCreateDTO.getDiscountAmount();
+        BigDecimal discountRateDto = couponCreateDTO.getDiscountRate();
+        // 1. 如果是满减券，满减门槛必须大于满减金额
+        if (type == 1) {
+            if (conditionAmountDto == null || discountAmountDto == null) {
+                return Result.error("优惠券满减金额或优惠金额未输入，请重新输入");
+            }
+            BigDecimal conditionAmount = conditionAmountDto.setScale(2, RoundingMode.HALF_UP);
+            BigDecimal discountAmount = discountAmountDto.setScale(2, RoundingMode.HALF_UP);
+            if (conditionAmount.compareTo(discountAmount) <= 0) {
+                return Result.error("优惠券满减门槛必须大于满减金额，请重新输入");
+            }
+        }
+        // 2. 如果是折扣券，折扣金额必须大于0
+        if (type == 2) {
+            if (discountRateDto == null) {
+                return Result.error("优惠券折扣未输入，请重新输入");
             }
         }
         if (couponCreateDTO.getValidFrom().isAfter(couponCreateDTO.getValidTo())) {

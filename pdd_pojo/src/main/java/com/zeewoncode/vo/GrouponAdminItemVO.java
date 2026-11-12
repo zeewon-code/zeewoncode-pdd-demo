@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,7 +19,7 @@ public class GrouponAdminItemVO implements Serializable {
     private Long spuId;
     private Long skuId;
     private String title;
-    private Double groupPrice;
+    private BigDecimal groupPrice;
     private Integer targetCount;
     private Integer status;
     private LocalDateTime startTime;

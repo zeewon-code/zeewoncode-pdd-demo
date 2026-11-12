@@ -105,11 +105,24 @@ public class GrouponsController {
     public Result<PageResult<GrouponInstanceVO>> getGrouponInstanceInSpu(
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
+            @RequestParam(defaultValue = "10") Integer size,
+            @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("商品进行中的拼团:{}", id);
-        PageResult<GrouponInstanceVO> pageResult = grouponsService.getGrouponInstanceInSpu(id, page, size);
+        PageResult<GrouponInstanceVO> pageResult = grouponsService.getGrouponInstanceInSpu(id, page, size, loginUser.getUserId());
         return Result.success(pageResult);
+    }
+
+    /**
+     * 获取拼团详情
+     * @param instanceId
+     * @return
+     */
+    @GetMapping("/{instanceId}")
+    public Result<GrouponInstanceVO> getGrouponInstanceDetail(@PathVariable Long instanceId) {
+        log.info("获取拼团详情:{}", instanceId);
+        GrouponInstanceVO vo = grouponsService.getGrouponInstanceDetail(instanceId);
+        return Result.success(vo);
     }
 
 }

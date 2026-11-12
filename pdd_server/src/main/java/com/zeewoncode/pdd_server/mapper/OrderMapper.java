@@ -5,6 +5,7 @@ import com.zeewoncode.vo.OrderItemVO;
 import com.zeewoncode.vo.OrderStatusDist;
 import org.apache.ibatis.annotations.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -186,11 +187,20 @@ public interface OrderMapper {
      * @param nowPlusOneDay
      * @return
      */
-    Double selectGmv(LocalDateTime now, LocalDateTime nowPlusOneDay);
+    BigDecimal selectGmv(LocalDateTime now, LocalDateTime nowPlusOneDay);
 
     /**
      * 各订单状态分布，无订单时count=0
      * @return
      */
     List<OrderStatusDist> selectOrderStatusDist();
+
+    /**
+     * 根据团购实例id和用户id和订单状态查询订单
+     * @param instanceId
+     * @param userId
+     * @param status
+     * @return
+     */
+    List<Order> selectOrderByInstanceIdAndUserIdAndStatus(Long instanceId, Long userId, Integer status);
 }

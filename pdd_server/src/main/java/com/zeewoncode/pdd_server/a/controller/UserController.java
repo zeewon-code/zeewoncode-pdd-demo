@@ -32,7 +32,7 @@ public class UserController {
      * @return
      */
     @GetMapping
-    public PageResult<UserVO> getUsersList(
+    public Result<PageResult<UserVO>> getUsersList(
             @RequestParam(required = false) Integer userType, // 1买家 2商家 9管理员
             @RequestParam(required = false) Integer status, // 1正常 0冻结
             @RequestParam(required = false) String phoneKeyword, // 手机号模糊搜索
@@ -42,7 +42,7 @@ public class UserController {
     ) {
         log.info("查询用户列表：userType:{}, status:{}, phoneKeyword:{}, nicknameKeyword:{}, page:{}, size:{}",
                 userType, status, phoneKeyword, nicknameKeyword, page, size);
-        return userService.getUsersList(userType, status, phoneKeyword, nicknameKeyword, page, size);
+        return Result.success(userService.getUsersList(userType, status, phoneKeyword, nicknameKeyword, page, size));
     }
 
     /**

@@ -28,12 +28,12 @@ public class CouponController {
      * @return
      */
     @GetMapping
-    public PageResult<CouponVO> listCoupons(
+    public Result<PageResult<CouponVO>> listCoupons(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size
-    ) {
+            @RequestParam(defaultValue = "10") Integer size) {
         log.info("优惠券列表（含已领/剩余）: 页码{}, 每页数量{}", page, size);
-        return couponService.listCoupons(page, size);
+        PageResult<CouponVO> result = couponService.listCoupons(page, size);
+        return Result.success(result);
     }
 
     /**
@@ -55,12 +55,13 @@ public class CouponController {
      * @return
      */
     @GetMapping("/{id}/records")
-    public PageResult<CouponRecord> getCouponRecord(
+    public Result<PageResult<CouponRecord>> getCouponRecord(
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size
     ) {
         log.info("获取优惠券记录: {}", id);
-        return couponService.getCouponRecord(id, page, size);
+        PageResult<CouponRecord> result = couponService.getCouponRecord(id, page, size);
+        return Result.success(result);
     }
 }

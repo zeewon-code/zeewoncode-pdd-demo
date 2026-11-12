@@ -2,6 +2,7 @@ package com.zeewoncode.pdd_server.a.controller;
 
 import com.zeewoncode.entity.OrderCard;
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +34,7 @@ public class OrderController {
      * @return
      */
     @GetMapping
-    public PageResult<OrderCard> selectOrders(
+    public Result<PageResult<OrderCard>> selectOrders(
             @RequestParam(required = false) Long merchantId,
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) LocalDateTime startTime,
@@ -43,6 +44,6 @@ public class OrderController {
     ) {
         log.info("全平台订单查询: merchantId={}, status={}, startTime={}, endTime={}, page={}, Size={}",
                 merchantId, status, startTime, endTime, page, size);
-        return orderService.selectOrders(merchantId, status, startTime, endTime, page, size);
+        return Result.success(orderService.selectOrders(merchantId, status, startTime, endTime, page, size));
     }
 }

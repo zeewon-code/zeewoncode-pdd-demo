@@ -17,9 +17,9 @@ public class CouponVO implements Serializable {
 
     private Long id;
     private String title;
-    private Double conditionAmount;
-    private Double discountAmount;
-    private Double discountRate;
+    private BigDecimal conditionAmount;
+    private BigDecimal discountAmount;
+    private BigDecimal discountRate;
     private LocalDateTime validTo;
     private Integer remain;
     private Integer issued;

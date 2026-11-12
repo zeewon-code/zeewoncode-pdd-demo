@@ -30,7 +30,7 @@ public class SpuController {
      * @return
      */
     @GetMapping
-    public PageResult<SpuCard> listAllSpuCards(
+    public Result<PageResult<SpuCard>> listAllSpuCards(
             @RequestParam(required = false) Long merchantId,
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) Long categoryId,
@@ -39,7 +39,7 @@ public class SpuController {
     ) {
         log.info("获取商品监督列表：merchantId:{}, status:{}, categoryId:{}, page:{}, size:{}", merchantId, status, categoryId, page, size);
         PageResult<SpuCard> result = spuService.listAllSpuCards(merchantId, status, categoryId, page, size);
-        return result;
+        return Result.success(result);
     }
 
     /**

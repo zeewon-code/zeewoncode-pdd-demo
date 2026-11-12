@@ -28,7 +28,7 @@ public class ReviewController {
      * @return
      */
     @GetMapping
-    public PageResult<Review> reviewList(
+    public Result<PageResult<Review>> reviewList(
             @RequestParam(required = false) Long spuId,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer rating,
@@ -37,7 +37,7 @@ public class ReviewController {
     ) {
         log.info("全平台评价列表：{},{},{}", spuId, keyword, rating);
         PageResult<Review> result = reviewService.reviewList(spuId, keyword, rating, page, size);
-        return result;
+        return Result.success(result);
     }
 
     /**

@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -85,7 +87,7 @@ public class GrouponServiceImpl implements GrouponService {
                     .id(grouponDefine.getId())
                     .spuId(grouponDefine.getSpuId())
                     .skuId(grouponDefine.getSkuId())
-                    .groupPrice(grouponDefine.getGroupPrice())
+                    .groupPrice(grouponDefine.getGroupPrice().setScale(2, RoundingMode.HALF_UP))
                     .targetCount(grouponDefine.getTargetCount())
                     .status(grouponDefine.getStatus())
                     .startTime(grouponDefine.getStartTime())
@@ -122,7 +124,7 @@ public class GrouponServiceImpl implements GrouponService {
             return Result.error("当前商品规格不属于当前店铺，无法创建拼团活动");
         }
         // groupPrice 必须小于等于 sku本来的价格
-        if (grouponCreateDTO.getGroupPrice() >= sku.getPrice()) {
+        if ((grouponCreateDTO.getGroupPrice().compareTo(sku.getPrice())) > 0){
             return Result.error("拼团价格必须小于商品规格价格");
         }
         // 校验startTime,endTime
@@ -137,7 +139,7 @@ public class GrouponServiceImpl implements GrouponService {
         GrouponDefine define = GrouponDefine.builder()
                 .skuId(grouponCreateDTO.getSkuId())
                 .spuId(sku.getSpuId())
-                .groupPrice(grouponCreateDTO.getGroupPrice())
+                .groupPrice(grouponCreateDTO.getGroupPrice().setScale(2, RoundingMode.HALF_UP))
                 .targetCount(grouponCreateDTO.getTargetCount())
                 .expireHours(grouponCreateDTO.getExpireHours())
                 .startTime(grouponCreateDTO.getStartTime())
@@ -182,7 +184,7 @@ public class GrouponServiceImpl implements GrouponService {
                 .id(grouponDefine.getId())
                 .spuId(grouponDefine.getSpuId())
                 .skuId(grouponDefine.getSkuId())
-                .groupPrice(grouponDefine.getGroupPrice())
+                .groupPrice(grouponDefine.getGroupPrice().setScale(2, RoundingMode.HALF_UP))
                 .targetCount(grouponDefine.getTargetCount())
                 .status(grouponDefine.getStatus())
                 .startTime(grouponDefine.getStartTime())

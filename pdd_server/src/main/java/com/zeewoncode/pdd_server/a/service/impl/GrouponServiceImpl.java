@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,7 +66,7 @@ public class GrouponServiceImpl implements GrouponService {
                     .id(grouponDefine.getId())
                     .spuId(grouponDefine.getSpuId())
                     .skuId(grouponDefine.getSkuId())
-                    .groupPrice(grouponDefine.getGroupPrice())
+                    .groupPrice(grouponDefine.getGroupPrice().setScale(2, RoundingMode.HALF_UP))
                     .targetCount(grouponDefine.getTargetCount())
                     .status(grouponDefine.getStatus())
                     .startTime(grouponDefine.getStartTime())

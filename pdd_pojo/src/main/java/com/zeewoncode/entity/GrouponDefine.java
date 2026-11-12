@@ -21,7 +21,7 @@ public class GrouponDefine implements Serializable {
     private Long id;
     private Long skuId;
     private Long spuId;
-    private Double groupPrice;
+    private BigDecimal groupPrice;
     private Integer targetCount; // 成团所需人数
     private Integer expireHours; // 成团时限
     private LocalDateTime startTime;

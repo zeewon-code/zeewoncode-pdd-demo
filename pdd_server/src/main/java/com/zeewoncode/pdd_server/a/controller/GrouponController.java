@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.a.controller;
 
 import com.zeewoncode.result.PageResult;
+import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.GrouponAdminItemVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +28,12 @@ public class GrouponController {
      * @return
      */
     @GetMapping
-    public PageResult<GrouponAdminItemVO> listGroupon(
+    public Result<PageResult<GrouponAdminItemVO>> listGroupon(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size
     ) {
         log.info("获取拼团活动监控列表");
-        return grouponService.listGroupon(page, size);
+        PageResult<GrouponAdminItemVO> result = grouponService.listGroupon(page, size);
+        return Result.success(result);
     }
 }

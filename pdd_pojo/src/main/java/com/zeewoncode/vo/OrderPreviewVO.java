@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +14,7 @@ import java.io.Serializable;
 @Builder
 public class OrderPreviewVO implements Serializable {
 
-    private Double totalAmount;
-    private Double discountAmount; // 优惠总额（优惠券）
-    private Double payableAmount;
+    private BigDecimal totalAmount;
+    private BigDecimal discountAmount; // 优惠总额（优惠券）
+    private BigDecimal payableAmount;
 }

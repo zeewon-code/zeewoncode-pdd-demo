@@ -33,7 +33,7 @@ public class ReviewController {
      * @return
      */
     @GetMapping
-    public PageResult<Review> getReviewList(
+    public Result<PageResult<Review>> getReviewList(
             @RequestParam(required = false) Long spuId,
             @RequestParam(required = false) Integer rating,
             @RequestParam(required = false, defaultValue = "1") Integer page,
@@ -41,7 +41,8 @@ public class ReviewController {
             @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("spuId:{}, rating:{}, page:{}, size:{}", spuId, rating, page, size);
-        return reviewService.getReviewList(spuId, rating, page, size, loginUser.getUserId());
+        PageResult<Review> result = reviewService.getReviewList(spuId, rating, page, size, loginUser.getUserId());
+        return Result.success(result);
     }
 
     /**

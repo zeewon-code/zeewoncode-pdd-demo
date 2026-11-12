@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,6 +17,6 @@ public class OrderCreateVO implements Serializable {
 
     private Integer orderId;
     private String orderNo;
-    private Double payableAmount;
+    private BigDecimal payableAmount;
     private LocalDateTime payExpireTime; //支付过期时间
 }

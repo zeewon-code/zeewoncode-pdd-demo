@@ -1,13 +1,12 @@
 package com.zeewoncode.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,7 +17,9 @@ public class GrouponCreateDTO implements Serializable {
     @NotNull(message = "商品规格不能为空")
     private Long skuId;
     @NotNull(message = "团购价格不能为空")
-    private Double groupPrice;
+    @DecimalMin(value = "0", inclusive = false, message = "团购价格必须大于0")
+    @Digits(integer = 18, fraction = 2, message = "金额小数位最多有两位")
+    private BigDecimal groupPrice;
     @NotNull(message = "成团人数不能为空")
     private Integer targetCount;
     @NotNull(message = "成团期限不能为空")

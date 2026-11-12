@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,13 +40,13 @@ public class CartServiceImpl implements CartService {
     public CartVO getCartList(Long userId) {
         CartVO cartVO = new CartVO();
         List<CartItem> cartItemList = cartMapper.selectCartItemByUserId(userId);
-        Double totalAmountCopy = 0.0;
+        BigDecimal totalAmountCopy = BigDecimal.ONE;
         for (CartItem cartItem : cartItemList) {
             Long skuId = cartItem.getSkuId();
             Integer quantity = cartItem.getQuantity();
             Sku sku = skuMapper.selectSkuById(skuId);
-            Double price = sku.getPrice();
-            totalAmountCopy += (quantity * price);
+            BigDecimal price = sku.getPrice().setScale(2, RoundingMode.HALF_UP);
+            totalAmountCopy = totalAmountCopy.add(price.multiply(BigDecimal.valueOf(quantity)));
         }
         cartVO.setTotalAmount(totalAmountCopy);
         Map<Long, List<CartItem>> cartList = cartItemList.stream()

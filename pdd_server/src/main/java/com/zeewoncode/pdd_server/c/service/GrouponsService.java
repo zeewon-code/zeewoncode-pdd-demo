@@ -59,5 +59,12 @@ public interface GrouponsService {
      * @param size
      * @return
      */
-    PageResult<GrouponInstanceVO> getGrouponInstanceInSpu(Long id, Integer page, Integer size);
+    PageResult<GrouponInstanceVO> getGrouponInstanceInSpu(Long id, Integer page, Integer size, Long userId);
+
+    /**
+     * 获取拼团详情
+     * @param instanceId
+     * @return
+     */
+    GrouponInstanceVO getGrouponInstanceDetail(Long instanceId);
 }

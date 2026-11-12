@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -22,8 +23,8 @@ public class OrderCard implements Serializable {
     private String orderNo; // 订单号
     private Integer status;
     private String statusText;  //0待付款 1待发货 2待收货 3已完成 4已取消 5已关闭
-    private Double totalAmount; // 订单总金额
-    private Double payableAmount;  // 应付金额
+    private BigDecimal totalAmount; // 订单总金额
+    private BigDecimal payableAmount;  // 应付金额
     private String createAt;
     private List<OrderItemVO> items;
 }

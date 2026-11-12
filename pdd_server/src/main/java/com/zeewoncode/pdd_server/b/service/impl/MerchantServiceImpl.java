@@ -16,9 +16,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -168,11 +171,16 @@ public class MerchantServiceImpl implements MerchantService {
                 || Integer.valueOf(2).equals(order.getStatus())
                 || Integer.valueOf(3).equals(order.getStatus()))
                 .toList();
-        Double totalSales = list.stream()
-                .mapToDouble(Order::getPayableAmount).sum();
-        Double todaySales = list.stream()
-                .filter(order -> order.getCreatedAt().toLocalDate().equals(today))
-                .mapToDouble(Order::getPayableAmount).sum();
+        BigDecimal totalSales = list.stream()
+                .map(Order::getPayableAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal todaySales = list.stream()
+                .filter(order -> order.getCreatedAt() != null
+                        && order.getCreatedAt().toLocalDate().equals(today))
+                .map(Order::getPayableAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         List<Long> spuIds = spuMapper.selectIdsByMerchantId(merchantId);
         // lowStockSkus （低库存stock<=10）(通过orderIds去sku表左连接spu表)
         List<LowStockSkus> lowStockSkus = skuMapper.selectLowStockSkus(spuIds);

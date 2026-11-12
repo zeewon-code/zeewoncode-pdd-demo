@@ -89,12 +89,10 @@ public class SpuServiceImpl implements SpuService {
         List<SpuCard> list = spuMapper.selectSpuList(req);
         // 3.包装分页结果
         PageInfo<SpuCard> spuCardPageInfo = new PageInfo<>(list);
-        PageResult<SpuCard> result = new PageResult<>();
-        result.setTotal((int) spuCardPageInfo.getTotal());
-        result.setRecords(spuCardPageInfo.getList());
-        result.setSize(spuCardPageInfo.getSize());
-        result.setPage(spuCardPageInfo.getPageNum());
-        return result;
+        if (list.isEmpty()) {
+            return PageResult.empty(spuCardPageInfo);
+        }
+        return PageResult.of(spuCardPageInfo, list);
     }
 
     /**

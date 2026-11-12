@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,14 +85,15 @@ public class OrderServiceImpl implements OrderService {
         order.setReceiverPhone(userAddress.getReceiverPhone());
         String address = userAddress.getProvince() + userAddress.getCity() + userAddress.getDistrict() + userAddress.getDetail();
         order.setReceiverAddress(address);
-        Double totalAmount = 0.0;
+        BigDecimal totalAmount = BigDecimal.ONE;
         // 填充totalAmount
         for (OrderItemDTO item : req.getItems()) {
             Long skuId = item.getSkuId();
             Integer quantity = item.getQuantity();
             Sku skuDB = skuMapper.selectSkuById(skuId);
-            Double price = skuDB.getPrice();
-            totalAmount += (price * quantity);
+            BigDecimal price = skuDB.getPrice();
+            totalAmount = totalAmount.add(price.multiply(BigDecimal.valueOf(quantity)))
+                    .setScale(2, RoundingMode.HALF_UP);
         }
         order.setTotalAmount(totalAmount);
         // 填充discountAmount, payableAmount
@@ -102,18 +104,20 @@ public class OrderServiceImpl implements OrderService {
             Coupon coupon = couponMapper.selectById(userCoupon.getCouponId(), LocalDateTime.now());
             if (coupon.getType() == 1) {
                 // 优惠券类型为满减券
-                if (totalAmount >= coupon.getConditionAmount()) {
-                    order.setDiscountAmount(coupon.getDiscountAmount());
+                if (totalAmount.compareTo(coupon.getConditionAmount()) >= 0) {
+                    order.setDiscountAmount(coupon.getDiscountAmount().setScale(2, RoundingMode.HALF_UP));
                 } else throw new RuntimeException("优惠券不满足使用条件");
             } else {
                 // 优惠券为折扣券
-                Double discountAmount = (1-coupon.getDiscountRate()) * totalAmount;
+                BigDecimal discountAmount = BigDecimal.ONE.subtract(coupon.getDiscountRate())
+                        .multiply(totalAmount).setScale(2, RoundingMode.HALF_UP);
                 order.setDiscountAmount(discountAmount);
             }
         } else {
-            order.setDiscountAmount(0.0);
+            order.setDiscountAmount(BigDecimal.ZERO);
         }
-        order.setPayableAmount((order.getTotalAmount() - order.getDiscountAmount()));
+        order.setPayableAmount((order.getTotalAmount().subtract(order.getDiscountAmount()))
+                .setScale(2, RoundingMode.HALF_UP));
         order.setPaymentId(null);
         order.setGrouponInstanceId(null);
         order.setStatus(0);
@@ -121,7 +125,7 @@ public class OrderServiceImpl implements OrderService {
         order.setPaidAt(null);
         order.setCompletedAt(null);
         orderMapper.insert(order);
-        if (order.getDiscountAmount() != null && order.getDiscountAmount() > 0) {
+        if (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
             // 修改优惠券的状态
             UserCoupon userCouponDb = UserCoupon.builder()
                     .orderId(order.getId())
@@ -148,7 +152,8 @@ public class OrderServiceImpl implements OrderService {
             item.setImage(skuDB.getImage());
             item.setPrice(skuDB.getPrice());
             item.setQuantity(orderItem.getQuantity());
-            item.setAmount(item.getPrice() * item.getQuantity());
+            item.setAmount(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))
+                    .setScale(2, RoundingMode.HALF_UP));
             orderItems.add(item);
         }
         orderMapper.insertOrderItems(orderItems);
@@ -162,7 +167,7 @@ public class OrderServiceImpl implements OrderService {
         OrderCreateVO result = OrderCreateVO.builder()
                 .orderId(order.getId().intValue())
                 .orderNo(order.getOrderNo())
-                .payableAmount(order.getPayableAmount())
+                .payableAmount(order.getPayableAmount().setScale(2, RoundingMode.HALF_UP))
                 .payExpireTime(expireDateTime)
                 .build();
         return result;
@@ -178,15 +183,15 @@ public class OrderServiceImpl implements OrderService {
         // orderPreviewReq中包含 商品规格id和数量的数组，以及用户优惠券id（可能为null）
         // 1、计算订单总金额 totalAmount
         OrderPreviewVO orderPreviewVO = new OrderPreviewVO();
-        Double totalAmount = 0.0;
-        Double payableAmount = 0.0;
+        BigDecimal totalAmount = BigDecimal.ZERO;
         for (OrderItemDTO item : orderPreviewDTO.getItems()) {
             Long skuId = item.getSkuId();
             Integer quantity = item.getQuantity();
             Sku sku = skuMapper.selectSkuById(skuId);
-            totalAmount += (sku.getPrice() * quantity);
+            totalAmount = totalAmount.add(sku.getPrice().setScale(2, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(quantity)));
         }
-        payableAmount = totalAmount;
+        BigDecimal payableAmount = totalAmount;
         // 填充totalAmount字段
         orderPreviewVO.setTotalAmount(totalAmount);
         // 2.计算优惠总额 discountAmount
@@ -202,18 +207,20 @@ public class OrderServiceImpl implements OrderService {
             Coupon coupon = couponMapper.selectById(userCoupon.getCouponId(), LocalDateTime.now());
             if (coupon.getType() == 1) {
                 // 优惠券类型为满减券
-                Double conditionAmount = coupon.getConditionAmount();
-                Double discountAmount = coupon.getDiscountAmount();
-                if (totalAmount >= conditionAmount) {
-                    payableAmount -= discountAmount;
+                BigDecimal conditionAmount = coupon.getConditionAmount().setScale(2, RoundingMode.HALF_UP);
+                BigDecimal discountAmount = coupon.getDiscountAmount().setScale(2, RoundingMode.HALF_UP);
+                if (totalAmount.compareTo(conditionAmount) >= 0) {
+                    payableAmount = payableAmount.subtract(discountAmount).setScale(2, RoundingMode.HALF_UP);
                     // 填充discountAmount字段
                     orderPreviewVO.setDiscountAmount(discountAmount);
                 }
             } else {
                 // 优惠券为折扣券
-                Double discountRate = coupon.getDiscountRate();
-                Double discountAmount = (1-discountRate) * totalAmount;
-                payableAmount = totalAmount - discountAmount;
+                BigDecimal discountRate = coupon.getDiscountRate();
+                BigDecimal discountAmount = (BigDecimal.ONE.subtract(discountRate)).multiply(totalAmount)
+                        .setScale(2, RoundingMode.HALF_UP);
+                payableAmount = totalAmount.subtract(discountAmount)
+                        .setScale(2, RoundingMode.HALF_UP);
                 // 填充discountAmount字段
                 orderPreviewVO.setDiscountAmount(discountAmount);
             }
@@ -248,7 +255,7 @@ public class OrderServiceImpl implements OrderService {
         }
         // 4.退还优惠券(将优惠券状态改为未使用，status=0, used_at=null, order_id = null)
         // 判断是否使用了优惠券
-        if (order.getDiscountAmount() != null && order.getDiscountAmount() > 0) {
+        if (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
             UserCoupon userCoupon = UserCoupon.builder().userId(userId).orderId(orderId).status(0).usedAt(null).build();
             couponMapper.updateUserCouponStatusAndUsedAt(userCoupon);
             UserCoupon userCoupon1 = couponMapper.selectUserCouponByUserIdAndOrderId(userId, orderId);
@@ -302,7 +309,8 @@ public class OrderServiceImpl implements OrderService {
         if (LocalDateTime.now().isAfter(order.getCreatedAt().plusMinutes(PAY_TIMEOUT_MINUTES))) {
             Order build = Order.builder().id(id).status(5).build();
             orderMapper.update(build);
-            if (order.getDiscountAmount() != null && order.getDiscountAmount() > 0) {
+            if (order.getDiscountAmount() != null
+                    && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
                 UserCoupon userCoupon = UserCoupon.builder()
                         .userId(userId)
                         .orderId(id)
@@ -318,7 +326,7 @@ public class OrderServiceImpl implements OrderService {
         }
         // 2.不超时
         // 3.往payment表插入数据，支付记录
-        Double payableAmount = order.getPayableAmount();
+        BigDecimal payableAmount = order.getPayableAmount().setScale(2, RoundingMode.HALF_UP);
         Payment payment = Payment.builder()
                 .paymentNo("P" + String.valueOf(snowflakeIdGenerator.nextId()))
                 .orderId(id)
@@ -360,12 +368,10 @@ public class OrderServiceImpl implements OrderService {
         List<OrderCard> orderList = orderMapper.selectOrderList(userId, status, null, null, null);
         // 3.包装分页结果
         PageInfo<OrderCard> pageInfo = new PageInfo<>(orderList);
-        PageResult<OrderCard> result = new PageResult<>();
-        result.setTotal((int) pageInfo.getTotal());
-        result.setSize(pageInfo.getSize());
-        result.setPage(pageInfo.getPageNum());
-        result.setRecords(pageInfo.getList());
-        return result;
+        if (orderList.isEmpty()) {
+            PageResult.empty(pageInfo);
+        }
+        return PageResult.of(pageInfo, orderList);
     }
 
     /**

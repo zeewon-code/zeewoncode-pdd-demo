@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -19,9 +20,9 @@ public class OrderDetail implements Serializable {
     private String orderNo;
     private Integer status;
     private String statusText;
-    private Double totalAmount;
-    private Double discountAmount;
-    private Double payableAmount;
+    private BigDecimal totalAmount;
+    private BigDecimal discountAmount;
+    private BigDecimal payableAmount;
     private Receiver receiver;
     private List<OrderItemVO> items;
     private ShipVO shipVO;

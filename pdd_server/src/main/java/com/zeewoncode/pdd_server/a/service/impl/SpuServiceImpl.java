@@ -15,6 +15,8 @@ import com.zeewoncode.utils.SafeCollectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,10 +57,10 @@ public class SpuServiceImpl implements SpuService {
         Map<Long, Spu> spuMap = SafeCollectors.toMap(spus, Spu::getId);
         // 通过spuIds在sku表获取minPrice, maxPrice
         List<SpuCard> skuPriceList = skuMapper.selectSkuMinPriceAndMaxPriceBySpuIds(spuIds);
-        Map<Long, SpuCard> skuMap = SafeCollectors.toMap(skuPriceList, spuCard -> spuCard.getId().longValue());
+        Map<Long, SpuCard> skuMap = SafeCollectors.toMap(skuPriceList, SpuCard::getId);
         // 通过spuIds在groupon_define表获取groupPrice, hasGroupon
         List<SpuCard> grouponCards = grouponMapper.selectPriceBySpuIds(spuIds);
-        Map<Long, SpuCard> grouponMap = SafeCollectors.toMap(grouponCards, SpuCard -> SpuCard.getId().longValue());
+        Map<Long, SpuCard> grouponMap = SafeCollectors.toMap(grouponCards, SpuCard::getId);
         List<SpuCard> spuCardsList = spuIds.stream().map(spuId -> {
             Spu spu = spuMap.get(spuId);
             if (spu == null) {
@@ -69,15 +71,15 @@ public class SpuServiceImpl implements SpuService {
             spuCard.setTitle(spu.getTitle());
             spuCard.setMainImage(spu.getMainImage());
             spuCard.setSales(spu.getSales());
-            SpuCard defaultCard = new SpuCard(spuId, "", "", 0.0, 0.0, 0, 0.0, false);
+            SpuCard defaultCard = new SpuCard(spuId, "", "", BigDecimal.ZERO, BigDecimal.ZERO, 0, BigDecimal.ZERO, false);
             SpuCard skuCard = skuMap.getOrDefault(spuId, defaultCard);
             SpuCard grouponCard = grouponMap.getOrDefault(spuId, defaultCard);
             if (skuCard != null) {
-                spuCard.setMinPrice(skuCard.getMinPrice());
-                spuCard.setMaxPrice(skuCard.getMaxPrice());
+                spuCard.setMinPrice(skuCard.getMinPrice().setScale(2, RoundingMode.HALF_UP));
+                spuCard.setMaxPrice(skuCard.getMaxPrice().setScale(2, RoundingMode.HALF_UP));
             }
             if (grouponCard != null) {
-                spuCard.setGroupPrice(grouponCard.getGroupPrice());
+                spuCard.setGroupPrice(grouponCard.getGroupPrice().setScale(2, RoundingMode.HALF_UP));
                 spuCard.setHasGroupon(grouponCard.getHasGroupon());
             }
             return spuCard;

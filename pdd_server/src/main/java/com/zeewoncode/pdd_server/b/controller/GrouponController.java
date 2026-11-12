@@ -31,14 +31,15 @@ public class GrouponController {
      * @return
      */
     @GetMapping
-    public PageResult<GrouponAdminItemVO> getGrouponsList(
+    public Result<PageResult<GrouponAdminItemVO>> getGrouponsList(
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false, defaultValue = "1") Integer page,
             @RequestParam(required = false, defaultValue = "10") Integer size,
             @AuthenticationPrincipal LoginUser loginUser
             ) {
         log.info("status:{}, page:{}, size:{}", status, page, size);
-        return grouponService.getGrouponsList(status, page, size, loginUser.getUserId());
+        PageResult<GrouponAdminItemVO> result = grouponService.getGrouponsList(status, page, size, loginUser.getUserId());
+        return Result.success(result);
     }
 
     /**

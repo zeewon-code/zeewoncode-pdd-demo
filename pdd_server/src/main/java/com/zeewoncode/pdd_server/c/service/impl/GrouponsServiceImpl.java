@@ -132,14 +132,14 @@ public class GrouponsServiceImpl implements GrouponsService {
         order.setReceiverPhone(userAddress.getReceiverPhone());
         order.setReceiverAddress(userAddress.getProvince() + userAddress.getCity() +
                 userAddress.getDistrict() + userAddress.getDetail());
-        Double payableAmount = define.getGroupPrice() * quantity;
-        order.setPayableAmount(new BigDecimal(Double.toString(payableAmount))
-                .setScale(2, RoundingMode.HALF_UP).doubleValue());
-        Double price = skuMapper.selectSkuById(define.getSkuId()).getPrice();
-        Double totalAmount = define.getGroupPrice() * quantity;
-        order.setTotalAmount(new BigDecimal(Double.toString(totalAmount))
-                .setScale(2, RoundingMode.HALF_UP).doubleValue());
-        order.setDiscountAmount(totalAmount - payableAmount);
+        BigDecimal quantityValue = BigDecimal.valueOf(quantity);
+        BigDecimal payableAmount = define.getGroupPrice().multiply(quantityValue)
+                .setScale(2, RoundingMode.HALF_UP);
+        order.setPayableAmount(payableAmount);
+        BigDecimal price = skuMapper.selectSkuById(define.getSkuId()).getPrice();
+        BigDecimal totalAmount = price.multiply(quantityValue).setScale(2, RoundingMode.HALF_UP);
+        order.setTotalAmount(totalAmount);
+        order.setDiscountAmount(totalAmount.subtract(payableAmount).setScale(2, RoundingMode.HALF_UP));
         order.setGrouponInstanceId(grouponInstance.getId());
         order.setStatus(0);
         orderMapper.insert(order);
@@ -163,11 +163,11 @@ public class GrouponsServiceImpl implements GrouponsService {
         Sku sku = skuMapper.selectSkuById(define.getSkuId());
         orderItem.setSpecs(sku.getSpecs());
         orderItem.setImage(sku.getImage());
-        orderItem.setPrice(define.getGroupPrice());
+        BigDecimal groupPrice = define.getGroupPrice().setScale(2, RoundingMode.HALF_UP);
+        orderItem.setPrice(groupPrice);
         orderItem.setQuantity(quantity);
-        Double price = new BigDecimal(Double.toString(define.getGroupPrice() * quantity))
-                .setScale(2, RoundingMode.HALF_UP).doubleValue();
-        orderItem.setAmount(price);
+        BigDecimal amout = groupPrice.multiply(BigDecimal.valueOf(quantity)).setScale(2, RoundingMode.HALF_UP);
+        orderItem.setAmount(amout);
         orderMapper.insertOrderItems(List.of(orderItem));
     }
 
@@ -396,15 +396,16 @@ public class GrouponsServiceImpl implements GrouponsService {
      * @return
      */
     @Override
-    public PageResult<GrouponInstanceVO> getGrouponInstanceInSpu(Long spuId, Integer pageNum, Integer pageSize) {
+    public PageResult<GrouponInstanceVO> getGrouponInstanceInSpu(Long spuId, Integer pageNum,
+                                                                 Integer pageSize, Long userId) {
         // 通过spuId查询拼团活动id，defineId
         List<GrouponDefine> defines = grouponMapper.selectGrouponDefineListBySpuId(spuId);
         if (defines.isEmpty()) {
             return PageResult.empty(new PageInfo(defines));
         }
         GrouponDefine define = defines.get(0);
-        Long id = define.getId().longValue();
-        Double groupPrice = define.getGroupPrice();
+        Long id = define.getId();
+        BigDecimal groupPrice = define.getGroupPrice();
         // 通过defineId查询拼团实例列表instanceIds
         PageHelper.startPage(pageNum, pageSize);
         List<Long> instanceIds = grouponMapper.selectGrouponInstanceByDefineId(id);
@@ -449,5 +450,26 @@ public class GrouponsServiceImpl implements GrouponsService {
         return PageResult.of(pageInfo, voList);
 
     }
+
+    /**
+     * 获取拼团详情（成员列表）
+     * @param instanceId
+     * @return
+     */
+    @Override
+    public GrouponInstanceVO getGrouponInstanceDetail(Long instanceId) {
+        GrouponInstanceVO vo = new GrouponInstanceVO();
+        GrouponInstance instance = grouponMapper.selectGrouponInstanceById(instanceId);
+        BeanUtils.copyProperties(instance, vo);
+        // leaderNickname , spuTitle, groupPrice,
+        User user = userMapper.selectById(instance.getLeaderUserId());
+        vo.setLeaderNickname(user.getNickname());
+        GrouponDefine define = grouponMapper.selectGrouponDefineById(instance.getDefineId());
+        Spu spuById = spuMapper.getSpuById(define.getSpuId());
+        vo.setSpuTitle(spuById.getTitle());
+        vo.setGroupPrice(define.getGroupPrice());
+        return vo;
+    }
+
 
 }

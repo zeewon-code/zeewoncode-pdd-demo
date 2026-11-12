@@ -195,8 +195,8 @@
             #{grouponInstanceId}
         </foreach>
     </select>
-    <select id="selectGmv" resultType="java.lang.Double">
-        select sum(payable_amount)
+    <select id="selectGmv" resultType="java.math.BigDecimal">
+        select COALESCE(sum(payable_amount), 0)
         from orders
         where status in (1,2,3)
         <if test="now != null and nowPlusOneDay != null">
@@ -223,6 +223,12 @@
            END AS statusName
         from orders
         group by status
+    </select>
+    <select id="selectOrderByInstanceIdAndUserIdAndStatus" resultType="com.zeewoncode.entity.Order">
+        SELECT * FROM orders
+        WHERE groupon_instance_id = #{grouponInstanceId}
+        AND user_id = #{userId}
+        AND status = #{status}
     </select>
 
     <update id="updateOrderStatusAndCancelTypeByInstanceIds">

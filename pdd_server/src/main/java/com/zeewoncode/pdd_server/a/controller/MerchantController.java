@@ -29,7 +29,7 @@ public class MerchantController {
      * @return
      */
     @GetMapping
-    public PageResult<MerchantVO> merchantsList(
+    public Result<PageResult<MerchantVO>> merchantsList(
             @RequestParam(required = false) Integer status,  // 1营业 0停业
             @RequestParam(required = false) String keyword, // 店铺名模糊搜索
             @RequestParam(defaultValue = "1") Integer page,
@@ -37,7 +37,7 @@ public class MerchantController {
     ) {
         log.info("店铺列表：status:{}, keyword:{}, page:{}, size:{}", status, keyword, page, size);
         PageResult<MerchantVO> result = merchantService.getMerchantsList(status, keyword, page, size);
-        return result;
+        return Result.success(result);
     }
 
     /**

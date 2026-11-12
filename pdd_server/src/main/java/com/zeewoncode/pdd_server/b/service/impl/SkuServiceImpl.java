@@ -11,6 +11,9 @@ import com.zeewoncode.utils.InfoValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -49,7 +52,7 @@ public class SkuServiceImpl implements SkuService {
         Sku sku = Sku.builder()
                 .spuId(id)
                 .specs(dto.getSpecs())
-                .price(dto.getPrice())
+                .price(dto.getPrice().setScale(2, RoundingMode.HALF_UP))
                 .stock(dto.getStock())
                 .image(dto.getImage())
                 .status(0)
@@ -76,12 +79,12 @@ public class SkuServiceImpl implements SkuService {
                 throw new RuntimeException("该商品已存在同规格");
             }
         }
-        if (dto.getPrice() != null && dto.getPrice() <= 0) {
+        if (dto.getPrice() != null && dto.getPrice().compareTo(BigDecimal.ZERO) > 0) {
             throw new RuntimeException("价格不能为负数或0");
         }
         Sku sku = Sku.builder()
                 .id(skuId)
-                .price(dto.getPrice())
+                .price(dto.getPrice().setScale(2, RoundingMode.HALF_UP))
                 .image(dto.getImage())
                 .specs(dto.getSpecs())
                 .build();
