@@ -6,6 +6,7 @@ import com.zeewoncode.vo.CouponOptionVO;
 import com.zeewoncode.vo.CouponVO;
 import com.zeewoncode.vo.UserCouponVO;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface CouponService {
@@ -41,5 +42,5 @@ public interface CouponService {
      * @param userId
      * @return
      */
-    List<CouponOptionVO> getCouponOptions(Double totalAmount, Long userId);
+    List<CouponOptionVO> getCouponOptions(BigDecimal totalAmount, Long userId);
 }

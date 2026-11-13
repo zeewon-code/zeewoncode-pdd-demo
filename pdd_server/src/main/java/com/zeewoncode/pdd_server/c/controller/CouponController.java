@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -78,7 +79,7 @@ public class CouponController {
      * @return
      */
     @GetMapping("/user-coupons/options")
-    public Result<List<CouponOptionVO>> getCouponOptions(@RequestParam Double totalAmount,
+    public Result<List<CouponOptionVO>> getCouponOptions(@RequestParam BigDecimal totalAmount,
                                                          @AuthenticationPrincipal LoginUser loginUser) {
         log.info("结算页可选券,总金额：{}", totalAmount);
         List<CouponOptionVO> couponOptionVOList = couponService.getCouponOptions(totalAmount, loginUser.getUserId());

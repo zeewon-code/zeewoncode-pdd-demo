@@ -53,6 +53,9 @@
         from coupon c inner join user_coupon uc on c.id = uc.coupon_id
         <where>
             uc.status = 0
+            <if test="couponType != null">
+                AND c.type = #{couponType}
+            </if>
             <if test="totalAmount != null">
                 AND c.condition_amount &lt;= #{totalAmount}
             </if>

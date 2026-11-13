@@ -7,6 +7,8 @@ import com.zeewoncode.vo.CouponOptionVO;
 import com.zeewoncode.vo.CouponVO;
 import com.zeewoncode.vo.UserCouponVO;
 import org.apache.ibatis.annotations.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -109,13 +111,15 @@ public interface CouponMapper {
     List<UserCouponVO> selectMyUserCoupons(Long userId, Integer status);
 
     /**
-     * 根据总金额、当前时间和用户id查询结算页可选优惠券选项列表
+     * 根据总金额、当前时间和用户id查询结算页可选满减优惠券选项列表
      * @param totalAmount
      * @param now
      * @param userId
+     * @param couponType
      * @return
      */
-    List<CouponOptionVO> selectCouponOptions(Double totalAmount, LocalDateTime now, Long userId);
+    List<CouponOptionVO> selectCouponOptions(BigDecimal totalAmount, LocalDateTime now,
+                                             Long userId, Integer couponType);
 
     /**
      * 列出优惠券列表（含已领和未领）

@@ -14,6 +14,9 @@ import com.zeewoncode.vo.UserCouponVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -108,9 +111,14 @@ public class CouponServiceImpl implements CouponService {
      * @return
      */
     @Override
-    public List<CouponOptionVO> getCouponOptions(Double totalAmount, Long userId) {
+    public List<CouponOptionVO> getCouponOptions(BigDecimal totalAmount, Long userId) {
         // 过滤满减门槛不满足、已过期或已使用的券。
-        List<CouponOptionVO> couponOptionVOList = couponMapper.selectCouponOptions(totalAmount, LocalDateTime.now(), userId);
-        return couponOptionVOList;
+        // 满减优惠券
+        List<CouponOptionVO> couponOptionVOByCondition = couponMapper.selectCouponOptions(totalAmount.setScale(2, RoundingMode.HALF_UP),
+                LocalDateTime.now(), userId, 1);
+        // 折扣优惠券
+        List<CouponOptionVO> couponOptionVOByRate = couponMapper.selectCouponOptions(null, LocalDateTime.now(), userId, 2);
+        couponOptionVOByCondition.addAll(couponOptionVOByRate);
+        return couponOptionVOByCondition;
     }
 }
