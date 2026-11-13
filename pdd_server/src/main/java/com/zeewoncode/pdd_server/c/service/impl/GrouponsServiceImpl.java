@@ -367,7 +367,6 @@ public class GrouponsServiceImpl implements GrouponsService {
                 Spu spu = spuMap.get(define.getSpuId());
                 if (spu != null) vo.setSpuTitle(spu.getTitle());
             }
-
             // 团长
             User leaderUser = userMap.get(grouponInstance.getLeaderUserId());
             if (leaderUser != null) {
@@ -405,7 +404,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         }
         GrouponDefine define = defines.get(0);
         Long id = define.getId();
-        BigDecimal groupPrice = define.getGroupPrice();
+        BigDecimal groupPrice = define.getGroupPrice().setScale(2, RoundingMode.HALF_UP);
         // 通过defineId查询拼团实例列表instanceIds
         PageHelper.startPage(pageNum, pageSize);
         List<Long> instanceIds = grouponMapper.selectGrouponInstanceByDefineId(id);
@@ -433,13 +432,29 @@ public class GrouponsServiceImpl implements GrouponsService {
             vo.setTargetCount(grouponInstance.getTargetCount());
             vo.setStatus(grouponInstance.getStatus());
             vo.setExpireAt(grouponInstance.getExpireAt());
-            vo.setGroupPrice(groupPrice != null ? groupPrice : null);
+            vo.setGroupPrice(groupPrice);
             Spu spu = spuMapper.getSpuById(spuId);
             if (spu != null) vo.setSpuTitle(spu.getTitle());
             // 团长
             User leaderUser = userMap.get(grouponInstance.getLeaderUserId());
+            Long leaderUserId = leaderUser.getId();
             if (leaderUser != null) {
                 vo.setLeaderNickname(leaderUser.getNickname());
+                List<Order> orders = orderMapper.selectOrderByInstanceIdAndUserIdAndStatus(instanceId, leaderUserId, 1);
+                String orderNo = orders.getFirst().getOrderNo();
+                vo.setOrderNo(orderNo);
+                if (leaderUserId.equals(userId)) {
+                    vo.setRole(1);
+                } else {
+                    // 两种可能 1.参与者， 2.未参与
+                    List<Order> orders1 = orderMapper.selectOrderByInstanceIdAndUserIdAndStatus(instanceId, userId, 1);
+                    if (!orders1.isEmpty()) {
+                        // 参与者
+                        vo.setRole(2);
+                    } else {
+                        vo.setRole(3);
+                    }
+                }
             }
             // remainCount
             if (vo.getTargetCount() != null && vo.getCurrentCount() != null) {
@@ -457,17 +472,32 @@ public class GrouponsServiceImpl implements GrouponsService {
      * @return
      */
     @Override
-    public GrouponInstanceVO getGrouponInstanceDetail(Long instanceId) {
+    public GrouponInstanceVO getGrouponInstanceDetail(Long instanceId, Long userId) {
         GrouponInstanceVO vo = new GrouponInstanceVO();
         GrouponInstance instance = grouponMapper.selectGrouponInstanceById(instanceId);
+        Long leaderUserId = instance.getLeaderUserId();
         BeanUtils.copyProperties(instance, vo);
-        // leaderNickname , spuTitle, groupPrice,
-        User user = userMapper.selectById(instance.getLeaderUserId());
+        User user = userMapper.selectById(leaderUserId);
         vo.setLeaderNickname(user.getNickname());
         GrouponDefine define = grouponMapper.selectGrouponDefineById(instance.getDefineId());
         Spu spuById = spuMapper.getSpuById(define.getSpuId());
         vo.setSpuTitle(spuById.getTitle());
-        vo.setGroupPrice(define.getGroupPrice());
+        vo.setGroupPrice(define.getGroupPrice().setScale(2, RoundingMode.HALF_UP));
+        List<Order> orders = orderMapper.selectOrderByInstanceIdAndUserIdAndStatus(instanceId, leaderUserId, 1);
+        String orderNo = orders.getFirst().getOrderNo();
+        vo.setOrderNo(orderNo);
+        if (leaderUserId.equals(userId)) {
+            vo.setRole(1);
+        } else {
+            // 两种可能 1.参与者， 2.未参与
+            List<Order> orders1 = orderMapper.selectOrderByInstanceIdAndUserIdAndStatus(instanceId, userId, 1);
+            if (!orders1.isEmpty()) {
+                // 参与者
+                vo.setRole(2);
+            } else {
+                vo.setRole(3);
+            }
+        }
         return vo;
     }
 

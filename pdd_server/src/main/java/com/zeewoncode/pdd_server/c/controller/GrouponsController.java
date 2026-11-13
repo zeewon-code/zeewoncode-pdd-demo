@@ -119,9 +119,10 @@ public class GrouponsController {
      * @return
      */
     @GetMapping("/{instanceId}")
-    public Result<GrouponInstanceVO> getGrouponInstanceDetail(@PathVariable Long instanceId) {
+    public Result<GrouponInstanceVO> getGrouponInstanceDetail(@PathVariable Long instanceId,
+                                                              @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取拼团详情:{}", instanceId);
-        GrouponInstanceVO vo = grouponsService.getGrouponInstanceDetail(instanceId);
+        GrouponInstanceVO vo = grouponsService.getGrouponInstanceDetail(instanceId, loginUser.getUserId());
         return Result.success(vo);
     }
 

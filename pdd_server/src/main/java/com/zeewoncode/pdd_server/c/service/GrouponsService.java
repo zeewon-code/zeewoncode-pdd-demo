@@ -66,5 +66,5 @@ public interface GrouponsService {
      * @param instanceId
      * @return
      */
-    GrouponInstanceVO getGrouponInstanceDetail(Long instanceId);
+    GrouponInstanceVO getGrouponInstanceDetail(Long instanceId, Long userId);
 }
