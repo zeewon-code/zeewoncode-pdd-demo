@@ -3,7 +3,6 @@ package com.zeewoncode.pdd_server.b.service;
 import com.zeewoncode.dto.GrouponCreateDTO;
 import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.GrouponAdminItemVO;
 
 public interface GrouponService {
@@ -23,7 +22,7 @@ public interface GrouponService {
      * @param userId
      * @return
      */
-    Result createGroupon(GrouponCreateDTO grouponCreateDTO, Long userId);
+    void createGroupon(GrouponCreateDTO grouponCreateDTO, Long userId);
 
     /**
      * 店家获取拼团活动详情
@@ -31,7 +30,7 @@ public interface GrouponService {
      * @param defineId
      * @return
      */
-    Result<GrouponAdminItemVO> getGrouponDetail(Long defineId, Long userId);
+    GrouponAdminItemVO getGrouponDetail(Long defineId, Long userId);
 
     /**
      * 启用 / 停用拼团活动
@@ -40,5 +39,5 @@ public interface GrouponService {
      * @param userId
      * @return
      */
-    Result updateGrouponDefineStatus(Long defineId, SpuStatusDTO dto, Long userId);
+    void updateGrouponDefineStatus(Long defineId, SpuStatusDTO dto, Long userId);
 }

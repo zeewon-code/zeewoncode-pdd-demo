@@ -1,7 +1,9 @@
 package com.zeewoncode.pdd_server.c.service.impl;
 
 
+import com.zeewoncode.constant.ErrorCode;
 import com.zeewoncode.entity.*;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.pdd_server.c.service.CartService;
 import com.zeewoncode.pdd_server.mapper.*;
 import com.zeewoncode.dto.CartAddDTO;
@@ -12,7 +14,7 @@ import com.zeewoncode.vo.CartVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -40,15 +42,18 @@ public class CartServiceImpl implements CartService {
     public CartVO getCartList(Long userId) {
         CartVO cartVO = new CartVO();
         List<CartItem> cartItemList = cartMapper.selectCartItemByUserId(userId);
-        BigDecimal totalAmountCopy = BigDecimal.ONE;
+        BigDecimal totalAmount = BigDecimal.ONE;
         for (CartItem cartItem : cartItemList) {
-            Long skuId = cartItem.getSkuId();
-            Integer quantity = cartItem.getQuantity();
-            Sku sku = skuMapper.selectSkuById(skuId);
-            BigDecimal price = sku.getPrice().setScale(2, RoundingMode.HALF_UP);
-            totalAmountCopy = totalAmountCopy.add(price.multiply(BigDecimal.valueOf(quantity)));
+            // 统计购物车中选中的商品金额
+            if (cartItem.getSelected() != null && cartItem.getSelected() != 0) {
+                Long skuId = cartItem.getSkuId();
+                Integer quantity = cartItem.getQuantity();
+                Sku sku = skuMapper.selectSkuById(skuId);
+                BigDecimal price = sku.getPrice().setScale(2, RoundingMode.HALF_UP);
+                totalAmount = totalAmount.add(price.multiply(BigDecimal.valueOf(quantity)));
+            }
         }
-        cartVO.setTotalAmount(totalAmountCopy);
+        cartVO.setTotalAmount(totalAmount);
         Map<Long, List<CartItem>> cartList = cartItemList.stream()
                 .collect(Collectors.groupingBy(CartItem::getSpuId));
         List<CartGroup> groups = cartList.entrySet().stream().map(entry -> {
@@ -91,17 +96,19 @@ public class CartServiceImpl implements CartService {
      * @param req
      */
     @Override
+    @Transactional
     public void addCart(CartAddDTO req, Long userId) {
         // 1. 对sku表的stock,status和deleted_flag进行校验
         Sku sku = skuMapper.selectSkuById(req.getSkuId());
-        if (sku == null || sku.getStock() <= 0 || sku.getStatus() != 1 || sku.getDeletedFlag() != 0) {
-            throw new RuntimeException("该商品规格已售罄或已下架");
+        if (sku == null || sku.getDeletedFlag() != 0) {
+            throw new BaseException(ErrorCode.SKU_NOT_EXIST);
         }
+        if (sku.getStatus() != 1) throw new BaseException(ErrorCode.SKU_IS_NOT_SALE);
+        if (sku.getStock() <= 0) throw new BaseException(ErrorCode.SKU_NOT_ENOUGH);
         // 2. 对spu表的status和deleted_flag进行校验
         Spu spuDetail = spuMapper.getSpuById(sku.getSpuId());
-        if (spuDetail.getStatus() != 1 || spuDetail.getDeletedFlag() != 0) {
-            throw new RuntimeException("该商品已下架");
-        }
+        if (spuDetail.getDeletedFlag() != 0) throw new BaseException(ErrorCode.SPU_NOT_EXIST);
+        if (spuDetail.getStatus() != 1) throw new BaseException(ErrorCode.SPU_NOT_SALE);
         // 3. 对购物车表进行操作，加入购物车（同 sku 数量累加）
         // 3.1 查询购物车表，判断该用户是否已经将该商品规格加入过购物车
         Long skuId = req.getSkuId();
@@ -110,7 +117,8 @@ public class CartServiceImpl implements CartService {
         if (cartItemList != null && cartItemList.size() == 1) {
             CartItem cartItem = cartItemList.get(0);
             cartItem.setQuantity(cartItem.getQuantity() + req.getQuantity());
-            cartMapper.updateCartItem(cartItem, userId);
+            if (cartMapper.updateCartItem(cartItem) <= 0)
+                throw new BaseException(ErrorCode.CART_SKU_QUANTITY_UPDATE_FAILED);
         } else {
             // 3.3 不存在则插入新记录
             // 填充spuId
@@ -122,7 +130,8 @@ public class CartServiceImpl implements CartService {
                     .quantity(req.getQuantity())
                     .selected(1)
                     .build();
-            cartMapper.insert(cartItem);
+            if (cartMapper.insert(cartItem) <= 0)
+                throw new BaseException(ErrorCode.CART_SKU_ADD_FAILED);
         }
     }
 
@@ -133,7 +142,8 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     public void updateCartQuantity(Long id, CartQuantityDTO req) {
-        cartMapper.updateCartQuantity(id, req.getQuantity());
+        if (cartMapper.updateCartQuantity(id, req.getQuantity()) <= 0)
+            throw new BaseException(ErrorCode.CART_SKU_QUANTITY_UPDATE_FAILED);
     }
 
     /**
@@ -145,7 +155,8 @@ public class CartServiceImpl implements CartService {
         List<Long> ids = req.getIds();
         Boolean isSelected = req.getSelected();
         Integer selected = isSelected != null && isSelected ? 1 : 0;
-        cartMapper.updateCartSelectByIds(ids, selected);
+        if (cartMapper.updateCartSelectByIds(ids, selected) <= 0)
+            throw new BaseException(ErrorCode.CART_SKU_SELECT_FAILED);
     }
 
     /**
@@ -154,7 +165,8 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     public void deleteCart(Long id) {
-        cartMapper.deleteCartById(id);
+        if (cartMapper.deleteCartById(id) <= 0)
+            throw new BaseException(ErrorCode.CART_SKU_DELETE_FAILED);
     }
 
     /**
@@ -162,6 +174,7 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     public void deleteCartBySelected(Long userId) {
-        cartMapper.deleteCartBySelected(userId);
+        if (cartMapper.deleteCartBySelected(userId) <= 0)
+            throw new BaseException(ErrorCode.CART_SKU_DELETE_FAILED);
     }
 }

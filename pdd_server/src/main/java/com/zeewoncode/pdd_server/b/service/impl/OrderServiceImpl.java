@@ -2,6 +2,8 @@ package com.zeewoncode.pdd_server.b.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.dto.ShipDTO;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.OrderService;
@@ -35,9 +37,6 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public PageResult<OrderCard> getOrderList(Integer status, Integer page, Integer size, Long userId) {
-        if (!haveMerchantOperation(userId)) {
-            throw new RuntimeException("当前用户没有权限进行相关操作");
-        }
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         // 1.启动分页
         PageHelper.startPage(page, size);
@@ -58,9 +57,6 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public OrderDetail getOrderDetail(Long orderId, Long userId) {
-        if (!haveMerchantOperation(userId)) {
-            throw new RuntimeException("当前用户没有权限进行相关操作");
-        }
         OrderDetail orderDetail = orderMapper.selectOrderDetail(userId, orderId);
         // 1.补充receiver类字段
         Receiver receiver = orderMapper.selectReceiverByOrderId(orderId);
@@ -86,18 +82,15 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public ShipVO ship(Long orderId, ShipDTO dto, Long userId) {
-        if (!haveMerchantOperation(userId)) {
-            throw new RuntimeException("当前用户没有权限进行相关操作");
-        }
         // 查询该订单是否存在
         Order orderDb = orderMapper.selectOrderById(orderId);
-        if (orderDb == null || orderDb.getStatus() != 1) {
-            throw new RuntimeException("订单不存在或订单状态异常，无法发货");
+        if (orderDb == null || orderDb.getStatus() != 0) {
+            throw new BaseException(ErrorCode.ORDER_NOT_EXIST, "订单不存在或订单状态错误");
         }
         // 2.更新订单状态
         Order order = Order.builder().id(orderId).status(2).build();
         if (orderMapper.update(order) != 1) {
-            throw new RuntimeException("订单状态更新失败");
+            throw new BaseException(ErrorCode.ORDER_UPDATE_FAILED);
         }
         // 3.插入物流信息
         Shipment shipment = Shipment.builder()
@@ -108,7 +101,7 @@ public class OrderServiceImpl implements OrderService {
                 .shippedAt(LocalDateTime.now())
                 .build();
         if (shipmentMapper.insert(shipment) == 0) {
-            throw new RuntimeException("物流信息插入失败");
+            throw new BaseException(ErrorCode.SHIPMENT_ADD_FAILED);
         }
         return ShipVO.builder()
                 .shipmentId(shipment.getId())
@@ -116,15 +109,5 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
-    /**
-     * 校验当前用户是否有资格进行相关操作
-     * @return
-     */
-    public Boolean haveMerchantOperation(Long userId) {
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        if (merchant == null || merchant.getDeletedFlag() == 0) {
-            return false;
-        }
-        return true;
-    }
+
 }

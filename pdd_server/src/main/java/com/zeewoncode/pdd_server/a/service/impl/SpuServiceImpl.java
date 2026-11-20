@@ -2,6 +2,8 @@ package com.zeewoncode.pdd_server.a.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.entity.Spu;
 import com.zeewoncode.entity.SpuCard;
@@ -10,7 +12,6 @@ import com.zeewoncode.pdd_server.mapper.GrouponMapper;
 import com.zeewoncode.pdd_server.mapper.SkuMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.result.Result;
 import com.zeewoncode.utils.SafeCollectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -94,17 +95,15 @@ public class SpuServiceImpl implements SpuService {
      * @return
      */
     @Override
-    public Result PlatformForceControl(Long spuId, SpuStatusDTO dto) {
+    public void PlatformForceControl(Long spuId, SpuStatusDTO dto) {
         Spu spuById = spuMapper.getSpuById(spuId);
         if ( spuById == null || spuById.getDeletedFlag() != 0) {
-            return Result.error("商品不存在");
+            throw new BaseException(ErrorCode.SPU_NOT_EXIST);
         }
         Spu spu = Spu.builder().id(spuId).status(dto.getStatus()).build();
-        int i = spuMapper.update(spu);
-        if (i == 0) {
-            return Result.error("商品状态更新失败，请稍后重试");
+        if (spuMapper.update(spu) == 0) {
+            throw new BaseException(ErrorCode.SPU_UPDATE_FAILED);
         }
-        return Result.success("商品状态更新成功");
     }
 
 }

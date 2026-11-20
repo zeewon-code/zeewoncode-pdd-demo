@@ -15,5 +15,5 @@ public interface PaymentMapper {
     @Insert("INSERT INTO payment (payment_no, order_id, user_id, amount, channel, status, paid_at, created_at ) " +
             "VALUES (#{paymentNo}, #{orderId}, #{userId}, #{amount}, #{channel}, #{status}, #{paidAt}, #{createdAt})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
-    void insert(Payment payment);
+    int insert(Payment payment);
 }

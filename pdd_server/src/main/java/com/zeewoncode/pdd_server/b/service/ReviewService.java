@@ -3,7 +3,6 @@ package com.zeewoncode.pdd_server.b.service;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.ReviewStat;
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.result.Result;
 
 public interface ReviewService {
     /**
@@ -22,6 +21,6 @@ public interface ReviewService {
      * @param userId
      * @return
      */
-    Result<ReviewStat> getReviewStat(Long userId);
+    ReviewStat getReviewStat(Long userId);
 
 }

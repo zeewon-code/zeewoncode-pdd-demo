@@ -33,7 +33,7 @@ public interface ReviewMapper {
      * @param productReview
      * @return
      */
-    void insert(ProductReview productReview);
+    int insert(ProductReview productReview);
 
     /**
      * 根据spuIds和评分获取评论列表

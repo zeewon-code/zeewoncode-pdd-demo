@@ -2,6 +2,8 @@ package com.zeewoncode.pdd_server.b.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.dto.*;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.SpuService;
@@ -14,7 +16,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,7 +47,6 @@ public class SpuServiceImpl implements SpuService {
     public PageResult<SpuCard> listSpuCards(Integer pageNum, Integer pageSize,
                                             String keyword, Long categoryId,
                                             Integer status, Long userId) {
-        if (!haveSpuOperation(userId)) throw new RuntimeException("没有此权限进行查看");
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         Long merchantId = merchant.getId();
         PageHelper.startPage(pageNum, pageSize);
@@ -89,16 +89,14 @@ public class SpuServiceImpl implements SpuService {
     @Override
     @Transactional
     public SpuCreateVO addSpu(SpuCreateDTO dto, Long userId) {
-        if (!haveSpuOperation(userId)) throw new RuntimeException("没有此权限进行新建商品");
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         // 对信息进行校验
         InfoValidator.validateName(dto.getTitle());
         if (dto.getSubtitle() != null) InfoValidator.validateName(dto.getSubtitle());
         if (dto.getMainImage() != null) InfoValidator.validateAvatarUrl(dto.getMainImage());
         if (dto.getImages() != null) InfoValidator.validateAvatarUrlList(dto.getImages());
-        if (categoryMapper.selectCategoryById(dto.getCategoryId()) == null) {
-            throw new RuntimeException("新建商品失败, 该分类不存在");
-        }
+        if (categoryMapper.selectCategoryById(dto.getCategoryId()) == null)
+            throw new BaseException(ErrorCode.CATEGORY_NOT_EXIST);
         // 涉及到的数据表，spu,sku
         List<String> images = dto.getImages();
         Spu spu = Spu.builder()
@@ -112,9 +110,8 @@ public class SpuServiceImpl implements SpuService {
                 .status(0)
                 .deletedFlag(0)
                 .build();
-        if (spuMapper.insert(spu) == 0) {
-            throw new RuntimeException("新建商品失败, 请检查信息是否正常");
-        }
+        if (spuMapper.insert(spu) != 1)
+            throw new BaseException(ErrorCode.SPU_ADD_FAILED);
         List<Sku> skuList = new ArrayList<>();
         for (SkuDTO skuDTO : dto.getSkus()) {
             Sku sku = new Sku();
@@ -134,7 +131,7 @@ public class SpuServiceImpl implements SpuService {
             if (sku.getImage() != null && !sku.getImage().isEmpty()) activeFields.add("image");
         }
         if (skuMapper.insertBatch(skuList, new ArrayList<>(activeFields)) == 0) {
-            throw new RuntimeException("新建商品失败, 请检查信息是否正常");
+            throw new BaseException(ErrorCode.SKU_ADD_FAILED);
         }
         return SpuCreateVO.builder().spuId(spu.getId()).build();
     }
@@ -146,14 +143,11 @@ public class SpuServiceImpl implements SpuService {
      */
     @Override
     public SpuDetail getSpuDetail(Long id, Long userId) {
-        // 校验用户是否是店铺管理员
-        if (!haveSpuOperation(userId)) throw new RuntimeException("没有此权限进行查看商品详情");
-        // 校验当前商品是否属于当前店铺
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        SpuDetail spuDetail = spuMapper.getSpuDetailById(id);
-        if (spuDetail.getMerchantId() != merchant.getId()) {
-            throw new RuntimeException("没有此权限进行查看商品详情");
+       // 校验当前商品是否属于当前店铺
+        if (!haveSpuOperation(userId, id)) {
+            throw new BaseException(ErrorCode.CURRENT_USER_NOT_PERMISSION);
         }
+        SpuDetail spuDetail = spuMapper.getSpuDetailById(id);
         List<Spu> spus = spuMapper.selectSpuByIds(new ArrayList<>(List.of(id)));
         String images = spus.get(0).getImages();
         if (images != null) {
@@ -163,13 +157,11 @@ public class SpuServiceImpl implements SpuService {
             spuDetail.setImages(imagesList);
         }
         spuDetail.setShopName(merchantMapper.selectMerchantById(spuDetail.getMerchantId()).getShopName());
-        if (spuDetail == null) {
-            throw new RuntimeException("该商品详情不存在");
-        }
+        if (spuDetail == null)
+            throw new BaseException(ErrorCode.SPU_DETAIL_NOT_EXIST);
         List<Sku> skus = skuMapper.selectSkuListBySpuId(id);
-        if (skus == null) {
-            throw new RuntimeException("该商品规格不存在");
-        }
+        if (skus == null)
+            throw new BaseException(ErrorCode.SKU_NOT_EXIST);
         List<GrouponDefine> defines = grouponMapper.selectGrouponDefineListBySpuId(id);
         SpuDetail detailVO = new SpuDetail();
         BeanUtils.copyProperties(spuDetail, detailVO);
@@ -185,24 +177,11 @@ public class SpuServiceImpl implements SpuService {
      */
     @Override
     public void editSpu(Long id, SpuEditDTO dto, Long userId) {
-        if (!haveSpuOperation(userId)) {
-            throw new RuntimeException("没有此权限进行编辑商品");
+        if (!haveSpuOperation(userId, id)) {
+            throw new BaseException(ErrorCode.CURRENT_USER_NOT_PERMISSION);
         }
-        Spu spuById = spuMapper.getSpuById(id);
-        if (spuById == null) {
-            throw new RuntimeException("该商品不存在");
-        }
-        // 校验当前商品是否属于当前店铺
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        if (spuById.getMerchantId().equals(merchant.getId())) {
-            throw new RuntimeException("没有此权限进行编辑该商品");
-        }
-        if (dto.getCategoryId() != null && categoryMapper.selectCategoryById(dto.getCategoryId()) == null) {
-            throw new RuntimeException("编辑商品失败, 该分类不存在");
-        }
-        if (dto.getTitle().equals(spuById.getTitle())) {
-            throw new RuntimeException("该商品标题在店铺商品已存在相同标题, 请重新修改商品标题");
-        }
+        if (dto.getCategoryId() != null && categoryMapper.selectCategoryById(dto.getCategoryId()) == null)
+            throw new BaseException(ErrorCode.CATEGORY_NOT_EXIST);
         if (dto.getTitle() != null) InfoValidator.validateName(dto.getTitle());
         if (dto.getSubtitle() != null) InfoValidator.validateName(dto.getSubtitle());
         if (dto.getMainImage() != null) InfoValidator.validateAvatarUrl(dto.getMainImage());
@@ -215,9 +194,8 @@ public class SpuServiceImpl implements SpuService {
         BeanUtils.copyProperties(dto, spu);
         spu.setImages(images);
         spu.setId(id);
-        int i = spuMapper.update(spu);
-        if (i == 0) {
-            throw new RuntimeException("编辑商品失败, 请检查信息是否正常");
+        if (spuMapper.update(spu) == 0) {
+            throw new BaseException(ErrorCode.SPU_UPDATE_FAILED);
         }
     }
 
@@ -228,29 +206,18 @@ public class SpuServiceImpl implements SpuService {
     @Override
     @Transactional
     public void softDeleteSpu(Long id, Long userId) {
-        if (!haveSpuOperation(userId)) {
-            throw new RuntimeException("没有此权限进行删除商品");
+        if (!haveSpuOperation(userId, id)) {
+            throw new BaseException(ErrorCode.CURRENT_USER_NOT_PERMISSION);
         }
         Spu spuById = spuMapper.getSpuById(id);
-        if (spuById == null || spuById.getDeletedFlag() == 1) {
-            throw new RuntimeException("该商品不存在");
-        }
-        // 校验当前商品是否属于当前店铺
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        if (spuById.getMerchantId().equals(merchant.getId())) {
-            throw new RuntimeException("没有此权限进行删除该商品");
-        }
         // 判断该商品是否已下架再进行删除
         if (spuById.getStatus() == 1) {
-            throw new RuntimeException("该商品还在上架中，请先下架之后，再进行删除");
-        }
-        if (spuById.getDeletedFlag() == 1) {
-            throw new RuntimeException("该商品已删除");
+            throw new BaseException(ErrorCode.SPU_DELETE_FAILED, "该商品还在上架中，请先下架之后，再进行删除");
         }
         int result = spuMapper.softDeleteSpu(id);
         int resultSku = skuMapper.softDeleteSku(id);
         if (result == 0 || resultSku == 0) {
-            throw new RuntimeException("删除商品失败, 请稍后重试");
+            throw new BaseException(ErrorCode.SPU_DELETE_FAILED);
         }
     }
 
@@ -261,23 +228,31 @@ public class SpuServiceImpl implements SpuService {
      */
     @Override
     public void listAndDelist(Long id, SpuStatusDTO dto, Long userId) {
-        if (!haveSpuOperation(userId)) throw new RuntimeException("没有此权限进行上架/下架商品");
         // 校验当前商品是否属于当前店铺
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
+        if (!haveSpuOperation(userId, id)) {
+            throw new BaseException(ErrorCode.CURRENT_USER_NOT_PERMISSION);
+        }
         Spu spu = spuMapper.getSpuById(id);
-        if (spu == null) throw new RuntimeException("该商品不存在");
-        if (spu.getMerchantId() != merchant.getId()) throw new RuntimeException("没有此权限进行上架/下架该商品");
-        if (spu.getStatus().equals(dto.getStatus())) throw new RuntimeException("该商品已经处于该状态");
-        if (spuMapper.listAndDelist(id, dto.getStatus()) == (0)) throw new RuntimeException("上架/下架商品失败, 请检查信息是否正常");
+        if (spu.getStatus().equals(dto.getStatus())) throw new BaseException(ErrorCode.SPU_SAME_STATUS_ALREADY);
+        if (spuMapper.listAndDelist(id, dto.getStatus()) == (0)) throw new BaseException(ErrorCode.SPU_UPDATE_FAILED);
     }
 
     /**
-     * 校验当前用户是否有资格进行相关操作
+     * 判断当前用户是否有资格去进行对商品进行操作
+     * @param userId
+     * @param spuId
      * @return
      */
-    public Boolean haveSpuOperation(Long userId) {
+    public Boolean haveSpuOperation(Long userId, Long spuId) {
+        // 查当前用户所在的店铺
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        if (merchant == null || merchant.getDeletedFlag() == 0) {
+        // 查出该商品信息
+        Spu spu = spuMapper.getSpuById(spuId);
+        if (merchant == null || spu == null || spu.getDeletedFlag() == 1) {
+            throw new BaseException(ErrorCode.SPU_NOT_EXIST, "商品不存在或店铺信息不存在");
+        }
+        // 商品信息的店铺id 得跟当前用户的店铺对应
+        if (!merchant.getId().equals(spu.getMerchantId())) {
             return false;
         }
         return true;

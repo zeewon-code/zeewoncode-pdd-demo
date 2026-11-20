@@ -37,7 +37,7 @@ public interface GrouponMapper {
             "target_count, status, expire_at) " +
             "values (#{defineId}, #{leaderUserId},#{currentCount}, #{targetCount}, " +
             "#{status}, #{expireAt})")
-    void insertGrouponInstance(GrouponInstance grouponInstance);
+    int insertGrouponInstance(GrouponInstance grouponInstance);
 
     /**
      * 根据拼团实例id查询拼团实例
@@ -98,13 +98,13 @@ public interface GrouponMapper {
       * @param status
      */
     @Update("update groupon_instance set status = #{status} where id = #{instanceId}")
-    void updateGrouponInstanceStatus(Long instanceId, Integer status);
+    int updateGrouponInstanceStatus(Long instanceId, Integer status);
 
     /**
      * 减少拼团实例当前拼团人数
      * @param instanceId
      */
-    void reduceGrouponInstanceCurrentCount(Long instanceId);
+    int reduceGrouponInstanceCurrentCount(Long instanceId);
 
     /**
      * 根据拼团活动id查询拼团实例id列表

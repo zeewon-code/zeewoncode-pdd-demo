@@ -3,6 +3,8 @@ package com.zeewoncode.pdd_server.a.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.entity.Merchant;
 import com.zeewoncode.pdd_server.a.service.MerchantService;
 import com.zeewoncode.pdd_server.mapper.MerchantMapper;
@@ -48,7 +50,7 @@ public class MerchantServiceImpl implements MerchantService {
     public MerchantVO getMerchantDetail(Long id) {
         Merchant merchant = merchantMapper.selectMerchantById(id);
         if (merchant == null || merchant.getDeletedFlag() != 0) {
-            throw new RuntimeException("店铺不存在");
+            throw new BaseException(ErrorCode.MERCHANT_NOT_EXIST);
         }
         MerchantVO merchantVO = BeanUtil.copyProperties(merchant, MerchantVO.class);
         return merchantVO;
@@ -63,10 +65,10 @@ public class MerchantServiceImpl implements MerchantService {
     public void updateMerchantStatus(Long merchantId, Integer status) {
         Merchant merchant = merchantMapper.selectMerchantById(merchantId);
         if (merchant == null || merchant.getDeletedFlag() != 0) {
-            throw new RuntimeException("店铺不存在");
+            throw new BaseException(ErrorCode.MERCHANT_NOT_EXIST);
         }
         if (merchantMapper.updateMerchantStatus(merchantId, status) == 0) {
-            throw new RuntimeException("更新店铺状态失败");
+            throw new BaseException(ErrorCode.MERCHANT_UPDATE_FAILED);
         }
     }
 

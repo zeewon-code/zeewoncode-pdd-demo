@@ -14,9 +14,10 @@ public interface CouponService {
      * 获取优惠券列表
      * @param page
      * @param size
+     * @param userId
      * @return
      */
-    PageResult<CouponVO> getCoupons(Integer page, Integer size);
+    PageResult<CouponVO> getCoupons(Integer page, Integer size, Long userId);
 
     /**
      * 领取优惠券

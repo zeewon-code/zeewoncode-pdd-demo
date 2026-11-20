@@ -38,8 +38,7 @@ public class GrouponController {
             @AuthenticationPrincipal LoginUser loginUser
             ) {
         log.info("status:{}, page:{}, size:{}", status, page, size);
-        PageResult<GrouponAdminItemVO> result = grouponService.getGrouponsList(status, page, size, loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(grouponService.getGrouponsList(status, page, size, loginUser.getUserId()));
     }
 
     /**
@@ -48,9 +47,11 @@ public class GrouponController {
      * @return
      */
     @PostMapping
-    public Result createGroupon(@Valid @RequestBody GrouponCreateDTO grouponCreateDTO, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result<Void> createGroupon(@Valid @RequestBody GrouponCreateDTO grouponCreateDTO,
+                                @AuthenticationPrincipal LoginUser loginUser) {
         log.info("店家创建拼团活动：{}", grouponCreateDTO);
-        return grouponService.createGroupon(grouponCreateDTO, loginUser.getUserId());
+        grouponService.createGroupon(grouponCreateDTO, loginUser.getUserId());
+        return Result.success();
     }
 
     /**
@@ -61,7 +62,7 @@ public class GrouponController {
     @GetMapping("/{id}")
     public Result<GrouponAdminItemVO> getGrouponDetail(@PathVariable Long id, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("店铺获取拼团活动详情：{}", id);
-        return grouponService.getGrouponDetail(id, loginUser.getUserId());
+        return Result.success(grouponService.getGrouponDetail(id, loginUser.getUserId()));
     }
 
     /**
@@ -71,12 +72,13 @@ public class GrouponController {
      * @return
      */
     @PutMapping("/{id}/status")
-    public Result updateGrouponDefineStatus(
+    public Result<Void> updateGrouponDefineStatus(
             @PathVariable Long id,
             @Valid @RequestBody SpuStatusDTO dto,
             @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("启用 / 停用拼团活动: {}, {}", id, dto);
-        return grouponService.updateGrouponDefineStatus(id, dto, loginUser.getUserId());
+        grouponService.updateGrouponDefineStatus(id, dto, loginUser.getUserId());
+        return Result.success();
     }
 }

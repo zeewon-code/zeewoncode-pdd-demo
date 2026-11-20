@@ -32,7 +32,7 @@ public class SkuController {
      * @return
      */
     @PostMapping("/{id}")
-    public Result addSku(
+    public Result<Void> addSku(
             @PathVariable Long id,
             @Valid @RequestBody SkuDTO dto,
             @AuthenticationPrincipal LoginUser loginUser
@@ -50,7 +50,7 @@ public class SkuController {
      * @return
      */
     @PutMapping("/{id}")
-    public Result editSku(
+    public Result<Void> editSku(
             @PathVariable Long id,
             @Valid @RequestBody SkuUpdateDTO dto,
             @AuthenticationPrincipal LoginUser loginUser
@@ -67,7 +67,7 @@ public class SkuController {
      */
     @Validated
     @DeleteMapping("/{id}")
-    public Result deleteSku(@PathVariable @NotNull(message = "ID不能为空") Long id,
+    public Result<Void> deleteSku(@PathVariable @NotNull(message = "ID不能为空") Long id,
                             @AuthenticationPrincipal LoginUser loginUser) {
         log.info("删除 SKU: {}", id);
         skuService.deleteSku(id, loginUser.getUserId());
@@ -81,7 +81,7 @@ public class SkuController {
      * @return
      */
     @PutMapping("/{id}/stock")
-    public Result updateStock(
+    public Result<Void> updateStock(
             @PathVariable Long id,
             @Valid @RequestBody StockDTO dto,
             @AuthenticationPrincipal LoginUser loginUser
@@ -98,7 +98,7 @@ public class SkuController {
      * @return
      */
     @PutMapping("/{id}/status")
-    public Result updateSkuStatus(
+    public Result<Void> updateSkuStatus(
             @PathVariable Long id,
             @Valid @RequestBody SpuStatusDTO dto,
             @AuthenticationPrincipal LoginUser loginUser

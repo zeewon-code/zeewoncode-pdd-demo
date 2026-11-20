@@ -15,10 +15,10 @@ public interface AddressesMapper {
     @Select("select * from user_address where user_id = #{userId}")
     List<UserAddress> selectAddressesByUserId(Long userId);
     /**
-     * 将用户其他收货地址修改为非默认
+     * 将用户默认收货地址修改为非默认
      */
-    @Update("update user_address set is_default = 0 where user_id = #{userId}")
-    void updateAddressToNonDefault(UserAddress userAddress);
+    @Update("update user_address set is_default = 0 where user_id = #{userId} and is_default = 1")
+    int updateAddressToNonDefault(UserAddress userAddress);
 
     /**
      * 添加收货地址
@@ -26,21 +26,21 @@ public interface AddressesMapper {
      */
     @Insert("insert into user_address (user_id, receiver_name, receiver_phone, province, city, district, detail, is_default) " +
             "values (#{userId}, #{receiverName}, #{receiverPhone}, #{province}, #{city}, #{district}, #{detail}, #{isDefault})")
-    void insertAddress(UserAddress userAddress);
+    int insertAddress(UserAddress userAddress);
 
 
     /**
      * 修改收货地址
      * @param userAddress
      */
-    void updateUserAddress(UserAddress userAddress);
+    int updateUserAddress(UserAddress userAddress);
 
     /**
      * 删除收货地址
       * @param addressId
      */
     @Delete("delete from user_address where id = #{addressId}")
-    void deleteAddress(Long addressId);
+    int deleteAddress(Long addressId);
 
 
     /**

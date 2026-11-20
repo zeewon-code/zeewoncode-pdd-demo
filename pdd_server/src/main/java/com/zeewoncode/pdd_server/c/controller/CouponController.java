@@ -35,10 +35,10 @@ public class CouponController {
     @GetMapping
     public Result<PageResult<CouponVO>> getCoupons(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "10") Integer size,
+            @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取优惠券列表");
-        PageResult<CouponVO> pageResult = couponService.getCoupons(page, size);
-        return Result.success(pageResult);
+        return Result.success(couponService.getCoupons(page, size, loginUser.getUserId()));
     }
 
     /**
@@ -50,8 +50,7 @@ public class CouponController {
     public Result<CouponClaimVO> claimCoupon(@PathVariable Long id,
                                              @AuthenticationPrincipal LoginUser loginUser) {
         log.info("领取优惠券:{}",id);
-        CouponClaimVO couponClaimVO = couponService.claimCoupon(id, loginUser.getUserId());
-        return Result.success(couponClaimVO);
+        return Result.success(couponService.claimCoupon(id, loginUser.getUserId()));
     }
 
     /**
@@ -69,8 +68,7 @@ public class CouponController {
             @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("获取我的优惠券:状态{}, 页码{}, 每页数量{}", status, page, size);
-        PageResult<UserCouponVO> pageResult = couponService.getMyUserCoupons(status, page, size, loginUser.getUserId());
-        return Result.success(pageResult);
+        return Result.success(couponService.getMyUserCoupons(status, page, size, loginUser.getUserId()));
     }
 
     /**
@@ -82,7 +80,6 @@ public class CouponController {
     public Result<List<CouponOptionVO>> getCouponOptions(@RequestParam BigDecimal totalAmount,
                                                          @AuthenticationPrincipal LoginUser loginUser) {
         log.info("结算页可选券,总金额：{}", totalAmount);
-        List<CouponOptionVO> couponOptionVOList = couponService.getCouponOptions(totalAmount, loginUser.getUserId());
-        return Result.success(couponOptionVOList);
+        return Result.success(couponService.getCouponOptions(totalAmount, loginUser.getUserId()));
     }
 }

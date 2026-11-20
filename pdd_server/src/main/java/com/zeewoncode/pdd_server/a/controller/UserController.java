@@ -53,7 +53,7 @@ public class UserController {
     @GetMapping("/{id}")
     public Result<UserVO> getUserInfo(@PathVariable Long id) {
         log.info("查询用户详情：userId:{}", id);
-        return userService.getUserInfo(id);
+        return Result.success(userService.getUserInfo(id));
     }
 
     /**
@@ -63,11 +63,12 @@ public class UserController {
      * @return
      */
     @PutMapping("/{id}")
-    public Result updateUserStatus(
+    public Result<Void> updateUserStatus(
             @PathVariable Long id,
             @RequestBody StatusDTO dto
     ) {
         log.info("冻结 / 解冻用户：userId:{}, status:{}", id, dto.getStatus());
-        return userService.updateUserStatus(id, dto.getStatus());
+        userService.updateUserStatus(id, dto.getStatus());
+        return Result.success();
     }
 }

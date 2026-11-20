@@ -10,6 +10,7 @@ import com.zeewoncode.vo.CountdownVO;
 import com.zeewoncode.vo.OrderCreateVO;
 import com.zeewoncode.vo.OrderPreviewVO;
 import com.zeewoncode.vo.PayVO;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,11 +30,10 @@ public class OrderController {
      * @return
      */
     @PostMapping
-    public Result<OrderCreateVO> createOrder(@RequestBody OrderCreateDTO req,
+    public Result<OrderCreateVO> createOrder(@RequestBody @Valid OrderCreateDTO req,
                                              @AuthenticationPrincipal LoginUser loginUser) {
         log.info("提交订单:{}", req);
-        OrderCreateVO result = orderService.createOrder(req, loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(orderService.createOrder(req, loginUser.getUserId()));
     }
 
 
@@ -43,10 +43,9 @@ public class OrderController {
      * @return
      */
     @PostMapping("/preview")
-    public Result<OrderPreviewVO> previewOrder(@RequestBody OrderPreviewDTO orderPreviewDTO) {
+    public Result<OrderPreviewVO> previewOrder(@RequestBody @Valid OrderPreviewDTO orderPreviewDTO) {
         log.info("订单结算预览:{}", orderPreviewDTO);
-        OrderPreviewVO result = orderService.previewOrder(orderPreviewDTO);
-        return Result.success(result);
+        return Result.success(orderService.previewOrder(orderPreviewDTO));
     }
 
     /**
@@ -55,7 +54,7 @@ public class OrderController {
      * @return
      */
     @PostMapping("/{id}/cancel")
-    public Result cancelOrderPendingPayMent(@PathVariable Long id,
+    public Result<Void> cancelOrderPendingPayMent(@PathVariable Long id,
                                             @AuthenticationPrincipal LoginUser loginUser) {
         log.info("取消待付款订单:{}", id);
         orderService.cancelOrderPendingPayMent(id, loginUser.getUserId());
@@ -70,8 +69,7 @@ public class OrderController {
     @GetMapping("/{id}/countdown")
     public Result<CountdownVO> getCountdown(@PathVariable Long id) {
         log.info("获取订单支付倒计时:订单id：{}", id);
-        CountdownVO result = orderService.getCountdown(id);
-        return Result.success(result);
+        return Result.success(orderService.getCountdown(id));
     }
 
     /**
@@ -83,8 +81,7 @@ public class OrderController {
     public Result<PayVO> orderPay(@PathVariable Long id,
                                   @AuthenticationPrincipal LoginUser loginUser) {
         log.info("订单支付:{}", id);
-        PayVO result = orderService.orderPay(id, loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(orderService.orderPay(id, loginUser.getUserId()));
     }
 
     /**
@@ -101,8 +98,7 @@ public class OrderController {
                                               @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("获取订单列表:状态{}, 页码{}, 每页数量{}", status, page, size);
-        PageResult<OrderCard> result = orderService.getOrderList(status, page, size, loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(orderService.getOrderList(status, page, size, loginUser.getUserId()));
     }
 
     /**
@@ -114,7 +110,6 @@ public class OrderController {
     public Result<OrderDetail> getOrderDetail(@PathVariable Long id,
                                               @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取订单详情:{}", id);
-        OrderDetail result = orderService.getOrderDetail(id, loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(orderService.getOrderDetail(id, loginUser.getUserId()));
     }
 }

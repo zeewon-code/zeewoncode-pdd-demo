@@ -36,8 +36,7 @@ public class ReviewController {
             @RequestParam(defaultValue = "10") Integer size
     ) {
         log.info("全平台评价列表：{},{},{}", spuId, keyword, rating);
-        PageResult<Review> result = reviewService.reviewList(spuId, keyword, rating, page, size);
-        return Result.success(result);
+        return Result.success(reviewService.reviewList(spuId, keyword, rating, page, size));
     }
 
     /**
@@ -46,8 +45,9 @@ public class ReviewController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result deleteReview(@PathVariable Long id) {
+    public Result<Void> deleteReview(@PathVariable Long id) {
         log.info("删除评价：{}", id);
-        return reviewService.deleteReview(id);
+        reviewService.deleteReview(id);
+        return Result.success();
     }
 }

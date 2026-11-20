@@ -43,7 +43,7 @@ public interface SkuMapper {
      * @param quantity
      */
     @Update("update sku set locked_stock = locked_stock - #{quantity} where id = #{skuId} and locked_stock >= #{quantity}")
-    void releaseLockStock(Long skuId, Integer quantity);
+    int releaseLockStock(Long skuId, Integer quantity);
 
     /**
      * 待付款订单取消导致预占库存减少

@@ -33,7 +33,6 @@ public class GrouponController {
             @RequestParam(defaultValue = "10") Integer size
     ) {
         log.info("获取拼团活动监控列表");
-        PageResult<GrouponAdminItemVO> result = grouponService.listGroupon(page, size);
-        return Result.success(result);
+        return Result.success(grouponService.listGroupon(page, size));
     }
 }

@@ -2,7 +2,8 @@ package com.zeewoncode.pdd_server.c.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.zeewoncode.constant.MessageConstant;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.constant.RatingConstant;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.ReviewService;
@@ -40,12 +41,10 @@ public class ReviewServiceImpl implements ReviewService {
         PageHelper.startPage(req.getPage(), req.getSize());
         List<Review> reviewList = reviewMapper.selectReviewList(spuId, req);
         PageInfo<Review> pageInfo = new PageInfo<>(reviewList);
-        PageResult<Review> result = new PageResult<>();
-        result.setTotal((int) pageInfo.getTotal());
-        result.setRecords(pageInfo.getList());
-        result.setSize(pageInfo.getSize());
-        result.setPage(pageInfo.getPageNum());
-        return result;
+        if (reviewList.isEmpty()) {
+            return PageResult.empty(pageInfo);
+        }
+        return PageResult.of(pageInfo, reviewList);
     }
 
     /**
@@ -100,10 +99,10 @@ public class ReviewServiceImpl implements ReviewService {
     public ReviewCreateResult addReview(ReviewCreateDTO req, Long userId) {
         Order order = orderMapper.selectOrderById(req.getOrderId());
         if (order == null) {
-            throw new RuntimeException(MessageConstant.ORDER_NOT_EXIST);
+            throw new BaseException(ErrorCode.ORDER_NOT_EXIST);
         }
         if (order.getStatus() != 3) {
-            throw new RuntimeException(MessageConstant.ORDER_STATUS_NOT_ALLOW_ADD_REVIEW);
+            throw new BaseException(ErrorCode.ORDER_STATUS_NOT_ALLOW_ADD_REVIEW);
         }
         ProductReview productReview = new ProductReview();
         BeanUtils.copyProperties(req, productReview);
@@ -111,7 +110,9 @@ public class ReviewServiceImpl implements ReviewService {
         OrderItem orderItem = orderMapper.selectItemById(req.getOrderItemId());
         productReview.setSpuId(orderItem.getSpuId());
         productReview.setCreatedAt(LocalDateTime.now());
-        reviewMapper.insert(productReview);
+        if (reviewMapper.insert(productReview) != 1) {
+            throw new BaseException(ErrorCode.REVIEW_ADD_FAILED);
+        }
         ReviewCreateResult result = ReviewCreateResult.builder().reviewId(productReview.getId()).build();
         return result;
     }

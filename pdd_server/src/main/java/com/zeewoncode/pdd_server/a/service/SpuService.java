@@ -3,9 +3,8 @@ package com.zeewoncode.pdd_server.a.service;
 import com.zeewoncode.dto.SpuStatusDTO;
 import com.zeewoncode.entity.SpuCard;
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.result.Result;
 
-import java.util.List;
+
 
 public interface SpuService {
 
@@ -27,5 +26,5 @@ public interface SpuService {
      * @param dto
      * @return
      */
-    Result PlatformForceControl(Long spuId, SpuStatusDTO dto);
+    void PlatformForceControl(Long spuId, SpuStatusDTO dto);
 }

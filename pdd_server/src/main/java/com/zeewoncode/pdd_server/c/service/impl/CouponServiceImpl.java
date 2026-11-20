@@ -2,6 +2,8 @@ package com.zeewoncode.pdd_server.c.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.entity.Coupon;
 import com.zeewoncode.entity.UserCoupon;
 import com.zeewoncode.pdd_server.c.service.CouponService;
@@ -30,14 +32,15 @@ public class CouponServiceImpl implements CouponService {
      * 获取优惠券列表
      * @param page
      * @param size
+     * @param userId
      * @return
      */
     @Override
-    public PageResult<CouponVO> getCoupons(Integer page, Integer size) {
+    public PageResult<CouponVO> getCoupons(Integer page, Integer size, Long userId) {
         // id,title,type,conditionAmount, discountAmount, discountRate, validTo, remain
         PageHelper.startPage(page, size);
         // 查出有效期内未发完的券
-        List<CouponVO> voList =  couponMapper.selectCouponsByValidTime(LocalDateTime.now());
+        List<CouponVO> voList =  couponMapper.selectCouponsByValidTime(LocalDateTime.now(), userId);
         PageInfo<CouponVO> couponVOPageInfo = new PageInfo<>(voList);
         if (voList.isEmpty()) {
             return PageResult.empty(couponVOPageInfo);
@@ -55,24 +58,23 @@ public class CouponServiceImpl implements CouponService {
     @Transactional
     public CouponClaimVO claimCoupon(Long id, Long userId) {
         // 判断用户是否已经领取过该优惠券
-        if (couponMapper.selectUserCouponByCouponId(id, userId) != null) {
-            throw new RuntimeException("您已经领取过该优惠券，请勿重复领取");
-        }
+        if (couponMapper.selectUserCouponByCouponId(id, userId) != null)
+            throw new BaseException(ErrorCode.COUPON_CLAIMED);
         // 根据优惠券id查询优惠券是否存在
         Coupon coupon = couponMapper.selectById(id, LocalDateTime.now());
-        if (coupon == null) {
-            throw new RuntimeException("优惠券不存在");
-        }
+        if (coupon == null)
+            throw new BaseException(ErrorCode.COUPON_NOT_EXIST);
         // 根据优惠券id对优惠券已领数量+1，每人限领一张
-        int i = couponMapper.updateCouponCountById(id);
-        if (i <= 0) throw new RuntimeException("优惠券领取失败");
+        if (couponMapper.updateCouponCountById(id) != 1)
+            throw new BaseException(ErrorCode.COUPON_STOCK_UPDATE_FAILED);
         // 插入用户优惠券记录
         UserCoupon userCoupon = UserCoupon.builder()
                 .userId(userId)
                 .couponId(id)
                 .status(0)
                 .build();
-        couponMapper.insertUserCoupon(userCoupon);
+        if (couponMapper.insertUserCoupon(userCoupon) != 1)
+            throw new BaseException(ErrorCode.USER_COUPON_CREATE_FAILED);
         Long userCouponId = userCoupon.getId();
         if (userCouponId == null) return null;
         CouponClaimVO vo = CouponClaimVO.builder()

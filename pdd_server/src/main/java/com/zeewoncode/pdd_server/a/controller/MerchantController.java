@@ -36,8 +36,7 @@ public class MerchantController {
             @RequestParam(defaultValue = "10") Integer size
     ) {
         log.info("店铺列表：status:{}, keyword:{}, page:{}, size:{}", status, keyword, page, size);
-        PageResult<MerchantVO> result = merchantService.getMerchantsList(status, keyword, page, size);
-        return Result.success(result);
+        return Result.success(merchantService.getMerchantsList(status, keyword, page, size));
     }
 
     /**
@@ -48,8 +47,7 @@ public class MerchantController {
     @GetMapping("/{id}")
     public Result<MerchantVO> merchantDetail(@PathVariable Long id) {
         log.info("店铺详情：id:{}", id);
-        MerchantVO result = merchantService.getMerchantDetail(id);
-        return Result.success(result);
+        return Result.success(merchantService.getMerchantDetail(id));
     }
 
     /**
@@ -59,7 +57,7 @@ public class MerchantController {
      * @return
      */
     @PutMapping("/{id}")
-    public Result updateMerchantStatus(
+    public Result<Void> updateMerchantStatus(
             @PathVariable("id") Long merchantId,
             @RequestBody @Valid StatusDTO dto
     ) {

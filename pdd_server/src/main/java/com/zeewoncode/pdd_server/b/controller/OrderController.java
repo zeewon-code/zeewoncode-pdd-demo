@@ -38,8 +38,7 @@ public class OrderController {
             @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("获取本店订单列表:状态{}, 页码{}, 每页数量{}", status, page, size);
-        PageResult<OrderCard> result = orderService.getOrderList(status, page, size, loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(orderService.getOrderList(status, page, size, loginUser.getUserId()));
     }
 
     /**
@@ -51,8 +50,7 @@ public class OrderController {
     public Result<OrderDetail> getOrderDetail(@PathVariable Long id,
                                               @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取本店订单详情: 订单id{}", id);
-        OrderDetail result = orderService.getOrderDetail(id, loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(orderService.getOrderDetail(id, loginUser.getUserId()));
     }
 
     /**
@@ -68,7 +66,6 @@ public class OrderController {
             @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("订单发货: 订单id{}, 发货信息{}", id, dto);
-        ShipVO result = orderService.ship(id, dto, loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(orderService.ship(id, dto, loginUser.getUserId()));
     }
 }

@@ -1,41 +1,42 @@
 package com.zeewoncode.result;
 
+import com.zeewoncode.constant.ErrorCode;
 import lombok.Data;
 
 import java.io.Serializable;
 
-/**
- * 统一返回结果类
- * @param <T>
- */
 @Data
 public class Result<T> implements Serializable {
 
-    //所有请求的响应结果都封装成Result
-    private Integer code; //编码：1.成功，0.失败
-    private String msg; //错误信息
-    private T data; //业务数据
+    private int code;
+    private String msg;
+    private T data;
 
-    public static <T> Result<T> success(T object) {
-        Result<T> result = new Result<>();
-        result.code = 1;
-        result.msg = "ok";
-        result.data = object;
-        return result;
+    public static <T> Result<T> success(T data) {
+        return build(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), data);
     }
 
     public static <T> Result<T> success() {
-        Result<T> result = new Result<>();
-        result.code = 1;
-        result.msg = "ok";
-        return result;
+        return build(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), null);
     }
 
-    public static <T> Result<T> error(String msg) {
+    public static <T> Result<T> error(ErrorCode errorCode) {
+        return build(errorCode.getCode(), errorCode.getMessage(), null);
+    }
+
+    public static <T> Result<T> error(ErrorCode errorCode, String msg) {
+        return build(errorCode.getCode(), msg, null);
+    }
+
+    public static <T> Result<T> error(int code, String msg) {
+        return build(code, msg, null);
+    }
+
+    private static <T> Result<T> build(int code, String msg, T data) {
         Result<T> result = new Result<>();
-        result.code = 0;
+        result.code = code;
         result.msg = msg;
+        result.data = data;
         return result;
     }
-
 }

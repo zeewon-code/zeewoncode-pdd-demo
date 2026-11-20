@@ -25,7 +25,7 @@ public interface UserMapper {
      */
     @Insert("insert into user (phone, password, nickname, status, user_type, deleted_flag, created_at, updated_at) " +
             "values (#{phone}, #{password}, #{nickname}, #{status}, #{userType}, #{deletedFlag}, #{createdAt}, #{updatedAt})")
-    void insert(User user);
+    int insert(User user);
 
     /**
      * 根据id查询用户信息

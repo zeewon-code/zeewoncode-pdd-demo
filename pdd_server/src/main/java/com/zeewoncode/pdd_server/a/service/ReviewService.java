@@ -2,7 +2,7 @@ package com.zeewoncode.pdd_server.a.service;
 
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.result.Result;
+
 
 public interface ReviewService {
 
@@ -22,5 +22,5 @@ public interface ReviewService {
      * @param id
      * @return
      */
-    Result deleteReview(Long id);
+    void deleteReview(Long id);
 }

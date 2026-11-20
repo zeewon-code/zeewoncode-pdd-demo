@@ -34,8 +34,7 @@ public class MerchantController {
     public Result<ShopApplyVO> applyShop(@RequestBody @Valid ShopApplyDTO shopApplyDTO,
                                          @AuthenticationPrincipal LoginUser loginUser) {
         log.info("申请开店:{}", shopApplyDTO);
-        ShopApplyVO shopApplyVO = merchantService.applyShop(shopApplyDTO, loginUser.getUserId());
-        return Result.success(shopApplyVO);
+        return Result.success(merchantService.applyShop(shopApplyDTO, loginUser.getUserId()));
     }
 
     /**
@@ -45,8 +44,7 @@ public class MerchantController {
     @GetMapping("/mine")
     public Result<MerchantVO> getMyShop(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取我的店铺信息");
-        MerchantVO merchantVO = merchantService.getMyShop(loginUser.getUserId());
-        return Result.success(merchantVO);
+        return Result.success(merchantService.getMyShop(loginUser.getUserId()));
     }
 
     /**
@@ -55,7 +53,7 @@ public class MerchantController {
      * @return
      */
     @PutMapping("/mine")
-    public Result updateShop(@RequestBody @Valid ShopUpdateDTO shopUpdateDTO,
+    public Result<Void> updateShop(@RequestBody @Valid ShopUpdateDTO shopUpdateDTO,
                              @AuthenticationPrincipal LoginUser loginUser) {
         log.info("修改店铺信息:{}", shopUpdateDTO);
         merchantService.updateShop(shopUpdateDTO, loginUser.getUserId());
@@ -68,7 +66,7 @@ public class MerchantController {
      * @return
      */
     @PutMapping("/mine/status")
-    public Result updateShopStatus(@RequestParam Integer status,
+    public Result<Void> updateShopStatus(@RequestParam Integer status,
                                    @AuthenticationPrincipal LoginUser loginUser) {
         log.info("修改店铺状态:{}", status);
         merchantService.updateShopStatus(status, loginUser.getUserId());
@@ -82,7 +80,6 @@ public class MerchantController {
     @GetMapping("/dashboard")
     public Result<BDashboard> getBDashboard(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取商家经营看板数据");
-        BDashboard bDashboard = merchantService.getBDashboard(loginUser.getUserId());
-        return Result.success(bDashboard);
+        return Result.success(merchantService.getBDashboard(loginUser.getUserId()));
     }
 }

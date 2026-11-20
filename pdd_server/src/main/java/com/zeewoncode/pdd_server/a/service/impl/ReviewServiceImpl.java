@@ -2,13 +2,14 @@ package com.zeewoncode.pdd_server.a.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.entity.Review;
 import com.zeewoncode.entity.Spu;
 import com.zeewoncode.pdd_server.a.service.ReviewService;
 import com.zeewoncode.pdd_server.mapper.ReviewMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,7 @@ public class ReviewServiceImpl implements ReviewService {
         if (spuId != null) {
             Spu spuById = spuMapper.getSpuById(spuId);
             if (spuById == null || spuById.getDeletedFlag() != 0) {
-                throw new RuntimeException("商品不存在");
+                throw new BaseException(ErrorCode.SPU_NOT_EXIST);
             }
         }
         PageHelper.startPage(page, size);
@@ -56,11 +57,9 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public Result deleteReview(Long id) {
-        if (reviewMapper.deleteById(id) > 0) {
-            return Result.success("删除成功");
-        } else {
-            return Result.error("删除失败");
+    public void deleteReview(Long id) {
+        if (reviewMapper.deleteById(id) <= 0) {
+            throw new BaseException(ErrorCode.REVIEW_DELETE_FAILED);
         }
     }
 }

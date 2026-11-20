@@ -2,6 +2,8 @@ package com.zeewoncode.pdd_server.c.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.dto.GrouponCancelDTO;
 import com.zeewoncode.dto.GrouponInitiateDTO;
 import com.zeewoncode.dto.GrouponJoinDTO;
@@ -57,33 +59,20 @@ public class GrouponsServiceImpl implements GrouponsService {
         LocalDateTime now = LocalDateTime.now();
         // 校验该拼团活动是否存在
         GrouponDefine define = grouponMapper.selectGrouponDefineById(defineId);
-        if (define == null) {
-            throw new RuntimeException("拼团活动不存在");
-        }
-        if (define.getStartTime().isAfter(now)) {
-            throw new RuntimeException("拼团活动尚未开始");
-        }
-        if (define.getEndTime().isBefore(now)) {
-            throw new RuntimeException("拼团活动已结束");
-        }
-        if (define.getStatus() != 1) {
-            throw new RuntimeException("拼团活动已下架");
-        }
+        if (define == null) throw new BaseException(ErrorCode.GROUPON_DEFINE_NOT_EXIST);
+        if (define.getStartTime().isAfter(now) || define.getStatus() != 1) throw new BaseException(ErrorCode.GROUPON_DEFINE_NOT_START);
+        if (define.getEndTime().isBefore(now)) throw new BaseException(ErrorCode.GROUPON_DEFINE_END);
         // 判断是否已经用户目前是否已经开起了拼团活动，
         // 如果已经发起该款商品活动且同商品拼团未结束；则不允许再发起新的同款商品的拼团活动
         GrouponInstance instanceDb = grouponMapper.selectGrouponInstanceByDefineIdAndLeaderUserId(defineId, userId);
-        if (instanceDb != null && instanceDb.getStatus() == 0) {
-            throw new RuntimeException("您已在进行该商品的拼团活动");
-        }
+        if (instanceDb != null && instanceDb.getStatus() == 0) throw new BaseException(ErrorCode.GROUPON_INSTANCE_USING);
         List<OrderItemDTO> list = new ArrayList<>();
         list.add(OrderItemDTO.builder()
                 .skuId(define.getSkuId())
                 .quantity(grouponInitiateDTO.getQuantity())
                 .build());
         int lock = skuMapper.lockStock(list);
-        if (lock == 0) {
-            throw new RuntimeException("库存不足");
-        }
+        if (lock == 0) throw new BaseException(ErrorCode.SKU_NOT_ENOUGH);
         // 创建拼团实例
         // targetCount拼团人数
         Integer targetCount = define.getTargetCount();
@@ -95,7 +84,8 @@ public class GrouponsServiceImpl implements GrouponsService {
                 .status(0)
                 .expireAt(now.plusHours(define.getExpireHours()).truncatedTo(ChronoUnit.SECONDS))
                 .build();
-        grouponMapper.insertGrouponInstance(grouponInstance);
+        if (grouponMapper.insertGrouponInstance(grouponInstance) != 1)
+            throw new BaseException(ErrorCode.GROUPON_INSTANCE_CREATE_FAILED);
         // 按拼团价下单并关联GrouponInstanceId
         // 插入订单表orders和order_item表
         Integer quantity = grouponInitiateDTO.getQuantity();
@@ -142,7 +132,7 @@ public class GrouponsServiceImpl implements GrouponsService {
         order.setDiscountAmount(totalAmount.subtract(payableAmount).setScale(2, RoundingMode.HALF_UP));
         order.setGrouponInstanceId(grouponInstance.getId());
         order.setStatus(0);
-        orderMapper.insert(order);
+        if (orderMapper.insert(order) != 1) throw new BaseException(ErrorCode.ORDER_CREATE_FAILED);
         return order;
     }
 
@@ -168,7 +158,8 @@ public class GrouponsServiceImpl implements GrouponsService {
         orderItem.setQuantity(quantity);
         BigDecimal amout = groupPrice.multiply(BigDecimal.valueOf(quantity)).setScale(2, RoundingMode.HALF_UP);
         orderItem.setAmount(amout);
-        orderMapper.insertOrderItems(List.of(orderItem));
+        if (orderMapper.insertOrderItems(List.of(orderItem)) != 1)
+            throw new BaseException(ErrorCode.ORDER_ITEMS_CREATE_FAILED);
     }
 
 
@@ -185,33 +176,26 @@ public class GrouponsServiceImpl implements GrouponsService {
         // 校验该拼团活动是否存在
         GrouponInstance grouponInstance = grouponMapper.selectGrouponInstanceById(instanceId);
         GrouponDefine define = grouponMapper.selectGrouponDefineById(grouponInstance.getDefineId());
-        if (grouponInstance == null) {
-            throw new RuntimeException("拼团事务不存在");
-        }
-        if (grouponInstance.getExpireAt().isBefore(now)) {
-            throw new RuntimeException("拼团事务已结束");
-        }
-        if (grouponInstance.getStatus() != 0) {
-            throw new RuntimeException("拼团事务已结束");
-        }
+        if (grouponInstance == null)
+            throw new BaseException(ErrorCode.GROUPON_INSTANCE_NOT_EXIST);
+        if (grouponInstance.getExpireAt().isBefore(now))
+            throw new BaseException(ErrorCode.GROUPON_INSTANCE_EXPIRED);
+        if (grouponInstance.getStatus() != 0)
+            throw new BaseException(ErrorCode.GROUPON_INSTANCE_STATUS_FALSE);
         // 用户只能占用一个拼团事务中的一个名额
         // 通过拼团实例跟用户id查询订单，判断用户是否已经占用该拼团事务的名额
-        if (grouponMapper.selectOrderByUserIdAndInstanceId(userId, instanceId) != null) {
-            throw new RuntimeException("您已经参加了该同款商品规格的拼团活动了");
-        }
+        if (grouponMapper.selectOrderByUserIdAndInstanceId(userId, instanceId) != null)
+            throw new BaseException(ErrorCode.GROUPON_INSTANCE_USING);
         List<OrderItemDTO> list = new ArrayList<>();
         list.add(OrderItemDTO.builder()
                 .skuId(define.getSkuId())
                 .quantity(grouponJoinDTO.getQuantity())
                 .build());
         int lock = skuMapper.lockStock(list);
-        if (lock == 0) {
-            throw new RuntimeException("库存不足");
-        }
+        if (lock == 0) throw new BaseException(ErrorCode.SKU_NOT_ENOUGH);
         // 乐观锁解决超员问题， 更新拼团实例当前拼团人数
-        boolean isTrue = updateGrouponInstanceCurrentCount(instanceId);
-        if (!isTrue) {
-            throw new RuntimeException("拼团已满");
+        if (!updateGrouponInstanceCurrentCount(instanceId)) {
+            throw new BaseException(ErrorCode.GROUPON_INSTANCE_COUNT_ENOUGH);
         }
         // 团员插入订单表
         Long addressId = grouponJoinDTO.getAddressId();
@@ -252,28 +236,25 @@ public class GrouponsServiceImpl implements GrouponsService {
         // 验证当前用户的id是否为团长id，且拼团状态是否为进行中， 且拼团名额小于成团人数
         Long instanceId = dto.getInstanceId();
         GrouponInstance instance = grouponMapper.selectGrouponInstanceById(instanceId);
-        if (instance == null) {
-            throw new RuntimeException("拼团事务不存在");
-        }
-        if (instance.getStatus() != 0) {
-            throw new RuntimeException("拼团状态不处于拼团中，无法取消");
-        }
-        if (instance.getCurrentCount().equals(instance.getTargetCount())) {
-            throw new RuntimeException("活动已拼成，无法取消");
-        }
-        if (instance.getExpireAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("拼团已过期");
-        }
+        if (instance.getStatus() != 0)
+            throw new BaseException(ErrorCode.GROUPON_INSTANCE_STATUS_FALSE);
+        if (instance.getCurrentCount().equals(instance.getTargetCount()))
+            throw new BaseException(ErrorCode.GROUPON_INSTANCE_SUCCESS);
+        if (instance.getExpireAt().isBefore(LocalDateTime.now()))
+            throw new BaseException(ErrorCode.GROUPON_INSTANCE_EXPIRED);
         // 修改拼团实例状态
-        grouponMapper.updateGrouponInstanceStatus(instanceId, 3);
+        if (grouponMapper.updateGrouponInstanceStatus(instanceId, 3) != 1)
+            throw new BaseException(ErrorCode.GROUPON_INSTANCE_STATUS_UPDATE_FAILED);
         // 通过拼团实例id找到该拼团实例下的所有订单并修改订单状态，并取出订单id
-        orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId, null, 4, 3);
         List<Long> orderIds = orderMapper.selectOrderIdsByInstanceIdAndUserId(instanceId,null);
+        if (orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId, null, 4, 3) != orderIds.size())
+            throw new BaseException(ErrorCode.ORDER_STATUS_UPDATE_FAILED);
         // 释放预占库存，通过订单id去找到订单明细表中对应的下单的商品数量
         Integer quantity = orderMapper.selectQuantityByOrderIds(orderIds);
         // 通过拼团实例id找到拼团活动define，找到skuId,然后到sku表进行预占库存的释放
         Long skuId = grouponMapper.selectGrouponDefineById(instance.getDefineId()).getSkuId();
-        skuMapper.releaseLockStock(skuId, quantity);
+        if (skuMapper.releaseLockStock(skuId, quantity) != 1)
+            throw new BaseException(ErrorCode.SKU_STOCK_RELEASE_FAILED);
     }
 
     /**
@@ -281,31 +262,27 @@ public class GrouponsServiceImpl implements GrouponsService {
      * @param dto
      */
     @Override
+    @Transactional
     public void cancelGroupon(GrouponCancelDTO dto, Long userId) {
         Long instanceId = dto.getInstanceId();
         GrouponInstance instance = grouponMapper.selectGrouponInstanceById(instanceId);
-        if (instance == null) {
-            throw new RuntimeException("拼团事务不存在");
-        }
-        if (instance.getStatus() != 0) {
-            throw new RuntimeException("拼团状态不处于拼团中，无法取消");
-        }
-        if (instance.getCurrentCount().equals(instance.getTargetCount())) {
-            throw new RuntimeException("活动已拼成，无法取消");
-        }
-        if (instance.getExpireAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("拼团已过期");
-        }
+        if (instance == null) throw new BaseException(ErrorCode.GROUPON_INSTANCE_NOT_EXIST);
+        if (instance.getStatus() != 0) throw new BaseException(ErrorCode.GROUPON_INSTANCE_STATUS_FALSE);
+        if (instance.getExpireAt().isBefore(LocalDateTime.now())) throw new BaseException(ErrorCode.GROUPON_INSTANCE_EXPIRED);
+        if (instance.getCurrentCount().equals(instance.getTargetCount())) throw new BaseException(ErrorCode.GROUPON_INSTANCE_SUCCESS);
         // 修改groupon_instance中的current_count-1
-        grouponMapper.reduceGrouponInstanceCurrentCount(instanceId);
+        if (grouponMapper.reduceGrouponInstanceCurrentCount(instanceId) != 1) throw new BaseException(ErrorCode.GROUPON_INSTANCE_COUNT_REDUCE_FAILED);
         // 通过拼团实例id找到该拼团实例下的当前用户id的订单并修改订单状态，并取出订单id
-        orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId, userId, 4, 3);
+        if (orderMapper.updateOrderStatusAndCancelTypeByInstanceIdAndUserId(instanceId, userId, 4, 3) != 1)
+            throw new BaseException(ErrorCode.ORDER_STATUS_UPDATE_FAILED);
         List<Long> orderIds = orderMapper.selectOrderIdsByInstanceIdAndUserId(instanceId, userId);
         // 释放预占库存，通过订单id去找到订单明细表中对应的下单的商品数量
         Integer quantity = orderMapper.selectQuantityByOrderIds(orderIds);
         // 通过拼团实例id找到拼团活动define，找到skuId,然后到sku表进行预占库存的释放
         Long skuId = grouponMapper.selectGrouponDefineById(instance.getDefineId()).getSkuId();
-        skuMapper.releaseLockStock(skuId, quantity);
+        if (skuMapper.releaseLockStock(skuId, quantity) != 1) {
+            throw new BaseException(ErrorCode.SKU_STOCK_RELEASE_FAILED);
+        }
     }
 
     // 涉及表：groupon_instance, user, spu, groupon_define, orders

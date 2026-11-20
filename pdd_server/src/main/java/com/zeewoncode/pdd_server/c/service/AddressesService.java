@@ -43,4 +43,12 @@ public interface AddressesService {
      * @param addressId
      */
     void setDefaultAddress(Long addressId, Long userId);
+
+    /**
+     * 获取收货地址详情
+     * @param addressId
+     * @param userId
+     * @return
+     */
+    AddressVO getAddressDetail(Long addressId, Long userId);
 }

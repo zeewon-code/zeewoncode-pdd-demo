@@ -1,6 +1,7 @@
 package com.zeewoncode.pdd_server.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zeewoncode.constant.ErrorCode;
 import com.zeewoncode.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +28,6 @@ public class JsonAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write(
-                objectMapper.writeValueAsString(Result.error("无权限访问")));
+                objectMapper.writeValueAsString(Result.error(ErrorCode.FORBIDDEN)));
     }
 }

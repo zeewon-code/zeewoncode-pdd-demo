@@ -1,5 +1,7 @@
 package com.zeewoncode.pdd_server.a.service.impl;
 
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.dto.CategoryCreateDTO;
 import com.zeewoncode.dto.CategoryUpdateDTO;
 import com.zeewoncode.entity.Category;
@@ -70,7 +72,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setLevel(dto.getParentId() == 0 ? 1 : 2);
         category.setCreatedAt(LocalDateTime.now());
         if (categoryMapper.insert(category) == 0) {
-            throw new RuntimeException("新增分类失败");
+            throw new BaseException(ErrorCode.CATEGORY_CREATE_FAILED);
         }
     }
 
@@ -86,7 +88,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(dto.getName());
         category.setSort(dto.getSort());
         if (categoryMapper.update(category) == 0) {
-            throw new RuntimeException("修改分类失败");
+            throw new BaseException(ErrorCode.CATEGORY_UPDATE_FAILED);
         }
     }
 
@@ -98,14 +100,14 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(Long id) {
         // 查询是否有子类
         if (categoryMapper.selectIsParentIdById(id) > 0) {
-            throw new RuntimeException("该分类下有子类，无法删除");
+            throw new BaseException(ErrorCode.CATEGORY_HAVE_SON);
         }
         // 查询该分类是否有挂商品
         if (spuMapper.selectSpuCountByCategoryId(id) > 0) {
-            throw new RuntimeException("该分类下有商品，无法删除");
+            throw new BaseException(ErrorCode.CATEGORY_HAVE_SPU);
         }
         if (categoryMapper.delete(id) == 0) {
-            throw new RuntimeException("删除分类失败");
+            throw new BaseException(ErrorCode.CATEGORY_DELETE_FAILED);
         }
     }
 }

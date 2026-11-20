@@ -44,8 +44,7 @@ public class SpuController {
             @AuthenticationPrincipal LoginUser loginUser
             ) {
         log.info("分页查询商品列表: 页码{}, 每页数量{}, 关键字{}, 类目ID{}, 状态{}", page, size, keyword, categoryId, status);
-        PageResult<SpuCard> result = spuService.listSpuCards(page, size, keyword, categoryId, status, loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(spuService.listSpuCards(page, size, keyword, categoryId, status, loginUser.getUserId()));
     }
 
     /**
@@ -57,8 +56,7 @@ public class SpuController {
     public Result<SpuCreateVO> addSpu(@Valid @RequestBody SpuCreateDTO dto,
                                       @AuthenticationPrincipal LoginUser loginUser) {
         log.info("新建商品: {}", dto);
-        SpuCreateVO vo = spuService.addSpu(dto, loginUser.getUserId());
-        return Result.success(vo);
+        return Result.success(spuService.addSpu(dto, loginUser.getUserId()));
     }
 
     /**
@@ -69,8 +67,7 @@ public class SpuController {
     @GetMapping("/{id}")
     public Result<SpuDetail> getSpuDetail(@PathVariable Long id, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("商品详情: {}", id);
-        SpuDetail detail = spuService.getSpuDetail(id, loginUser.getUserId());
-        return Result.success(detail);
+        return Result.success(spuService.getSpuDetail(id, loginUser.getUserId()));
     }
 
     /**
@@ -80,7 +77,7 @@ public class SpuController {
      * @return
      */
     @PutMapping("/{id}")
-    public Result editSpu(@PathVariable Long id,
+    public Result<Void> editSpu(@PathVariable Long id,
                           @Valid @RequestBody(required = false) SpuEditDTO dto,
                           @AuthenticationPrincipal LoginUser loginUser
     ) {
@@ -95,7 +92,7 @@ public class SpuController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result softDeleteSpu(@PathVariable Long id,
+    public Result<Void> softDeleteSpu(@PathVariable Long id,
                                 @AuthenticationPrincipal LoginUser loginUser) {
         log.info("软删除商品: {}", id);
         spuService.softDeleteSpu(id, loginUser.getUserId());
@@ -109,9 +106,9 @@ public class SpuController {
      * @return
      */
     @PutMapping("/{id}/status")
-    public Result listAndDelist(
+    public Result<Void> listAndDelist(
             @PathVariable Long id,
-            @RequestBody SpuStatusDTO dto,
+            @RequestBody @Valid SpuStatusDTO dto,
             @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("更新商品状态: {}, {}", id, dto);

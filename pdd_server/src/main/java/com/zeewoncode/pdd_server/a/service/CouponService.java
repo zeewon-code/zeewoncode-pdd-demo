@@ -3,7 +3,6 @@ package com.zeewoncode.pdd_server.a.service;
 import com.zeewoncode.dto.CouponCreateDTO;
 import com.zeewoncode.entity.CouponRecord;
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CouponVO;
 
 public interface CouponService {
@@ -21,7 +20,7 @@ public interface CouponService {
      * @param couponCreateDTO
      * @return
      */
-    Result createCoupon(CouponCreateDTO couponCreateDTO);
+    void createCoupon(CouponCreateDTO couponCreateDTO);
 
     /**
      * 获取优惠券领取/使用记录

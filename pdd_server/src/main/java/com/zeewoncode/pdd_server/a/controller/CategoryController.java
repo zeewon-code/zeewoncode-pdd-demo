@@ -30,8 +30,7 @@ public class CategoryController {
     @GetMapping
     public Result<List<CategoryAdminNode>> getCategoryTree() {
         log.info("获取分类树");
-        List<CategoryAdminNode> categoryAdminNodes = categoryService.getCategoryTree();
-        return Result.success(categoryAdminNodes);
+        return Result.success(categoryService.getCategoryTree());
     }
 
     /**
@@ -40,7 +39,7 @@ public class CategoryController {
      * @return
      */
     @PostMapping
-    public Result addCategory(@RequestBody @Valid CategoryCreateDTO dto) {
+    public Result<Void> addCategory(@RequestBody @Valid CategoryCreateDTO dto) {
         log.info("新增分类：{}", dto);
         categoryService.addCategory(dto);
         return Result.success();
@@ -53,7 +52,7 @@ public class CategoryController {
      * @return
      */
     @PutMapping("/{id}")
-    public Result updateCategory(
+    public Result<Void> updateCategory(
             @PathVariable Long id,
             @RequestBody CategoryUpdateDTO dto
     ) {
@@ -68,7 +67,7 @@ public class CategoryController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result deleteCategory(@PathVariable Long id) {
+    public Result<Void> deleteCategory(@PathVariable Long id) {
         log.info("删除分类：{}", id);
         categoryService.delete(id);
         return Result.success();

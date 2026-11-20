@@ -1,13 +1,20 @@
 package com.zeewoncode.exception;
 
-/**
- * 业务异常类，用于表示业务逻辑中的异常情况
- */
-public class BaseException extends RuntimeException{
-    public BaseException(String message) {
-        super(message);
-    }
-    public BaseException() {
+import com.zeewoncode.constant.ErrorCode;
+import lombok.Getter;
 
+@Getter
+public class BaseException extends RuntimeException {
+
+    private final int code;
+
+    public BaseException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.code = errorCode.getCode();
+    }
+
+    public BaseException(ErrorCode errorCode, String message) {
+        super(message);
+        this.code = errorCode.getCode();
     }
 }

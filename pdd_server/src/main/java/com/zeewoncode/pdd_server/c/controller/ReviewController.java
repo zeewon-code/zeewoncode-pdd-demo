@@ -9,6 +9,7 @@ import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.result.ReviewCreateResult;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,8 +47,7 @@ public class ReviewController {
     @GetMapping("/spu/{id}/reviews/stat")
     public Result<ReviewStat> getReviewStat(@PathVariable Long id) {
         log.info("统计商品id：{}的商品评分分布", id);
-        ReviewStat reviewStat = reviewService.getReviewStat(id);
-        return Result.success(reviewStat);
+        return Result.success(reviewService.getReviewStat(id));
     }
 
     /**
@@ -61,8 +61,7 @@ public class ReviewController {
                                                              @RequestParam(defaultValue = "10") Integer size,
                                                              @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取待评价订单列表");
-        PageResult<OrderCard> unReviewedOrders = reviewService.getUnreviewedOrders(page, size, loginUser.getUserId());
-        return Result.success(unReviewedOrders);
+        return Result.success(reviewService.getUnreviewedOrders(page, size, loginUser.getUserId()));
     }
 
     /**
@@ -71,10 +70,9 @@ public class ReviewController {
      * @return
      */
     @PostMapping("/reviews")
-    public Result<ReviewCreateResult> addReview(@RequestBody ReviewCreateDTO req,
+    public Result<ReviewCreateResult> addReview(@RequestBody @Valid ReviewCreateDTO req,
                                                 @AuthenticationPrincipal LoginUser loginUser) {
         log.info("发表评价:{}", req);
-        ReviewCreateResult reviewCreateResult = reviewService.addReview(req, loginUser.getUserId());
-        return Result.success(reviewCreateResult);
+        return Result.success(reviewService.addReview(req, loginUser.getUserId()));
     }
 }

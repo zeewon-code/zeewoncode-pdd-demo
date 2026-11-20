@@ -2,6 +2,8 @@ package com.zeewoncode.pdd_server.b.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.constant.RatingConstant;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.b.service.ReviewService;
@@ -9,7 +11,6 @@ import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.ReviewMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.result.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
@@ -40,9 +41,6 @@ public class ReviewServiceImpl implements ReviewService {
     public PageResult<Review> getReviewList(Long spuId, Integer rating, Integer page,
                                             Integer size, Long userId) {
         // 涉及的表：user， product_review
-        if (!haveMerchantOperation(userId)) {
-            throw new RuntimeException("当前用户没有权限进行相关操作");
-        }
         // 如果前端没传spuId，就把店铺旗下的所有商品id查询出来
         List<Long> spuIds = null;
         if (spuId != null) {
@@ -50,7 +48,7 @@ public class ReviewServiceImpl implements ReviewService {
             Spu spuById = spuMapper.getSpuById(spuId);
             Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
             if (spuById == null || !spuById.getMerchantId().equals(merchant.getId()) || spuById.getDeletedFlag() != 0) {
-                throw new RuntimeException("当前店铺下不存在该商品");
+                throw new BaseException(ErrorCode.SPU_NOT_BELONG_TO_MERCHANT);
             }
             spuIds = List.of(spuId);
         } else {
@@ -72,10 +70,7 @@ public class ReviewServiceImpl implements ReviewService {
      * @return
      */
     @Override
-    public Result<ReviewStat> getReviewStat(Long userId) {
-        if (!haveMerchantOperation(userId)) {
-            throw new RuntimeException("当前用户没有权限进行相关操作");
-        }
+    public ReviewStat getReviewStat(Long userId) {
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         List<Spu> spus = spuMapper.selectSpuByMerchantId(merchant.getId(), null, null, null);
         List<Long> spuIds = spus.stream().map(Spu::getId).toList();
@@ -95,18 +90,6 @@ public class ReviewServiceImpl implements ReviewService {
         ratingDist.put(RatingConstant.RATING_4, countMap.getOrDefault(4, 0L));
         ratingDist.put(RatingConstant.RATING_5, countMap.getOrDefault(5, 0L));
         reviewStat.setRatingDist(ratingDist);
-        return Result.success(reviewStat);
-    }
-
-    /**
-     * 校验当前用户是否有资格进行相关操作
-     * @return
-     */
-    public Boolean haveMerchantOperation(Long userId) {
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        if (merchant == null || merchant.getDeletedFlag() == 0) {
-            return false;
-        }
-        return true;
+        return reviewStat;
     }
 }

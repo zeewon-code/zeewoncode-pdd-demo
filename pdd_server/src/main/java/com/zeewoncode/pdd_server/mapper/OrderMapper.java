@@ -53,13 +53,13 @@ public interface OrderMapper {
             "#{discountAmount}, #{payableAmount}, #{paymentId}, #{grouponInstanceId}, " +
             "#{status}, #{cancelType}, #{paidAt}, #{completedAt})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
-    void insert(Order order);
+    int insert(Order order);
 
     /**
      * 插入订单明细
      * @param orderItems
      */
-    void insertOrderItems(List<OrderItem> orderItems);
+    int insertOrderItems(List<OrderItem> orderItems);
 
     /**
      * 更新订单
@@ -81,7 +81,7 @@ public interface OrderMapper {
      * @param orderId
      */
     @Delete("DELETE FROM order_item WHERE order_id = #{orderId}")
-    void deleteByOrderId(Long orderId);
+    int deleteByOrderId(Long orderId);
 
     /**
      * 根据用户id和订单状态查询订单列表
@@ -123,7 +123,7 @@ public interface OrderMapper {
     /**
      * 根据团购实例id和用户id更新订单状态和取消类型
      */
-    void updateOrderStatusAndCancelTypeByInstanceIdAndUserId(Long instanceId, Long userId, Integer status, Integer cancelType);
+    int updateOrderStatusAndCancelTypeByInstanceIdAndUserId(Long instanceId, Long userId, Integer status, Integer cancelType);
 
     /**
      * 根据订单id列表查询订单商品数量

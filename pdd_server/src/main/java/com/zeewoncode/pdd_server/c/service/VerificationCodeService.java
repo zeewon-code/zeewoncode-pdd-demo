@@ -1,5 +1,7 @@
 package com.zeewoncode.pdd_server.c.service;
 
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -137,7 +139,7 @@ public class VerificationCodeService {
                 String.valueOf(CODE_TTL.getSeconds())
         );
         if (result == null || result != 1L) {
-            throw new RuntimeException("验证码发送过于频繁，请稍后再试");
+            throw new BaseException(ErrorCode.CODE_ERROR, "验证码发送过于频繁，请稍后再试");
         }
         return code;
     }

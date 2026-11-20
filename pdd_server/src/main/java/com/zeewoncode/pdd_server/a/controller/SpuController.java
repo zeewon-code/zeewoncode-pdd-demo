@@ -38,8 +38,7 @@ public class SpuController {
             @RequestParam(defaultValue = "10") Integer size
     ) {
         log.info("获取商品监督列表：merchantId:{}, status:{}, categoryId:{}, page:{}, size:{}", merchantId, status, categoryId, page, size);
-        PageResult<SpuCard> result = spuService.listAllSpuCards(merchantId, status, categoryId, page, size);
-        return Result.success(result);
+        return Result.success(spuService.listAllSpuCards(merchantId, status, categoryId, page, size));
     }
 
     /**
@@ -49,13 +48,13 @@ public class SpuController {
      * @return
      */
     @PutMapping("/{id}/status")
-    public Result PlatformForceControl(
+    public Result<Void> PlatformForceControl(
             @PathVariable Long id,
             @RequestBody SpuStatusDTO dto
 
     ) {
         log.info("强制下架 / 恢复（平台兜底）：spuId:{}, dto:{}", id, dto);
-        Result result = spuService.PlatformForceControl(id, dto);
-        return result;
+        spuService.PlatformForceControl(id, dto);
+        return Result.success();
     }
 }

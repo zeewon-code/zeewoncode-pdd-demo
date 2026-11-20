@@ -1,5 +1,7 @@
 package com.zeewoncode.pdd_server.c.service.impl;
 
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.entity.Order;
 import com.zeewoncode.entity.OrderItem;
 import com.zeewoncode.entity.Shipment;
@@ -9,6 +11,7 @@ import com.zeewoncode.pdd_server.mapper.ShipmentMapper;
 import com.zeewoncode.pdd_server.mapper.SpuMapper;
 import com.zeewoncode.vo.ShipmentStep;
 import com.zeewoncode.vo.ShipmentVO;
+import org.hibernate.validator.internal.constraintvalidators.bv.time.futureorpresent.FutureOrPresentValidatorForReadableInstant;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,19 +30,20 @@ public class ShipmentServiceImpl implements ShipmentService {
     private OrderMapper orderMapper;
     @Autowired
     private SpuMapper spuMapper;
+    @Autowired
+    private FutureOrPresentValidatorForReadableInstant futureOrPresentValidatorForReadableInstant;
 
     /**
      * 根据id获取物流信息
      * @param shipmentId
      * @return
      */
+    @Transactional
     @Override
     public ShipmentVO getShipment(Long shipmentId) {
         // 调用Mapper层根据id获取物流信息
         Shipment shipment = shipmentMapper.selectShipmentById(shipmentId);
-        if (shipment == null) {
-            throw new RuntimeException("Shipment not found");
-        }
+        if (shipment == null) throw new BaseException(ErrorCode.SHIPMENT_NOT_EXIST);
         ShipmentVO shipmentVO = new ShipmentVO();
         BeanUtils.copyProperties(shipment, shipmentVO);
         shipmentVO.setShipmentId(shipment.getId());
@@ -49,6 +53,14 @@ public class ShipmentServiceImpl implements ShipmentService {
         steps.add(new ShipmentStep(LocalDateTime.now().plusDays(2).truncatedTo(ChronoUnit.SECONDS), "快件正在派送中"));
         steps.add(new ShipmentStep(LocalDateTime.now().plusDays(3).plusHours(2).truncatedTo(ChronoUnit.SECONDS), "快件已送达"));
         shipmentVO.setSteps(steps);
+        // 更新物流信息状态为已签收
+        shipmentMapper.updateShipmentStatus(shipmentId, 3);
+        // 更新订单状态为已完成
+        Order order = new Order();
+        order.setCompletedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+        order.setStatus(3);
+        order.setId(shipment.getOrderId());
+        orderMapper.update(order);
         return shipmentVO;
     }
 
@@ -63,7 +75,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         //shipment置3已签收
         int i = shipmentMapper.updateShipmentStatus(id, 3);
         if (i <= 0) {
-            throw new RuntimeException("订单签收失败");
+            throw new BaseException(ErrorCode.ORDER_STATUS_UPDATE_FAILED, "订单签收失败");
         }
         //订单状态修改为3已完成
         Shipment shipment = shipmentMapper.selectShipmentById(id);
@@ -83,7 +95,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         }
         int result = spuMapper.updateSpuSalesById(orderItems.get(0).getSpuId(), totalQuantity);
         if (result <= 0) {
-            throw new RuntimeException("更新商品销售量失败");
+            throw new BaseException(ErrorCode.SPU_UPDATE_FAILED, "更新商品销售量失败");
         }
     }
 }

@@ -6,6 +6,7 @@ import com.zeewoncode.dto.CartSelectDTO;
 import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.vo.CartVO;
 import com.zeewoncode.result.Result;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,8 +30,7 @@ public class CartController {
     @GetMapping
     public Result<CartVO> getCartList(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("查看购物车列表");
-        CartVO result = cartService.getCartList(loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(cartService.getCartList(loginUser.getUserId()));
     }
 
     /**
@@ -39,7 +39,7 @@ public class CartController {
      * @return
      */
     @PostMapping("/add")
-    public Result addCart(@RequestBody CartAddDTO req, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result<Void> addCart(@RequestBody @Valid CartAddDTO req, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("添加购物车:{}", req);
         cartService.addCart(req, loginUser.getUserId());
         return Result.success();
@@ -52,8 +52,8 @@ public class CartController {
      * @return
      */
     @PutMapping("/{id}/quantity")
-    public Result updateCartQuantity(@PathVariable Long id,
-                                     @RequestBody CartQuantityDTO req) {
+    public Result<Void> updateCartQuantity(@PathVariable Long id,
+                                     @RequestBody @Valid CartQuantityDTO req) {
         log.info("更新购物车数量:id:{},quantity:{}", id,req);
         cartService.updateCartQuantity(id, req);
         return Result.success();
@@ -66,7 +66,7 @@ public class CartController {
      * @return
      */
     @PutMapping("/select")
-    public Result selectCart(@RequestBody CartSelectDTO req) {
+    public Result<Void> selectCart(@RequestBody CartSelectDTO req) {
         log.info("选中或取消选中购物车:{}", req);
         cartService.selectCart(req);
         return Result.success();
@@ -78,7 +78,7 @@ public class CartController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result deleteCart(@PathVariable Long id) {
+    public Result<Void> deleteCart(@PathVariable Long id) {
         log.info("删除购物车:id:{}", id);
         cartService.deleteCart(id);
         return Result.success();
@@ -89,7 +89,7 @@ public class CartController {
      * @return
      */
     @DeleteMapping("/selected")
-    public Result deleteCartBySelected(@AuthenticationPrincipal LoginUser loginUser) {
+    public Result<Void> deleteCartBySelected(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("清空已勾选购物车条目");
         cartService.deleteCartBySelected(loginUser.getUserId());
         return Result.success();

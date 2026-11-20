@@ -35,8 +35,8 @@ public interface CouponMapper {
      * 更新用户优惠券状态和使用时间
      * @param userCoupon
      */
-    @Update("UPDATE user_coupon SET status = #{status}, used_at = #{usedAt} WHERE user_id = #{userId} AND order_id = #{orderId}")
-    void updateUserCouponStatusAndUsedAt(UserCoupon userCoupon);
+    @Update("UPDATE user_coupon SET status = #{status}, used_at = #{usedAt}, order_id = null WHERE user_id = #{userId} AND order_id = #{orderId}")
+    int updateUserCouponStatusAndUsedAt(UserCoupon userCoupon);
 
     /**
      * 根据订单id查询用户优惠券
@@ -51,7 +51,7 @@ public interface CouponMapper {
      * 更新用户优惠券
      * @param userCoupon
      */
-    void updateUserCoupon(UserCoupon userCoupon);
+    int updateUserCoupon(UserCoupon userCoupon);
 
 
     /**
@@ -74,7 +74,7 @@ public interface CouponMapper {
      * 根据优惠券有效期查询优惠券列表
      * @return
      */
-    List<CouponVO> selectCouponsByValidTime(LocalDateTime now);
+    List<CouponVO> selectCouponsByValidTime(LocalDateTime now, Long userId);
 
     /**
      * 根据优惠券id对优惠券已领取数量进行加一操作

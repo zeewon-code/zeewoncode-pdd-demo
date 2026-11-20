@@ -3,13 +3,14 @@ package com.zeewoncode.pdd_server.a.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.entity.Merchant;
 import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.a.service.UserService;
 import com.zeewoncode.pdd_server.mapper.MerchantMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,13 +56,12 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public Result<UserVO> getUserInfo(Long userId) {
+    public UserVO getUserInfo(Long userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
-            return Result.error("该用户信息不存在");
+            throw new BaseException(ErrorCode.USER_NOT_EXIST);
         }
-        UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
-        return Result.success(userVO);
+        return BeanUtil.copyProperties(user, UserVO.class);
     }
 
     /**
@@ -72,19 +72,20 @@ public class UserServiceImpl implements UserService {
      */
     @Transactional
     @Override
-    public Result updateUserStatus(Long userId, Integer status) {
+    public void updateUserStatus(Long userId, Integer status) {
         User user = userMapper.selectById(userId);
         if (user == null) {
-            return Result.error("该用户信息不存在");
+            throw new BaseException(ErrorCode.USER_NOT_EXIST);
         }
         user.setStatus(status);
-        int i = userMapper.updateById(user);
         // 如果用户类型为商户，则更新店铺营业状态
         if (user.getUserType() == 2) {
             Merchant merchant = Merchant.builder().userId(userId).status(0).build();
             merchantMapper.update(merchant);
         }
-        return i > 0 ? Result.success() : Result.error("更新用户状态失败");
+        if (userMapper.updateById(user) <= 0) {
+            throw new BaseException(ErrorCode.USER_UPDATE_FAILED);
+        }
     }
 
 }

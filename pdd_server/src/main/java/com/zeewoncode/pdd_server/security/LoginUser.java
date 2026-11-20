@@ -31,12 +31,16 @@ public class LoginUser implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String role = switch (userType == null ? 0 : userType) {
-            case UserTypeConstant.USER_TYPE_ADMIN -> "ROLE_ADMIN";
-            case UserTypeConstant.USER_TYPE_BUSINESS -> "ROLE_BUSINESS";
-            default -> "ROLE_USER";
+        if (userType == null) {
+            return List.of();
+        }
+        return switch (userType) {
+            case UserTypeConstant.USER_TYPE_ADMIN -> List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            case UserTypeConstant.USER_TYPE_BUSINESS -> List.of(new SimpleGrantedAuthority("ROLE_BUSINESS"));
+            case UserTypeConstant.USER_TYPE_USER -> List.of(new SimpleGrantedAuthority("ROLE_USER"));
+            // 非法用户类型：不授予任何权限，后续 hasRole 校验会返回 403
+            default -> List.of();
         };
-        return List.of(new SimpleGrantedAuthority(role));
     }
 
     @Override

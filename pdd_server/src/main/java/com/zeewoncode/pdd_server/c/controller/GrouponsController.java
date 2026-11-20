@@ -36,8 +36,7 @@ public class GrouponsController {
     @PostMapping("/initiate")
     public Result<GrouponInitiateVO> initiateGroupon(@RequestBody GrouponInitiateDTO grouponInitiateDTO, @AuthenticationPrincipal LoginUser loginUser) {
         log.info("拼团发起:{}", grouponInitiateDTO);
-        GrouponInitiateVO grouponInitiateVO = grouponsService.initiateGroupon(grouponInitiateDTO, loginUser.getUserId());
-        return Result.success(grouponInitiateVO);
+        return Result.success(grouponsService.initiateGroupon(grouponInitiateDTO, loginUser.getUserId()));
     }
 
     /**
@@ -53,8 +52,7 @@ public class GrouponsController {
             @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("拼团加入:{},{}", instanceId,grouponJoinDTO);
-        GrouponJoinVO grouponJoinVO = grouponsService.joinGroupon(instanceId, grouponJoinDTO, loginUser.getUserId());
-        return Result.success(grouponJoinVO);
+        return Result.success(grouponsService.joinGroupon(instanceId, grouponJoinDTO, loginUser.getUserId()));
     }
 
     /**
@@ -67,8 +65,7 @@ public class GrouponsController {
             @RequestParam(defaultValue = "10") Integer size,
             @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取我的拼团列表");
-        PageResult<GrouponInstanceVO> pageResult = grouponsService.getGrouponInstanceList(page, size, loginUser.getUserId());
-        return Result.success(pageResult);
+        return Result.success(grouponsService.getGrouponInstanceList(page, size, loginUser.getUserId()));
     }
 
     /**
@@ -77,7 +74,7 @@ public class GrouponsController {
      * @return
      */
     @PostMapping("/leader/cancel")
-    public Result cancelGrouponByLeader(@RequestBody GrouponCancelDTO dto){
+    public Result<Void> cancelGrouponByLeader(@RequestBody GrouponCancelDTO dto){
         log.info("团长取消拼团:{}", dto);
         grouponsService.cancelGrouponByLeader(dto);
         return Result.success();
@@ -88,7 +85,8 @@ public class GrouponsController {
      * @return
      */
     @PostMapping("/cancel")
-    public Result cancelGroupon(@RequestBody GrouponCancelDTO dto, @AuthenticationPrincipal LoginUser loginUser) {
+    public Result<Void> cancelGroupon(@RequestBody GrouponCancelDTO dto,
+                                @AuthenticationPrincipal LoginUser loginUser) {
         log.info("团员取消拼团：{}", dto);
         grouponsService.cancelGroupon(dto, loginUser.getUserId());
         return Result.success();
@@ -109,8 +107,7 @@ public class GrouponsController {
             @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("商品进行中的拼团:{}", id);
-        PageResult<GrouponInstanceVO> pageResult = grouponsService.getGrouponInstanceInSpu(id, page, size, loginUser.getUserId());
-        return Result.success(pageResult);
+        return Result.success(grouponsService.getGrouponInstanceInSpu(id, page, size, loginUser.getUserId()));
     }
 
     /**
@@ -122,8 +119,7 @@ public class GrouponsController {
     public Result<GrouponInstanceVO> getGrouponInstanceDetail(@PathVariable Long instanceId,
                                                               @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取拼团详情:{}", instanceId);
-        GrouponInstanceVO vo = grouponsService.getGrouponInstanceDetail(instanceId, loginUser.getUserId());
-        return Result.success(vo);
+        return Result.success(grouponsService.getGrouponInstanceDetail(instanceId, loginUser.getUserId()));
     }
 
 }

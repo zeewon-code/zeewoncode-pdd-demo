@@ -6,6 +6,7 @@ import com.zeewoncode.dto.SpuListQueryDTO;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.CategoryNodeVO;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +28,9 @@ public class SpuController {
      * @return
      */
     @GetMapping("/categories")
-    public List<CategoryNodeVO> getCategoryTree() {
+    public Result<List<CategoryNodeVO>> getCategoryTree() {
         log.info("获取商品分类树");
-        return spuService.getCategoryTree();
+        return Result.success(spuService.getCategoryTree());
     }
 
     /**
@@ -38,10 +39,9 @@ public class SpuController {
      * @return
      */
     @PostMapping("/spu/list")
-    public Result<PageResult<SpuCard>> getSpuList(@RequestBody SpuListQueryDTO req) {
+    public Result<PageResult<SpuCard>> getSpuList(@RequestBody @Valid SpuListQueryDTO req) {
         log.info("获取商品列表");
-        PageResult<SpuCard> result = spuService.getSpuList(req);
-        return Result.success(result);
+        return Result.success(spuService.getSpuList(req));
     }
 
     /**
@@ -51,8 +51,7 @@ public class SpuController {
     @GetMapping("/spu/{id}")
     public Result<SpuDetail> getSpuDetail(@PathVariable Long id) {
         log.info("获取商品详情");
-        SpuDetail result = spuService.getSpuDetail(id);
-        return Result.success(result);
+        return Result.success(spuService.getSpuDetail(id));
     }
 
 

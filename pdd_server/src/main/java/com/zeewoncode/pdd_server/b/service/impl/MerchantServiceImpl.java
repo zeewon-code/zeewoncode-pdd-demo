@@ -1,5 +1,7 @@
 package com.zeewoncode.pdd_server.b.service.impl;
 
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.dto.ShopApplyDTO;
 import com.zeewoncode.dto.ShopUpdateDTO;
 import com.zeewoncode.entity.Merchant;
@@ -50,30 +52,25 @@ public class MerchantServiceImpl implements MerchantService {
         //建 merchant(status=1) → user.user_type 升级为 2。
         // 先判断当前用户有没有开店资格
         User userDb = userMapper.selectById(userId);
-        if (userDb.getUserType() != 1) {
-            throw new RuntimeException("当前用户已经开店了或者该用户是管理员身份");
-        }
+        if (userDb.getUserType() != 1)
+            throw new BaseException(ErrorCode.CURRENT_USER_IDENTITY_NOT_USER);
         // 对 shopApplyDTO 进行校验
         InfoValidator.validateName(shopApplyDTO.getShopName());
         InfoValidator.validateAvatarUrl(shopApplyDTO.getLogo());
         Merchant merchantDb = merchantMapper.selectMerchantByShopName(shopApplyDTO.getShopName());
-        if (merchantDb != null) {
-            throw new RuntimeException("店铺名称已存在");
-        }
+        if (merchantDb != null)
+            throw new BaseException(ErrorCode.MERCHANT_NAME_EXIST_ALREADY);
         Merchant merchant = new Merchant();
         BeanUtils.copyProperties(shopApplyDTO, merchant);
         merchant.setStatus(1);
         merchant.setUserId(userId);
         merchant.setCreatedAt(LocalDateTime.now());
         merchant.setDeletedFlag(0);
-        int i = merchantMapper.insert(merchant);
-        if (i <= 0 ) {
-            throw new RuntimeException("申请开店异常，请稍后重试");
-        }
+        if (merchantMapper.insert(merchant) != 1)
+            throw new BaseException(ErrorCode.MERCHANT_CREATE_FAILED);
         User user = User.builder().id(userId).userType(2).build();
-        if (userMapper.updateById(user) <= 0) {
-            throw new RuntimeException("更新用户信息异常，请稍后重试");
-        }
+        if (userMapper.updateById(user) != 1)
+            throw new BaseException(ErrorCode.USER_UPDATE_FAILED);
         return ShopApplyVO.builder()
                 .merchantId(merchant.getId())
                 .shopName(merchant.getShopName())
@@ -88,13 +85,9 @@ public class MerchantServiceImpl implements MerchantService {
      */
     @Override
     public MerchantVO getMyShop(Long userId) {
-        if (!haveMerchantOperation(userId)) {
-            throw new RuntimeException("当前用户没有权限进行相关操作");
-        }
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        if (merchant == null) {
-            throw new RuntimeException("店铺信息异常，请稍后重试");
-        }
+        if (merchant == null)
+            throw new BaseException(ErrorCode.MERCHANT_NOT_EXIST);
         return MerchantVO.builder()
                 .id(merchant.getId())
                 .shopName(merchant.getShopName())
@@ -110,21 +103,16 @@ public class MerchantServiceImpl implements MerchantService {
      */
     @Override
     public void updateShop(ShopUpdateDTO shopUpdateDTO, Long userId) {
-        if (!haveMerchantOperation(userId)) {
-            throw new RuntimeException("当前用户没有权限进行相关操作");
-        }
         InfoValidator.validateName(shopUpdateDTO.getShopName());
         InfoValidator.validateAvatarUrl(shopUpdateDTO.getLogo());
         Merchant merchantDb = merchantMapper.selectMerchantByShopName(shopUpdateDTO.getShopName());
-        if (merchantDb != null) {
-            throw new RuntimeException("店铺名称已存在");
-        }
+        if (merchantDb != null)
+            throw new BaseException(ErrorCode.MERCHANT_NAME_EXIST_ALREADY);
         Merchant merchant = new Merchant();
         BeanUtils.copyProperties(shopUpdateDTO, merchant);
         merchant.setUserId(userId);
-        if (merchantMapper.update(merchant) == 0) {
-            throw new RuntimeException("修改店铺信息异常，请稍后重试");
-        }
+        if (merchantMapper.update(merchant) != 1)
+            throw new BaseException(ErrorCode.MERCHANT_UPDATE_FAILED);
     }
 
     /**
@@ -133,19 +121,9 @@ public class MerchantServiceImpl implements MerchantService {
      */
     @Override
     public void updateShopStatus(Integer status, Long userId) {
-        if (!haveMerchantOperation(userId)) {
-            throw new RuntimeException("当前用户没有权限进行相关操作");
-        }
-        // 根据当前用户id查询店铺信息
-        Merchant merchantDb = merchantMapper.selectMerchantByUserId(userId);
-        if (merchantDb.getStatus().equals(status)) {
-            throw new RuntimeException("店铺状态已为指定状态");
-        }
         Merchant merchant = Merchant.builder().userId(userId).status(status).build();
-        int i = merchantMapper.update(merchant);
-        if (i <= 0) {
-            throw new RuntimeException("修改店铺状态异常，请稍后重试");
-        }
+        if (merchantMapper.update(merchant) != 1)
+            throw new BaseException(ErrorCode.MERCHANT_UPDATE_FAILED);
     }
 
     /**
@@ -154,9 +132,6 @@ public class MerchantServiceImpl implements MerchantService {
      */
     @Override
     public BDashboard getBDashboard(Long userId) {
-        if (!haveMerchantOperation(userId)) {
-            throw new RuntimeException("当前用户没有权限进行相关操作");
-        }
         Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
         Long merchantId = merchant.getId();
         List<Order> orders = orderMapper.selectOrderByMerchantId(merchantId);
@@ -191,15 +166,4 @@ public class MerchantServiceImpl implements MerchantService {
         return dashboard;
     }
 
-    /**
-     * 校验当前用户是否有资格进行相关操作
-     * @return
-     */
-    public Boolean haveMerchantOperation(Long userId) {
-        Merchant merchant = merchantMapper.selectMerchantByUserId(userId);
-        if (merchant == null || merchant.getDeletedFlag() != 0) {
-            return false;
-        }
-        return true;
-    }
 }

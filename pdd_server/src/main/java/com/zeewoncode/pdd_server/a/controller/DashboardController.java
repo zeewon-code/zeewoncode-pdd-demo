@@ -26,7 +26,6 @@ public class DashboardController {
     @GetMapping
     public Result<ADashboard> getDashboardData() {
         log.info("获取平台看板数据");
-        ADashboard data = dashboardService.getDashboardData();
-        return Result.success(data);
+        return Result.success(dashboardService.getDashboardData());
     }
 }

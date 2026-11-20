@@ -29,8 +29,7 @@ public class ShipmentController {
     @GetMapping("/{id}")
     public Result<ShipmentVO> getShipment(@PathVariable Long id) {
         log.info("获取物流轨迹:{}",id);
-        ShipmentVO vo = shipmentService.getShipment(id);
-        return Result.success(vo);
+        return Result.success(shipmentService.getShipment(id));
     }
 
     /**
@@ -39,7 +38,7 @@ public class ShipmentController {
      * @return
      */
     @PostMapping("/{id}/receive")
-    public Result receive(@PathVariable Long id,
+    public Result<Void> receive(@PathVariable Long id,
                           @AuthenticationPrincipal LoginUser loginUser) {
         log.info("确认收货:{}",id);
         shipmentService.receive(id, loginUser.getUserId());

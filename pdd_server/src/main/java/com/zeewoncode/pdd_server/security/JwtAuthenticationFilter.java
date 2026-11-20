@@ -1,8 +1,11 @@
 package com.zeewoncode.pdd_server.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zeewoncode.constant.ErrorCode;
 import com.zeewoncode.constant.StatusConstant;
 import com.zeewoncode.entity.User;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
+import com.zeewoncode.result.Result;
 import com.zeewoncode.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -17,7 +20,7 @@ import java.io.IOException;
 
 /**
  * 从 Authorization: Bearer xxx 中解析 JWT，
- * 认证成功后写入 SecurityContext，同时兼容现有 BaseContext。
+ * 认证成功后写入 SecurityContext
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -26,16 +29,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
+    private final ObjectMapper objectMapper;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserMapper userMapper) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserMapper userMapper, ObjectMapper objectMapper
+    ) {
         this.jwtUtil = jwtUtil;
         this.userMapper = userMapper;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        // 登录、注册、验证码接口不参与 token 校验
+        if (request.getRequestURI().startsWith("/api/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             String header = request.getHeader(HEADER);
             if (header != null && header.toLowerCase().startsWith(PREFIX.toLowerCase())) {
@@ -50,11 +62,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         User user = userMapper.selectById(userId);
 
                         // 用户被删除或已冻结
-                        if (user == null || StatusConstant.DISABLE == user.getStatus()) {
+                        if (user == null || Integer.valueOf(StatusConstant.DISABLE).equals(user.getStatus())) {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write(
-                                    "{\"code\":401,\"msg\":\"账号已被冻结或不存在\",\"data\":null}");
+                            response.getWriter().write(objectMapper.writeValueAsString(
+                                    Result.error(ErrorCode.UNAUTHORIZED, "账号已被冻结或不存在")));
                             return;
                         }
 

@@ -1,5 +1,6 @@
 package com.zeewoncode.pdd_server.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zeewoncode.pdd_server.mapper.UserMapper;
 import com.zeewoncode.pdd_server.security.JsonAccessDeniedHandler;
 import com.zeewoncode.pdd_server.security.JsonAuthenticationEntryPoint;
@@ -23,6 +24,7 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final UserMapper userMapper;
+    private final ObjectMapper objectMapper;
     private final JsonAuthenticationEntryPoint authenticationEntryPoint;
     private final JsonAccessDeniedHandler accessDeniedHandler;
 
@@ -66,7 +68,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)           // 403
                 )
                 // JWT 过滤器放在用户名密码过滤器之前
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userMapper),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userMapper, objectMapper),
                         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

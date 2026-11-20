@@ -32,8 +32,7 @@ public class CouponController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
         log.info("优惠券列表（含已领/剩余）: 页码{}, 每页数量{}", page, size);
-        PageResult<CouponVO> result = couponService.listCoupons(page, size);
-        return Result.success(result);
+        return Result.success(couponService.listCoupons(page, size));
     }
 
     /**
@@ -42,9 +41,10 @@ public class CouponController {
      * @return
      */
     @PostMapping
-    public Result createCoupon(@RequestBody @Valid CouponCreateDTO couponCreateDTO) {
+    public Result<Void> createCoupon(@RequestBody @Valid CouponCreateDTO couponCreateDTO) {
         log.info("创建优惠券：{}", couponCreateDTO);
-        return couponService.createCoupon(couponCreateDTO);
+        couponService.createCoupon(couponCreateDTO);
+        return Result.success();
     }
 
     /**
@@ -61,7 +61,6 @@ public class CouponController {
             @RequestParam(defaultValue = "10") Integer size
     ) {
         log.info("获取优惠券记录: {}", id);
-        PageResult<CouponRecord> result = couponService.getCouponRecord(id, page, size);
-        return Result.success(result);
+        return Result.success(couponService.getCouponRecord(id, page, size));
     }
 }

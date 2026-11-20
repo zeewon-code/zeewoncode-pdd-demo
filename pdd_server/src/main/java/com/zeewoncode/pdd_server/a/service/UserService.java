@@ -1,7 +1,6 @@
 package com.zeewoncode.pdd_server.a.service;
 
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.UserVO;
 
 public interface UserService {
@@ -24,7 +23,7 @@ public interface UserService {
      * @param userId
      * @return
      */
-    Result<UserVO> getUserInfo(Long userId);
+    UserVO getUserInfo(Long userId);
 
     /**
      *冻结 / 解冻用户
@@ -32,5 +31,5 @@ public interface UserService {
      * @param status
      * @return
      */
-    Result updateUserStatus(Long userId, Integer status);
+    void updateUserStatus(Long userId, Integer status);
 }

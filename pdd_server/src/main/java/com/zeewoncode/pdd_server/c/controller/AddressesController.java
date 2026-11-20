@@ -4,6 +4,7 @@ import com.zeewoncode.dto.AddressDTO;
 import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.Result;
 import com.zeewoncode.vo.AddressVO;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,8 +30,19 @@ public class AddressesController {
     @GetMapping
     public Result<List<AddressVO>> getAddresses(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取收货地址列表");
-        List<AddressVO> addressVOList = addressesService.getAddresses(loginUser.getUserId());
-        return Result.success(addressVOList);
+        return Result.success(addressesService.getAddresses(loginUser.getUserId()));
+    }
+
+    /**
+     * 获取收货地址详情
+     * @param addressId
+     * @return
+     */
+    @GetMapping("/{addressId}")
+    public Result<AddressVO> getAddressDetail(@PathVariable Long addressId,
+                                              @AuthenticationPrincipal LoginUser loginUser) {
+        log.info("获取收货地址详情:{}", addressId);
+        return Result.success(addressesService.getAddressDetail(addressId, loginUser.getUserId()));
     }
 
     /**
@@ -39,7 +51,7 @@ public class AddressesController {
      * @return
      */
     @PostMapping
-    public Result addAddress(@RequestBody AddressDTO addressDTO,
+    public Result<Void> addAddress(@RequestBody @Valid AddressDTO addressDTO,
                              @AuthenticationPrincipal LoginUser loginUser) {
         log.info("添加收货地址:{}", addressDTO);
         addressesService.addAddress(addressDTO, loginUser.getUserId());
@@ -52,8 +64,8 @@ public class AddressesController {
      * @return
      */
     @PutMapping("/{id}")
-    public Result updateAddress(@PathVariable Long id,
-                                @RequestBody AddressDTO addressDTO,
+    public Result<Void> updateAddress(@PathVariable Long id,
+                                @RequestBody @Valid AddressDTO addressDTO,
                                 @AuthenticationPrincipal LoginUser loginUser) {
         addressDTO.setId(id);
         log.info("修改收货地址:{}", addressDTO);
@@ -67,7 +79,7 @@ public class AddressesController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result deleteAddress(@PathVariable Long id) {
+    public Result<Void> deleteAddress(@PathVariable Long id) {
         log.info("删除收货地址:{}", id);
         addressesService.deleteAddress(id);
         return Result.success();
@@ -79,7 +91,7 @@ public class AddressesController {
      * @return
      */
     @PutMapping("/{id}/default")
-    public Result setDefaultAddress(@PathVariable Long id,
+    public Result<Void> setDefaultAddress(@PathVariable Long id,
                                     @AuthenticationPrincipal LoginUser loginUser) {
         log.info("设置默认收货地址:{}", id);
         addressesService.setDefaultAddress(id, loginUser.getUserId());

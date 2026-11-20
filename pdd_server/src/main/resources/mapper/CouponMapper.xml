@@ -27,16 +27,18 @@
     </update>
 
     <select id="selectCouponsByValidTime" resultType="com.zeewoncode.vo.CouponVO">
-        select id, title, condition_amount, discount_amount,
-               discount_rate, valid_to, (total - issued) as remain, issued, type
-        from coupon
-        where valid_to &gt; #{now}
+        select c.id, c.title, c.condition_amount, c.discount_amount,
+               c.discount_rate, c.valid_to, (c.total - c.issued) as remain, c.issued, c.type
+        from coupon c left join (
+            SELECT coupon_id FROM user_coupon WHERE user_id = #{userId}
+        ) ci on c.id <![CDATA[ != ]]> ci.coupon_id
+        where c.valid_to &gt; #{now}
     </select>
     <select id="selectMyUserCoupons" resultType="com.zeewoncode.vo.UserCouponVO">
         select uc.id as id, c.title as title, c.type as type, c.condition_amount as condition_amount,
                c.discount_amount as discount_amount, c.discount_rate as discount_rate,
                uc.status as status, c.valid_to as valid_to
-        FROM user_coupon uc LEFT JOIN coupon c ON uc.coupon_id = c.id
+        FROM user_coupon uc LEFT JOIN coupon c
       <where>
           <if test="status != null">
              AND uc.status = #{status}

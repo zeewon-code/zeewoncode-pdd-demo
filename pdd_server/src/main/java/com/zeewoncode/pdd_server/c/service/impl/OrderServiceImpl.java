@@ -3,6 +3,8 @@ package com.zeewoncode.pdd_server.c.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zeewoncode.constant.ErrorCode;
+import com.zeewoncode.exception.BaseException;
 import com.zeewoncode.entity.*;
 import com.zeewoncode.pdd_server.c.service.OrderService;
 import com.zeewoncode.pdd_server.mapper.*;
@@ -20,6 +22,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -58,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
         int isLockStock = skuMapper.lockStock(req.getItems());
         int size = req.getItems().size();
         if (isLockStock != size) {
-            throw new RuntimeException("库存不足");
+            throw new BaseException(ErrorCode.SKU_NOT_ENOUGH);
         }
         // 判断下单的sku属于的spu是否存在
         for (OrderItemDTO item : req.getItems()) {
@@ -66,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
             Sku sku = skuMapper.selectSkuById(skuId);
             Spu spuById = spuMapper.getSpuById(sku.getSpuId());
             if (spuById.getDeletedFlag() == 1) {
-                throw new RuntimeException("该商品已下架");
+                throw new BaseException(ErrorCode.SPU_NOT_SALE);
             }
         }
         // 2.插入订单表orders
@@ -106,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
                 // 优惠券类型为满减券
                 if (totalAmount.compareTo(coupon.getConditionAmount()) >= 0) {
                     order.setDiscountAmount(coupon.getDiscountAmount().setScale(2, RoundingMode.HALF_UP));
-                } else throw new RuntimeException("优惠券不满足使用条件");
+                } else throw new BaseException(ErrorCode.COUPON_CONDITION_NOT_MEET);
             } else {
                 // 优惠券为折扣券
                 BigDecimal discountAmount = BigDecimal.ONE.subtract(coupon.getDiscountRate())
@@ -124,7 +127,9 @@ public class OrderServiceImpl implements OrderService {
         order.setCancelType(null);
         order.setPaidAt(null);
         order.setCompletedAt(null);
-        orderMapper.insert(order);
+        if (orderMapper.insert(order) != 1) {
+            throw new BaseException(ErrorCode.ORDER_CREATE_FAILED);
+        }
         if (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
             // 修改优惠券的状态
             UserCoupon userCouponDb = UserCoupon.builder()
@@ -133,7 +138,9 @@ public class OrderServiceImpl implements OrderService {
                     .usedAt(LocalDateTime.now())
                     .id(req.getUserCouponId())
                     .build();
-            couponMapper.updateUserCoupon(userCouponDb);
+            if (couponMapper.updateUserCoupon(userCouponDb) != 1) {
+                throw new BaseException(ErrorCode.COUPON_USE_FAILED);
+            }
         }
 
         // 3. 插入订单商品项表order_items
@@ -156,10 +163,12 @@ public class OrderServiceImpl implements OrderService {
                     .setScale(2, RoundingMode.HALF_UP));
             orderItems.add(item);
         }
-        orderMapper.insertOrderItems(orderItems);
-        // 4. 删除cart_items表购物车数据
-        for (OrderItemDTO orderItem : req.getItems()) {
-            cartMapper.deleteCartItemsByUserIdAndSkuId(userId, orderItem.getSkuId());
+        if (orderMapper.insertOrderItems(orderItems) != size) {
+            throw new BaseException(ErrorCode.ORDER_ITEMS_CREATE_FAILED);
+        }
+        List<Long> skuIds = req.getItems().stream().map(OrderItemDTO::getSkuId).toList();
+        if (cartMapper.deleteCartItemsByUserIdAndSkuIds(userId, skuIds) != skuIds.size()) {
+            throw new BaseException(ErrorCode.CART_SKU_DELETE_FAILED);
         }
         // 5. 返回创建订单结果
         // 返回支付截止时间
@@ -200,9 +209,9 @@ public class OrderServiceImpl implements OrderService {
             Long userCouponId = orderPreviewDTO.getUserCouponId();
             UserCoupon userCoupon = couponMapper.selectUserCouponById(userCouponId);
             if (userCoupon.getStatus() == 1) {
-                throw new RuntimeException("优惠券已使用");
+                throw new BaseException(ErrorCode.COUPON_USED);
             } else if (userCoupon.getStatus() == 2) {
-                throw new RuntimeException("优惠券已过期");
+                throw new BaseException(ErrorCode.COUPON_EXPIRED);
             }
             Coupon coupon = couponMapper.selectById(userCoupon.getCouponId(), LocalDateTime.now());
             if (coupon.getType() == 1) {
@@ -239,15 +248,17 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrderPendingPayMent(Long orderId, Long userId) {
         Order order = orderMapper.selectOrderById(orderId);
         if (order == null) {
-            throw new RuntimeException("该订单不存在");
+            throw new BaseException(ErrorCode.ORDER_NOT_EXIST);
         }
         // 1.校验订单状态status，是否=0待付款
         if (order.getStatus() != 0) {
-            throw new RuntimeException("该订单不是待付款，订单不能取消");
+            throw new BaseException(ErrorCode.ORDER_NOT_CANCEL);
         }
         // 2.更新订单状态status=4，cancel_type=1
         Order orderDb = Order.builder().id(orderId).cancelType(1).status(4).build();
-        orderMapper.update(orderDb);
+        if (orderMapper.update(orderDb) != 1) {
+            throw new BaseException(ErrorCode.ORDER_CANCEL_FAILED);
+        }
         // 3.释放预占库存
         List<OrderItem> orderItems = orderMapper.selectItemsByOrderId(orderId);
         for (OrderItem orderItem : orderItems) {
@@ -257,13 +268,14 @@ public class OrderServiceImpl implements OrderService {
         // 判断是否使用了优惠券
         if (order.getDiscountAmount() != null && order.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
             UserCoupon userCoupon = UserCoupon.builder().userId(userId).orderId(orderId).status(0).usedAt(null).build();
-            couponMapper.updateUserCouponStatusAndUsedAt(userCoupon);
-            UserCoupon userCoupon1 = couponMapper.selectUserCouponByUserIdAndOrderId(userId, orderId);
-            userCoupon1.setOrderId(null);
-            couponMapper.updateUserCouponSetOrderIdToNull(userCoupon1);
+            if (couponMapper.updateUserCouponStatusAndUsedAt(userCoupon) != 1) {
+                throw new BaseException(ErrorCode.COUPON_RETURN_FAILED);
+            }
         }
         // 5.删掉order_item表的数据
-        orderMapper.deleteByOrderId(orderId);
+        if (orderMapper.deleteByOrderId(orderId) != orderItems.size()) {
+            throw new BaseException(ErrorCode.ORDER_ITEMS_DELETE_FAILED);
+        }
     }
 
     /**
@@ -273,12 +285,9 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public CountdownVO getCountdown(Long id) {
-        if (id == null) {
-            throw new RuntimeException("订单id不能为空");
-        }
         Order order = orderMapper.selectOrderById(id);
         if (order == null) {
-            throw new RuntimeException("订单不存在");
+            throw new BaseException(ErrorCode.ORDER_NOT_EXIST);
         }
         Integer status = order.getStatus();
         if (status != 0) {
@@ -304,7 +313,7 @@ public class OrderServiceImpl implements OrderService {
         // 超时
         Order order = orderMapper.selectOrderById(id);
         if (order == null) {
-            throw new RuntimeException("订单不存在");
+            throw new BaseException(ErrorCode.ORDER_NOT_EXIST);
         }
         if (LocalDateTime.now().isAfter(order.getCreatedAt().plusMinutes(PAY_TIMEOUT_MINUTES))) {
             Order build = Order.builder().id(id).status(5).build();
@@ -318,29 +327,30 @@ public class OrderServiceImpl implements OrderService {
                         .usedAt(null)
                         .build();
                 couponMapper.updateUserCouponStatusAndUsedAt(userCoupon);
-                UserCoupon userCoupon1 = couponMapper.selectUserCouponByUserIdAndOrderId(userId, id);
-                userCoupon1.setOrderId(null);
-                couponMapper.updateUserCouponSetOrderIdToNull(userCoupon1);
             }
-            throw new RuntimeException("订单支付超时");
+            throw new BaseException(ErrorCode.ORDER_PAY_TIME_OUT);
         }
         // 2.不超时
         // 3.往payment表插入数据，支付记录
         BigDecimal payableAmount = order.getPayableAmount().setScale(2, RoundingMode.HALF_UP);
         Payment payment = Payment.builder()
-                .paymentNo("P" + String.valueOf(snowflakeIdGenerator.nextId()))
+                .paymentNo("P" + (snowflakeIdGenerator.nextId()))
                 .orderId(id)
-                .userId(userId.longValue())
+                .userId(userId)
                 .amount(payableAmount)
                 .channel("MOCK模拟")
                 .status(1)
                 .paidAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .build();
-        paymentMapper.insert(payment);
+        if (paymentMapper.insert(payment) != 1) {
+            throw new BaseException(ErrorCode.PAYMENT_CREATE_FAILED);
+        }
         // 4.订单状态修改为1 （待发货）
         Order build = Order.builder().id(id).status(1).userId(userId).build();
-        orderMapper.update(build);
+        if (orderMapper.update(build) != 1) {
+            throw new BaseException(ErrorCode.ORDER_STATUS_UPDATE_FAILED);
+        }
         // 5.扣减库存跟释放预占库存
         List<OrderItem> orderItems = orderMapper.selectItemsByOrderId(id);
         for (OrderItem orderItem : orderItems) {

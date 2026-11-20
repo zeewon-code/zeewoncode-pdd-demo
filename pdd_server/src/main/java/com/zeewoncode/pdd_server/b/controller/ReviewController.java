@@ -41,8 +41,7 @@ public class ReviewController {
             @AuthenticationPrincipal LoginUser loginUser
     ) {
         log.info("spuId:{}, rating:{}, page:{}, size:{}", spuId, rating, page, size);
-        PageResult<Review> result = reviewService.getReviewList(spuId, rating, page, size, loginUser.getUserId());
-        return Result.success(result);
+        return Result.success(reviewService.getReviewList(spuId, rating, page, size, loginUser.getUserId()));
     }
 
     /**
@@ -52,7 +51,6 @@ public class ReviewController {
     @GetMapping("/stat")
     public Result<ReviewStat> getReviewStat(@AuthenticationPrincipal LoginUser loginUser) {
         log.info("本店商品评价统计");
-        Result<ReviewStat> result = reviewService.getReviewStat(loginUser.getUserId());
-        return result;
+        return Result.success(reviewService.getReviewStat(loginUser.getUserId()));
     }
 }
