@@ -197,16 +197,20 @@ public class GrouponsServiceImpl implements GrouponsService {
         if (!updateGrouponInstanceCurrentCount(instanceId)) {
             throw new BaseException(ErrorCode.GROUPON_INSTANCE_COUNT_ENOUGH);
         }
+        GrouponInstance updated = grouponMapper.selectGrouponInstanceById(instanceId);
+        if (updated.getCurrentCount() >= updated.getTargetCount()
+                && updated.getStatus() == 0) {
+            grouponMapper.updateGrouponInstanceStatus(instanceId, 1);
+        }
         // 团员插入订单表
         Long addressId = grouponJoinDTO.getAddressId();
         Integer quantity = grouponJoinDTO.getQuantity();
         Order order = insertOrder(userId, define, addressId, quantity, grouponInstance);
         insertOrderItem(order, define, quantity);
-        GrouponInstance updatedGrouponInstance = grouponMapper.selectGrouponInstanceById(instanceId);
         GrouponJoinVO grouponJoinVO = new GrouponJoinVO();
-        grouponJoinVO.setTargetCount(updatedGrouponInstance.getTargetCount());
-        grouponJoinVO.setGroupStatus(updatedGrouponInstance.getStatus());
-        grouponJoinVO.setCurrentCount(updatedGrouponInstance.getCurrentCount());
+        grouponJoinVO.setTargetCount(updated.getTargetCount());
+        grouponJoinVO.setGroupStatus(updated.getStatus());
+        grouponJoinVO.setCurrentCount(updated.getCurrentCount());
         grouponJoinVO.setInstanceId(instanceId);
         grouponJoinVO.setOrderNo(order.getOrderNo());
         return grouponJoinVO;

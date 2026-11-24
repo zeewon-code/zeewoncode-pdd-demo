@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--suppress XmlUnresolvedReference -->
 <mapper namespace="com.zeewoncode.pdd_server.mapper.SpuMapper">
 
 
@@ -45,12 +46,11 @@
         LEFT JOIN sku_agg ON s.id = sku_agg.spu_id
         LEFT JOIN groupon_agg ON s.id = groupon_agg.spu_id
         <include refid="queryCondition"/>
-
         <choose>
-            <when test='sort == "priceAsc"'> ORDER BY sku_agg.min_price ASC </when>
-            <when test='sort == "priceDesc"'> ORDER BY sku_agg.min_price DESC </when>
-            <when test='sort == "sales"'> ORDER BY s.sales DESC </when>
-            <when test='sort == "newest"'> ORDER BY s.created_at DESC </when>
+            <when test="sort == 'priceAsc'"> ORDER BY sku_agg.min_price ASC </when>
+            <when test="sort == 'priceDesc'"> ORDER BY sku_agg.min_price DESC </when>
+            <when test="sort == 'sales'"> ORDER BY s.sales DESC </when>
+            <when test="sort == 'newest'"> ORDER BY s.created_at DESC </when>
             <otherwise> ORDER BY s.id DESC </otherwise>
         </choose>
     </select>
@@ -138,6 +138,7 @@
             <if test="details != null">details = #{details},</if>
             <if test="categoryId != null">category_id = #{categoryId},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="sales != null">sales = #{sales},</if>
         </set>
         WHERE id = #{id}
     </update>

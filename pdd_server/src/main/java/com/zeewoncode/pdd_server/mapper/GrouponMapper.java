@@ -8,6 +8,7 @@ import com.zeewoncode.pdd_server.mapper.po.GrouponInstancesCount;
 import com.zeewoncode.pdd_server.mapper.po.InstanceRef;
 import org.apache.ibatis.annotations.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -190,4 +191,12 @@ public interface GrouponMapper {
      * @return
      */
     List<SpuCard> selectPriceBySpuIds(List<Long> spuIds);
+
+    @Select("SELECT * FROM groupon_instance WHERE status = 0 AND expire_at < #{now} " +
+            "ORDER BY id LIMIT #{limit}")
+    List<GrouponInstance> selectExpiredInstances(@Param("now") LocalDateTime now,
+                                                 @Param("limit") int limit);
+
+    @Update("UPDATE groupon_instance SET status = #{target} WHERE id = #{id} AND status = 0")
+    int closeInstance(@Param("id") Long id, @Param("target") Integer target);
 }

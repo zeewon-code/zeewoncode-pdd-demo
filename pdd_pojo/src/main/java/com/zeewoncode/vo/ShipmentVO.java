@@ -17,9 +17,12 @@ public class ShipmentVO implements Serializable {
 
     private Long shipmentId;
     private Long orderId;
+    private String orderNo;
     private String trackingNo; // 运单号
     private String carrier; // 快递公司
     private Integer status; // 0-待发货 1-已发货 2-配送中 3-已签收
+    private String statusText; // 状态文案
+    private Boolean canReceive; // 是否可收货
     private LocalDateTime shippedAt; // 发货时间
     private LocalDateTime receivedAt; // 签收时间
     private LocalDateTime createdAt;

@@ -6,10 +6,7 @@ import com.zeewoncode.dto.OrderPreviewDTO;
 import com.zeewoncode.pdd_server.security.LoginUser;
 import com.zeewoncode.result.PageResult;
 import com.zeewoncode.result.Result;
-import com.zeewoncode.vo.CountdownVO;
-import com.zeewoncode.vo.OrderCreateVO;
-import com.zeewoncode.vo.OrderPreviewVO;
-import com.zeewoncode.vo.PayVO;
+import com.zeewoncode.vo.*;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,5 +108,32 @@ public class OrderController {
                                               @AuthenticationPrincipal LoginUser loginUser) {
         log.info("获取订单详情:{}", id);
         return Result.success(orderService.getOrderDetail(id, loginUser.getUserId()));
+    }
+
+    /**
+     * 查询订单物流与轨迹
+     * @param orderId
+     * @param loginUser
+     * @return
+     */
+    @GetMapping("/{orderId}/shipment")
+    public Result<ShipmentVO> getShipment(@PathVariable Long orderId,
+                                          @AuthenticationPrincipal LoginUser loginUser) {
+        log.info("查询订单物流与轨迹:订单id：{}", orderId);
+        return Result.success(orderService.getShipment(orderId, loginUser.getUserId()));
+    }
+
+    /**
+     * 确认收货
+     * @param orderId
+     * @param loginUser
+     * @return
+     */
+    @PostMapping("/{orderId}/receive")
+    public Result<Void> receiveOrder(@PathVariable Long orderId,
+                                      @AuthenticationPrincipal LoginUser loginUser) {
+        log.info("确认收货:{}", orderId);
+        orderService.receiveOrder(orderId, loginUser.getUserId());
+        return Result.success();
     }
 }

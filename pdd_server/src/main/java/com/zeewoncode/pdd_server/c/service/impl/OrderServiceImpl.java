@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -406,5 +407,174 @@ public class OrderServiceImpl implements OrderService {
         orderDetail.setShipVO(shipVO);
         orderDetail.setReceiver(receiver != null ? receiver : null);
         return orderDetail;
+    }
+
+    /**
+     * 查询订单物流与轨迹
+     * @param orderId
+     * @param userId
+     * @return
+     */
+    @Override
+    @Transactional
+    public ShipmentVO getShipment(Long orderId, Long userId) {
+        // 查询订单是否存在
+        Order order = orderMapper.selectOrderById(orderId);
+        if (order == null || !order.getUserId().equals(userId)) {
+            throw new BaseException(ErrorCode.ORDER_NOT_EXIST);
+        }
+        ShipmentVO vo = new ShipmentVO();
+        vo.setOrderId(orderId);
+        vo.setOrderNo(order.getOrderNo());
+        // 查物流单
+        Shipment shipment = shipmentMapper.selectShipmentByOrderId(orderId);
+        if (shipment == null) {
+            // 物流不存在，尚未发货：返回空结构，前端不需要处理 null
+            vo.setStatus(0);
+            vo.setStatusText(orderStatusText(order.getStatus()));
+            vo.setCanReceive(false);
+            vo.setSteps(Collections.emptyList());
+            return vo;
+        }
+        // 3. 基础字段
+        vo.setShipmentId(shipment.getId());
+        vo.setTrackingNo(shipment.getTrackingNo());
+        vo.setCarrier(shipment.getCarrier());
+        vo.setStatus(shipment.getStatus());
+        vo.setShippedAt(shipment.getShippedAt());
+        vo.setReceivedAt(shipment.getReceivedAt());
+        vo.setCreatedAt(shipment.getCreatedAt());
+        vo.setCanReceive(isReceivable(shipment.getStatus(), order.getStatus()));
+
+        // 4. 轨迹
+        List<ShipmentTrack> tracks = shipmentMapper.selectTracksByShipmentId(shipment.getId());
+        List<ShipmentStep> steps = tracks.stream()
+                .map(t -> ShipmentStep.builder()
+                        .time(t.getHappenedAt())
+                        .desc(t.getDescription())
+                        .status(t.getStatus())
+                        .build())
+                .collect(Collectors.toList());
+        // 5. 没有轨迹记录时，用物流单的时间戳补两条
+        if (steps.isEmpty()) {
+            steps = buildFallbackSteps(shipment);
+        }
+        vo.setSteps(steps);
+        // 6. 设置状态文案
+        vo.setStatusText(resolveStatusText(shipment, tracks));
+        return vo;
+    }
+
+    /**
+     * 确认收货
+     * @param orderId
+     * @param userId
+     */
+    @Override
+    @Transactional
+    public void receiveOrder(Long orderId, Long userId) {
+        // 校验订单属于当前用户且 status=2待收货
+        Order order = orderMapper.selectOrderById(orderId);
+        if (order == null || !order.getUserId().equals(userId)) {
+            throw new BaseException(ErrorCode.ORDER_NOT_EXIST);
+        }
+        if (order.getStatus() != 2) {
+            throw new BaseException(ErrorCode.ORDER_STATUS_ERROR);
+        }
+        Shipment shipment = shipmentMapper.selectShipmentByOrderId(orderId);
+        // 条件更新物流单 status IN (1,2) -> 3已签收
+        if (shipmentMapper.updateShipmentStatusByOrderId(shipment.getId(), 3, LocalDateTime.now()) != 1) {
+            throw new BaseException(ErrorCode.SHIPMENT_STATUS_ERROR);
+        }
+        ShipmentTrack track = ShipmentTrack.builder()
+                .shipmentId(shipment.getId())
+                .status(4)
+                .description("快件已签收，感谢使用")
+                .happenedAt(LocalDateTime.now())
+                .build();
+        // 写入物流轨迹（已签收）
+        if (shipmentMapper.insertTrack(track) != 1) {
+            throw new BaseException(ErrorCode.SHIPMENT_ADD_FAILED);
+        }
+        // 条件更新订单 status=2 -> 3已完成
+        Order orderdb = Order.builder().id(orderId).status(3).build();
+        if (orderMapper.update(orderdb) != 1) {
+            throw new BaseException(ErrorCode.ORDER_STATUS_ERROR);
+        }
+        // 按 SPU 分组累加 order_item.quantity 到 spu.sales
+        //重复调用幂等：已签收时直接返回成功，不重复累加销量。
+        List<OrderItem> orderItems = orderMapper.selectItemsByOrderId(orderId);
+        for (OrderItem orderItem : orderItems) {
+            Spu spu = spuMapper.getSpuById(orderItem.getSpuId());
+            if (spu != null) {
+                spu.setSales(spu.getSales() + orderItem.getQuantity());
+                spuMapper.update(spu);
+            }
+        }
+    }
+
+    // 根据物流单和轨迹，判断物流状态文案
+    private String resolveStatusText(Shipment shipment, List<ShipmentTrack> tracks) {
+        if (!Integer.valueOf(2).equals(shipment.getStatus())) {
+            return shipmentStatusText(shipment.getStatus());
+        }
+        Integer maxStage = tracks.stream()
+                .map(ShipmentTrack::getStatus)
+                .max(Integer::compareTo)
+                .orElse(null);
+        return maxStage != null && maxStage >= 3 ? "派送中" : "运输中";
+    }
+
+    // 判断是否可收货
+    private boolean isReceivable(Integer shipmentStatus, Integer orderStatus) {
+        return orderStatus != null && orderStatus == 2
+                && shipmentStatus != null
+                && (shipmentStatus == 1 || shipmentStatus == 2);
+    }
+
+    // 物流状态文案
+    private String shipmentStatusText(Integer status) {
+        if (status == null) {
+            return "待发货";
+        }
+        return switch (status) {
+            case 1 -> "已发货";
+            case 2 -> "配送中";
+            case 3 -> "已签收";
+            case 4 -> "已取消";
+            default -> "待发货";
+        };
+    }
+
+    // 订单状态文案
+    private String orderStatusText(Integer status) {
+        if (status == null) {
+            return "待发货";
+        }
+        return switch (status) {
+            case 0 -> "待付款";
+            case 1 -> "待发货";
+            case 4 -> "已取消";
+            default -> "待发货";
+        };
+    }
+
+    private List<ShipmentStep> buildFallbackSteps(Shipment shipment) {
+        List<ShipmentStep> steps = new ArrayList<>();
+        if (shipment.getReceivedAt() != null) {
+            steps.add(ShipmentStep.builder()
+                    .time(shipment.getReceivedAt())
+                    .status(3)
+                    .desc("快件已签收")
+                    .build());
+        }
+        if (shipment.getShippedAt() != null) {
+            steps.add(ShipmentStep.builder()
+                    .time(shipment.getShippedAt())
+                    .status(1)
+                    .desc("商家已发货")
+                    .build());
+        }
+        return steps;
     }
 }

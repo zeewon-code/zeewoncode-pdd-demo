@@ -14,6 +14,7 @@ import com.zeewoncode.result.PageResult;
 import com.zeewoncode.vo.ShipVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -81,6 +82,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
+    @Transactional
     public ShipVO ship(Long orderId, ShipDTO dto, Long userId) {
         // 查询该订单是否存在
         Order orderDb = orderMapper.selectOrderById(orderId);
@@ -92,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
         if (orderMapper.update(order) != 1) {
             throw new BaseException(ErrorCode.ORDER_UPDATE_FAILED);
         }
-        // 3.插入物流信息
+        // 3.插入订单物流信息
         Shipment shipment = Shipment.builder()
                 .orderId(orderId)
                 .trackingNo(dto.getTrackingNo())
@@ -101,6 +103,17 @@ public class OrderServiceImpl implements OrderService {
                 .shippedAt(LocalDateTime.now())
                 .build();
         if (shipmentMapper.insert(shipment) == 0) {
+            throw new BaseException(ErrorCode.SHIPMENT_ADD_FAILED);
+        }
+        // 4.插入物流轨迹信息（已发货）
+        ShipmentTrack track = ShipmentTrack.builder()
+                .shipmentId(shipment.getId())
+                .status(1)
+                .happenedAt(LocalDateTime.now())
+                .description("商家已发货:" + dto.getCarrier() + " 已揽收")
+                .createdAt(LocalDateTime.now())
+                .build();
+        if (shipmentMapper.insertTrack(track) == 0) {
             throw new BaseException(ErrorCode.SHIPMENT_ADD_FAILED);
         }
         return ShipVO.builder()

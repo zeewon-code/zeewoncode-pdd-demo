@@ -113,4 +113,8 @@ public interface SkuMapper {
      * @return
      */
     List<LowStockSkus> selectLowStockSkus(List<Long> spuIds);
+
+    // 已支付订单失败：库存已经扣减，需要加回来
+    @Update("UPDATE sku SET stock = stock + #{quantity} WHERE id = #{skuId}")
+    int restoreStock(@Param("skuId") Long skuId, @Param("quantity") Integer quantity);
 }

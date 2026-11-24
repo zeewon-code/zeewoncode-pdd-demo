@@ -15,6 +15,11 @@
             #{orderId}
         </foreach>
     </update>
+    <update id="updateShipmentStatusByOrderId">
+        UPDATE shipment
+        SET status = #{status}, received_at = #{receivedAt}
+        WHERE id = #{shipmentId} AND status IN (1,2)
+    </update>
 
     <select id="selectShipmentsByOrderIds" resultType="com.zeewoncode.entity.Shipment">
         SELECT * FROM shipment WHERE order_id IN

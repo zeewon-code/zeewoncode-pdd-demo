@@ -4,10 +4,7 @@ import com.zeewoncode.entity.*;
 import com.zeewoncode.dto.OrderCreateDTO;
 import com.zeewoncode.dto.OrderPreviewDTO;
 import com.zeewoncode.result.PageResult;
-import com.zeewoncode.vo.CountdownVO;
-import com.zeewoncode.vo.OrderCreateVO;
-import com.zeewoncode.vo.OrderPreviewVO;
-import com.zeewoncode.vo.PayVO;
+import com.zeewoncode.vo.*;
 
 public interface OrderService {
 
@@ -65,4 +62,19 @@ public interface OrderService {
      * @return
      */
     OrderDetail getOrderDetail(Long orderId, Long userId);
+
+    /**
+     * 查询订单物流与轨迹
+     * @param orderId
+     * @param userId
+     * @return
+     */
+    ShipmentVO getShipment(Long orderId, Long userId);
+
+    /**
+     * 确认收货
+     * @param orderId
+     * @param userId
+     */
+    void receiveOrder(Long orderId, Long userId);
 }

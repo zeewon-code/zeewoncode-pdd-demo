@@ -108,11 +108,15 @@ public enum ErrorCode {
     ORDER_STATUS_UPDATE_FAILED(3109, "订单状态修改失败"),
     ORDER_UPDATE_FAILED(3110, "订单修改失败"),
     ORDER_STATUS_ERROR(3111, "订单状态错误"),
+    ORDER_STATUS_NOT_ALLOW_OPERATE(3112, "订单状态不允许该操作"),
 
     // ==================== 物流 32xx ====================
     SHIPMENT_NOT_EXIST(3201, "物流记录不存在"),
     SHIPMENT_UPDATE_FAILED(3202, "物流记录更新失败"),
     SHIPMENT_ADD_FAILED(3203, "物流记录添加失败"),
+    SHIPMENT_STATUS_NOT_ALLOW_OPERATE(3204, "物流记录状态不允许该操作"),
+    SHIPMENT_STATUS_ERROR(3205, "物流记录状态错误"),
+
 
     // ==================== 支付 33xx ====================
     PAYMENT_CREATE_FAILED(3301, "支付记录创建失败"),

@@ -203,4 +203,18 @@ public interface OrderMapper {
      * @return
      */
     List<Order> selectOrderByInstanceIdAndUserIdAndStatus(Long instanceId, Long userId, Integer status);
+
+    @Select("SELECT * FROM orders WHERE status = 0 AND created_at < #{deadline} " +
+            "ORDER BY id LIMIT #{limit}")
+    List<Order> selectTimeoutOrders(@Param("deadline") LocalDateTime deadline,
+                                    @Param("limit") int limit);
+
+    @Update("UPDATE orders SET status = 5, cancel_type = 2 WHERE id = #{id} AND status = 0")
+    int closeTimeoutOrder(@Param("id") Long id);
+
+    @Select("SELECT * FROM orders WHERE groupon_instance_id = #{instanceId} AND status IN (0, 1)")
+    List<Order> selectGrouponOrders(@Param("instanceId") Long instanceId);
+
+    @Update("UPDATE orders SET status = 4, cancel_type = 3 WHERE id = #{id} AND status IN (0, 1)")
+    int cancelGrouponOrder(@Param("id") Long id);
 }

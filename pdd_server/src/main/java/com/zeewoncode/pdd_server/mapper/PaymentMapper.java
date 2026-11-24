@@ -1,9 +1,8 @@
 package com.zeewoncode.pdd_server.mapper;
 
 import com.zeewoncode.entity.Payment;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.*;
+
 
 @Mapper
 public interface PaymentMapper {
@@ -16,4 +15,7 @@ public interface PaymentMapper {
             "VALUES (#{paymentNo}, #{orderId}, #{userId}, #{amount}, #{channel}, #{status}, #{paidAt}, #{createdAt})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Payment payment);
+
+    @Update("UPDATE payment SET status = 3 WHERE order_id = #{orderId} AND status = 1")
+    int refundByOrderId(@Param("orderId") Long orderId);
 }

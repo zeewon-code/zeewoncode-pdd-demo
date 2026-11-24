@@ -16,4 +16,5 @@ public class ShipmentStep implements Serializable {
 
     private LocalDateTime time;
     private String desc;
+    private Integer status;
 }
